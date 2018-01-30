@@ -1,0 +1,67 @@
+{
+  "name": "chem-helper-js",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Ivan Saranchonkau <ivan.saranchenkov@gmail.com>",
+  "dependencies": {},
+  "devDependencies": {
+    "ag-grid": "^16.0.0",
+    "ag-grid-react": "^16.0.0",
+    "aphrodite": "^1.2.5",
+    "bootstrap": "^4.0.0",
+    "chart.js": "^2.7.1",
+    "electron": "^1.8.1",
+    "electron-builder": "^19.55.1",
+    "electron-packager": "^10.1.1",
+    "font-awesome": "^4.7.0",
+    "foreman": "^2.0.0",
+    "history": "^4.7.2",
+    "jquery": "^3.3.1",
+    "lodash": "^4.17.4",
+    "material-ui": "^1.0.0-beta.30",
+    "material-ui-icons": "^1.0.0-beta.17",
+    "popper.js": "^1.12.9",
+    "react": "^16.2.0",
+    "react-chartjs-2": "^2.7.0",
+    "react-dom": "^16.2.0",
+    "react-dom-factories": "^1.0.2",
+    "react-redux": "^5.0.6",
+    "react-router-dom": "^4.2.2",
+    "react-router-redux": "^4.0.8",
+    "react-scripts": "1.1.0",
+    "recharts": "^1.0.0-beta.9",
+    "redux": "^3.7.2",
+    "redux-devtools": "^3.4.1",
+    "redux-devtools-dock-monitor": "^1.1.3",
+    "redux-devtools-log-monitor": "^1.4.0",
+    "redux-form": "^7.2.1",
+    "redux-thunk": "^2.2.0",
+    "typeface-roboto": "0.0.54"
+  },
+  "description": "React and Electron Awesome App",
+  "homepage": "./",
+  "main": "public/main.js",
+  "build": {
+    "productName": "ChemHelper",
+    "appId": "by.bsu.chemistry",
+    "electronVersion": "1.8.1",
+    "asar": false,
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "build/**/*"
+    ]
+  },
+  "scripts": {
+    "dist": "build --em.main=build/main.js",
+    "start": "nf start -p 3000",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
+    "electron-start": "node electron-wait-react",
+    "react-start": "react-scripts start",
+    "package": "electron-packager ."
+  }
+}

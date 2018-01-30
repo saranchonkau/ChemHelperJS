@@ -1,0 +1,1 @@
+export const bsuColor = '#00285f';

@@ -1,0 +1,7 @@
+body {
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+.ag-theme-fresh .ag-row-selected {
+  background-color: transparent;
+}
