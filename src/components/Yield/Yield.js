@@ -134,8 +134,8 @@ class Yield extends Component {
         let { classes } = this.props;
         return (
             <div>
-               <h3 className={'my-3'} style={{textAlign: 'center'}}>Radiation Chemistry Yield from chart</h3>
-                <div style={{marginLeft: '2rem'}}>
+               <h3 className="my-3 text-center">Radiation Chemistry Yield from chart</h3>
+                <div className='d-flex flex-row justify-content-center'>
                     <div style={containerStyle} className="ag-theme-fresh">
                         <AgGridReact
                             rowData={this.state.data}
