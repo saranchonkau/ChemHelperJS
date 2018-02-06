@@ -8,17 +8,42 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
 import lsq from 'least-squares';
+import {Units} from "../../utils";
 
-class Chart extends Component {
+class FinalChart extends Component {
+
+    constructor(props){
+        super(props);
+        this.state = {
+            data: [],
+            yield: 0
+        };
+    }
+
+    componentDidMount(){
+        let {doseRate, solutionDensity, unit, finalData} = this.props;
+        let data = finalData.map(point => {
+            point.yield = doseRate * 60 * point.time;
+            return point;
+        });
+        this.setState({data});
+    }
+
+    calculateYield = slope => {
+        let coefficient = 6.022140e6 * 1.602176;
+        let yieldPerJoule = slope / this.props.solutionDensity;
+        return this.props.unit === Units.moleculesPerHundredVolt ?
+            yieldPerJoule * coefficient : yieldPerJoule;
+    };
 
     convertSelectedData = () => {
-        return this.props.data.filter(point => point.isSelected)
-            .map( data => ({ x: data.concentration, y: data.dencity }) );
+        return this.state.data.filter(point => point.isSelected)
+            .map( data => ({ x: data.yield, y: data.concentration }) );
     };
 
     getUnselectedData = () => {
-        return this.props.data.filter(point => !point.isSelected)
-            .map( data => ({ x: data.concentration, y: data.dencity }) );
+        return this.state.data.filter(point => !point.isSelected)
+            .map( data => ({ x: data.yield, y: data.concentration }) );
     };
 
     getTrendData = () => {
@@ -33,16 +58,6 @@ class Chart extends Component {
         let yArray = data.map(point => point.y);
         let result = {};
         return lsq(xArray, yArray, true, result);
-    };
-
-    nextPage = () => {
-        let data = this.convertSelectedData();
-        let xArray = data.map(point => point.x);
-        let yArray = data.map(point => point.y);
-        let result = {};
-        let func = lsq(yArray, xArray, true, result);
-        this.props.change('trendFunc', func);
-        this.props.nextPage();
     };
 
     render() {
@@ -102,6 +117,7 @@ class Chart extends Component {
                 },
             ]
         };
+        console.log('Data: ', data);
 
         const options = {
             legend: {
@@ -116,8 +132,8 @@ class Chart extends Component {
                 callbacks: {
                     // use label callback to return the desired label
                     label: (tooltipItem, data) => [
-                        `Optical dencity: ${tooltipItem.yLabel}`,
-                        `Concentration: ${tooltipItem.xLabel} mol/l`,
+                        `Concentration: ${tooltipItem.yLabel} mol/l`,
+                        `Absorbed dose: ${tooltipItem.xLabel} Gray`,
                     ],
                     // remove title
                     title: (tooltipItem, data) => {
@@ -130,7 +146,7 @@ class Chart extends Component {
                     type: 'linear',
                     scaleLabel: {
                         display: true,
-                        labelString: 'Optical dencity, D',
+                        labelString: 'Concentration, M',
                         fontSize: 16,
                         fontStyle: 'bold'
                     }
@@ -139,14 +155,14 @@ class Chart extends Component {
                     type: 'linear',
                     scaleLabel: {
                         display: true,
-                        labelString: 'Concentration, M',
+                        labelString: 'Absorbed dose, Gray',
                         fontSize: 16,
                         fontStyle: 'bold'
                     },
                     offset: true,
                     ticks: {
                         min: Math.min.apply(Math, xArray) - diff > 0 ?
-                             Math.min.apply(Math, xArray) - diff : 0,
+                            Math.min.apply(Math, xArray) - diff : 0,
                         max: Math.max.apply(Math, xArray) + diff
                     }
                 }],
@@ -155,6 +171,7 @@ class Chart extends Component {
         let { classes } = this.props;
         let result = {};
         let trendFunc = lsq(xArray, yArray, true, result);
+        console.log('Yield: ', this.calculateYield(result.m));
         console.log('RET: ', result);
         return (
             <div>
@@ -168,10 +185,6 @@ class Chart extends Component {
                                 <Back className={classes.leftIcon} />
                                 Back
                             </Button>
-                            <Button className={classes.button} raised color="primary" onClick={this.nextPage}>
-                                Next
-                                <Forward className={classes.rightIcon} />
-                            </Button>
                         </div>
                     </div>
                 </div>
@@ -180,14 +193,17 @@ class Chart extends Component {
     }
 }
 
-Chart = connect(
+FinalChart = connect(
     state => ({
-        data: getFormValues('Wizard')(state).initialData
+        finalData: getFormValues('Wizard')(state).finalData,
+        doseRate: getFormValues('Wizard')(state).doseRate,
+        solutionDensity: getFormValues('Wizard')(state).solutionDensity,
+        unit: getFormValues('Wizard')(state).unit,
     })
-)(Chart);
+)(FinalChart);
 
 export default reduxForm({
     form: 'Wizard', // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
     forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
-})(withStyles(styles)(Chart));
+})(withStyles(styles)(FinalChart));

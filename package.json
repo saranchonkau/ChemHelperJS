@@ -17,6 +17,7 @@
     "foreman": "^2.0.0",
     "history": "^4.7.2",
     "jquery": "^3.3.1",
+    "least-squares": "0.0.2",
     "lodash": "^4.17.4",
     "material-ui": "^1.0.0-beta.30",
     "material-ui-icons": "^1.0.0-beta.17",
@@ -25,6 +26,7 @@
     "react-chartjs-2": "^2.7.0",
     "react-dom": "^16.2.0",
     "react-dom-factories": "^1.0.2",
+    "react-number-format": "^3.1.4",
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
     "react-router-redux": "^4.0.8",
@@ -36,6 +38,7 @@
     "redux-devtools-log-monitor": "^1.4.0",
     "redux-form": "^7.2.1",
     "redux-thunk": "^2.2.0",
+    "regression": "^2.0.1",
     "typeface-roboto": "0.0.54"
   },
   "description": "React and Electron Awesome App",
@@ -59,7 +62,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "electron": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
+    "electron": "ELECTRON_START_URL=http://localhost:3000 electron .",
     "electron-start": "node electron-wait-react",
     "react-start": "react-scripts start",
     "package": "electron-packager ."
