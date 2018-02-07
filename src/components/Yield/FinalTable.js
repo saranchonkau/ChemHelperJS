@@ -14,6 +14,7 @@ import Input, { InputLabel } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import {Units} from "../../utils";
 import NumberFormat from 'react-number-format';
+import {optionsCellStyle, RemoveRowRenderer} from "./Yield";
 
 const cellStyle = {
     fontSize: '16px',
@@ -113,7 +114,8 @@ class FinalTable extends Component {
                     cellStyle: cellStyle,
                     valueParser: numberParser
                 },
-                { checkboxSelection: true, width: 30, headerName: 'On/Off', cellStyle: cellStyle}
+                { checkboxSelection: true, width: 30, headerName: 'On/Off', cellStyle: cellStyle},
+                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: optionsCellStyle, cellClass: 'no-border'}
             ],
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
@@ -141,7 +143,6 @@ class FinalTable extends Component {
         this.gridApi = params.api;
         this.columnApi = params.columnApi;
         this.gridApi.sizeColumnsToFit();
-        this.gridApi.selectAll();
     };
 
     addRow = () => {
@@ -203,7 +204,7 @@ class FinalTable extends Component {
     render() {
         let containerStyle = {
             height: this.getTableHeight(this.state.data.length),
-            width: 600,
+            width: 650,
             align: 'center'
         };
         let { classes } = this.props;
@@ -218,18 +219,21 @@ class FinalTable extends Component {
                             gridOptions={this.gridOptions}
                         />
                         <div className='d-flex flex-row justify-content-between'>
-                            <Button className={classes.button} raised color="secondary" onClick={this.calculateConcentrations}>
+                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.calculateConcentrations}>
                                 Calculate concentrations
                             </Button>
-                            <Button className={classes.button} raised color="secondary" onClick={this.addRow}>
+                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.addRow}>
                                 <PlusOne className={classes.leftIcon} />
                                 Row
                             </Button>
-                            <Button className={classes.button} raised color="secondary" onClick={this.props.previousPage}>
+                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
                                 <Back className={classes.leftIcon} />
                                 Back
                             </Button>
-                            <Button className={classes.button} raised color="primary" onClick={this.nextPage}>
+                            <Button className={classes.button} variant="raised" color="primary"
+                                    onClick={this.nextPage}
+                                    disabled={!this.state.doseRate || !this.state.solutionDensity}
+                            >
                                 Next
                                 <Forward className={classes.rightIcon} />
                             </Button>
@@ -237,8 +241,10 @@ class FinalTable extends Component {
                         <div>
                             <h3 className="my-3 text-center">Enter parameters for calculating yield:</h3>
                             <div className='d-table'>
-                                <div className='d-table-row'>
-                                    <div className='d-table-cell' style={{width: 160}}>Solution dencity &rho; :</div>
+                                <div className='d-table-row my-2'>
+                                    <div className='d-table-cell' style={{width: 160, fontSize: 16}}>
+                                        Solution dencity &rho; :
+                                    </div>
                                     <div className='d-table-cell'>
                                         <Input value={this.state.solutionDensity}
                                                onChange={this.handleChange('solutionDensity')}
@@ -246,8 +252,8 @@ class FinalTable extends Component {
                                         />
                                     </div>
                                 </div>
-                                <div className='d-table-row'>
-                                    <div className='d-table-cell' style={{width: 160}}>Dose rate P :</div>
+                                <div className='d-table-row my-2'>
+                                    <div className='d-table-cell' style={{width: 160, fontSize: 16}}>Dose rate P :</div>
                                     <div className='d-table-cell'>
                                         <Input value={this.state.doseRate}
                                                onChange={this.handleChange('doseRate')}
@@ -255,8 +261,8 @@ class FinalTable extends Component {
                                         />
                                     </div>
                                 </div>
-                                <div className='d-table-row'>
-                                    <div className='d-table-cell'>Unit of measure of yield:</div>
+                                <div className='d-table-row my-2'>
+                                    <div className='d-table-cell' style={{fontSize: 16}}>Unit of measure of yield:</div>
                                     <div className='d-table-cell'>
                                         <Select value={this.state.unit} onChange={this.handleChange('unit')}>
                                             <MenuItem value={Units.moleculesPerHundredVolt}>{Units.moleculesPerHundredVolt}</MenuItem>

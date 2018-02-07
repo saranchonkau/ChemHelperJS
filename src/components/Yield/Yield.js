@@ -8,6 +8,8 @@ import Forward from 'material-ui-icons/ArrowForward';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Units} from "../../utils";
+import {finalData, initialData} from "./Data";
+import regression from 'regression';
 
 const cellStyle = {
     fontSize: '16px',
@@ -17,32 +19,6 @@ const cellStyle = {
     border: 'none'
 };
 
-const initialData = [
-    {
-        id: 1,
-        concentration: 5e-5,
-        dencity: 0.015,
-        isSelected: true
-    },
-    {
-        id: 2,
-        concentration: 8e-5,
-        dencity: 0.025,
-        isSelected: true
-    },
-    {
-        id: 3,
-        concentration: 1e-4,
-        dencity: 0.03,
-        isSelected: true
-    },
-    {
-        id: 4,
-        concentration: 4e-4,
-        dencity: 0.122,
-        isSelected: true
-    }
-];
 
 const numberParser = params => Number(params.newValue);
 
@@ -57,6 +33,33 @@ export const styles = theme => ({
         marginLeft: theme.spacing.unit,
     },
 });
+
+export class RemoveRowRenderer extends Component {
+    constructor(props){
+        super(props);
+    }
+
+    removeRow = () => this.props.api.updateRowData({ remove: [this.props.data] });
+
+    render(){
+        return (
+            <div className='d-flex align-items-center justify-content-center'>
+                <button type="button" className='bg-transparent'
+                        style={{outline: 'none', border: 'none', cursor: 'pointer'}}
+                        onClick={this.removeRow}
+                >
+                    <span className='i fa fa-trash' style={{fontSize: 20, color: '#f50057'}}/>
+                </button>
+            </div>
+        );
+    }
+}
+
+export const optionsCellStyle = {
+    paddingLeft: '0px',
+    paddingRight: '0px',
+    border: 'none'
+};
 
 class Yield extends Component {
     constructor(props) {
@@ -83,7 +86,9 @@ class Yield extends Component {
                     cellStyle: cellStyle,
                     valueParser: numberParser
                 },
-                { checkboxSelection: true, width: 30, headerName: 'On/Off', cellStyle: cellStyle}
+                { checkboxSelection: true, width: 30, headerName: 'On/Off', cellStyle: cellStyle},
+                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: optionsCellStyle, cellClass: 'no-border'},
+
             ],
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
@@ -114,7 +119,6 @@ class Yield extends Component {
     };
 
     onGridReady = params => {
-        console.log('Grid ready');
         this.gridApi = params.api;
         this.columnApi = params.columnApi;
 
@@ -150,7 +154,7 @@ class Yield extends Component {
     render() {
         let containerStyle = {
             height: this.getTableHeight(this.state.data.length),
-            width: 500,
+            width: 520,
             align: 'center'
         };
 
@@ -166,11 +170,11 @@ class Yield extends Component {
                             gridOptions={this.gridOptions}
                         />
                         <div className='d-flex flex-row justify-content-between'>
-                            <Button className={classes.button} raised color="secondary" onClick={this.addRow}>
+                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.addRow}>
                                 <PlusOne className={classes.leftIcon} />
                                 Row
                             </Button>
-                            <Button className={classes.button} raised color="primary" onClick={this.nextPage}>
+                            <Button className={classes.button} variant="raised" color="primary" onClick={this.nextPage}>
                                 Next
                                 <Forward className={classes.rightIcon} />
                             </Button>
@@ -187,51 +191,6 @@ Yield = connect(
         data: getFormValues('Wizard')(state).initialData
     })
 )(Yield);
-
-const finalData = [
-    {
-        id: 1,
-        time: 0.0,
-        concentration: 0.0,
-        dencity: 0.005,
-        isSelected: true
-    },
-    {
-        id: 2,
-        time: 5.0,
-        concentration: 0.0,
-        dencity: 0.004,
-        isSelected: true
-    },
-    {
-        id: 3,
-        time: 10.0,
-        concentration: 0.0,
-        dencity: 0.009,
-        isSelected: true
-    },
-    {
-        id: 4,
-        time: 15.0,
-        concentration: 0.0,
-        dencity: 0.013,
-        isSelected: true
-    },
-    {
-        id: 5,
-        time: 31.0,
-        concentration: 0.0,
-        dencity: 0.028,
-        isSelected: true
-    },
-    {
-        id: 6,
-        time: 31.0,
-        concentration: 0.0,
-        dencity: 0.025,
-        isSelected: true
-    }
-];
 
 export default reduxForm({
     form: 'Wizard', // <------ same form name

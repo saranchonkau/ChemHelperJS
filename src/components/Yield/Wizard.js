@@ -60,7 +60,7 @@ class Wizard extends Component {
         return (
             // TODO something with it (through array)
             <div>
-                <Header/>
+                {/*<Header/>*/}
                 {page === counter.next() && <Yield nextPage={this.nextPage}/>}
                 {page === counter.next() && <Chart nextPage={this.nextPage} previousPage={this.previousPage}/>}
                 {page === counter.next() && <FinalTable nextPage={this.nextPage} previousPage={this.previousPage}/>}

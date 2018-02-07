@@ -9,34 +9,33 @@ import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
 import lsq from 'least-squares';
 import {Units} from "../../utils";
+import regression from 'regression';
 
 class FinalChart extends Component {
 
     constructor(props){
         super(props);
-        this.state = {
-            data: [],
-            yield: 0
-        };
-    }
-
-    componentDidMount(){
-        let {doseRate, solutionDensity, unit, finalData} = this.props;
+        let {doseRate, finalData} = props;
         let data = finalData.map(point => {
             point.yield = doseRate * 60 * point.time;
             return point;
         });
-        this.setState({data});
+
+        this.state = {
+            data: data,
+            yield: 0
+        };
     }
 
     calculateYield = slope => {
+        console.log('Slope : ', slope);
         let coefficient = 6.022140e6 * 1.602176;
         let yieldPerJoule = slope / this.props.solutionDensity;
         return this.props.unit === Units.moleculesPerHundredVolt ?
             yieldPerJoule * coefficient : yieldPerJoule;
     };
 
-    convertSelectedData = () => {
+    getSelectedData = () => {
         return this.state.data.filter(point => point.isSelected)
             .map( data => ({ x: data.yield, y: data.concentration }) );
     };
@@ -47,25 +46,33 @@ class FinalChart extends Component {
     };
 
     getTrendData = () => {
-        let data = this.convertSelectedData();
-        let trendFunc = this.getTrendFunc();
+        let data = this.getSelectedData();
+        let trendFunc = this.getTrendFunc()[0];
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
     getTrendFunc = () => {
-        let data = this.convertSelectedData();
+        let data = this.getSelectedData();
         let xArray = data.map(point => point.x);
         let yArray = data.map(point => point.y);
         let result = {};
-        return lsq(xArray, yArray, true, result);
+        let func = lsq(xArray, yArray, true, result);
+        return [func, result];
+    };
+
+    getPointsArray = () => {
+        return this.state.data.filter(point => point.isSelected)
+            .map( data => ([data.yield, data.concentration]) );
     };
 
     render() {
-        let initialData = this.convertSelectedData();
-        let xArray = initialData.map(point => point.x);
-        let yArray = initialData.map(point => point.y);
+        let xArray = this.state.data.map(point => point.yield);
+        let yArray = this.state.data.map(point => point.concentration);
         let diff = (Math.max.apply(Math, xArray) -
             Math.min.apply(Math, xArray)) * 0.05;
+        console.log('Selected data: ', this.getSelectedData());
+        console.log('UnSelected data: ', this.getUnselectedData());
+        console.log('Trend data: ', this.getTrendData());
         let data = {
             datasets: [
                 {
@@ -80,7 +87,7 @@ class FinalChart extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 3,
                     pointHitRadius: 10,
-                    data: this.convertSelectedData()
+                    data: this.getSelectedData()
                 },
                 {
                     showLine: false,
@@ -114,7 +121,7 @@ class FinalChart extends Component {
                     pointRadius: 0,
                     pointHitRadius: 10,
                     data: this.getTrendData()
-                },
+                }
             ]
         };
         console.log('Data: ', data);
@@ -169,19 +176,25 @@ class FinalChart extends Component {
             }
         };
         let { classes } = this.props;
-        let result = {};
-        let trendFunc = lsq(xArray, yArray, true, result);
-        console.log('Yield: ', this.calculateYield(result.m));
-        console.log('RET: ', result);
+        let result = this.getTrendFunc()[1];
+        console.log('Regression: ', regression);
+        console.log('Points: ', this.getPointsArray());
+        let regression2 = regression.linear(this.getPointsArray(), {
+            order: 7,
+            precision: 7,
+        });
+        console.log('Result: ', regression2);
         return (
             <div>
                 <h3 className="my-3 text-center">Line Example</h3>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line data={data} options={options}/>
-                        <span>y = {result.m}*x + ({result.b})</span>
+                        <p>y = {result.m}*x + ({result.b})</p>
+                        <p>R^2 = {regression2.r2}</p>
+                        <span>Yield = {this.calculateYield(result.m)} {this.props.unit}</span>
                         <div className='d-flex flex-row justify-content-between'>
-                            <Button className={classes.button} raised color="secondary" onClick={this.props.previousPage}>
+                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
                                 <Back className={classes.leftIcon} />
                                 Back
                             </Button>

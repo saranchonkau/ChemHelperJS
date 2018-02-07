@@ -8,10 +8,11 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
 import lsq from 'least-squares';
+import regression from 'regression';
 
 class Chart extends Component {
 
-    convertSelectedData = () => {
+    getSelectedData = () => {
         return this.props.data.filter(point => point.isSelected)
             .map( data => ({ x: data.concentration, y: data.dencity }) );
     };
@@ -22,21 +23,26 @@ class Chart extends Component {
     };
 
     getTrendData = () => {
-        let data = this.convertSelectedData();
-        let trendFunc = this.getTrendFunc();
+        let data = this.getSelectedData();
+        let trendFunc = this.getTrendFunc()[0];
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
     getTrendFunc = () => {
-        let data = this.convertSelectedData();
+        let data = this.getSelectedData();
         let xArray = data.map(point => point.x);
         let yArray = data.map(point => point.y);
         let result = {};
-        return lsq(xArray, yArray, true, result);
+        return [lsq(xArray, yArray, true, result), result];
+    };
+
+    getPointsArray = () => {
+        return this.props.data.filter(point => point.isSelected)
+            .map( data => ([data.concentration, data.dencity]) );
     };
 
     nextPage = () => {
-        let data = this.convertSelectedData();
+        let data = this.getSelectedData();
         let xArray = data.map(point => point.x);
         let yArray = data.map(point => point.y);
         let result = {};
@@ -46,9 +52,8 @@ class Chart extends Component {
     };
 
     render() {
-        let initialData = this.convertSelectedData();
-        let xArray = initialData.map(point => point.x);
-        let yArray = initialData.map(point => point.y);
+        let xArray = this.props.data.map(point => point.concentration);
+        let yArray = this.props.data.map(point => point.solutionDensity);
         let diff = (Math.max.apply(Math, xArray) -
             Math.min.apply(Math, xArray)) * 0.05;
         let data = {
@@ -65,7 +70,7 @@ class Chart extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 3,
                     pointHitRadius: 10,
-                    data: this.convertSelectedData()
+                    data: this.getSelectedData()
                 },
                 {
                     showLine: false,
@@ -116,7 +121,7 @@ class Chart extends Component {
                 callbacks: {
                     // use label callback to return the desired label
                     label: (tooltipItem, data) => [
-                        `Optical dencity: ${tooltipItem.yLabel}`,
+                        `Optical density: ${tooltipItem.yLabel}`,
                         `Concentration: ${tooltipItem.xLabel} mol/l`,
                     ],
                     // remove title
@@ -130,7 +135,7 @@ class Chart extends Component {
                     type: 'linear',
                     scaleLabel: {
                         display: true,
-                        labelString: 'Optical dencity, D',
+                        labelString: 'Optical density, D',
                         fontSize: 16,
                         fontStyle: 'bold'
                     }
@@ -153,22 +158,25 @@ class Chart extends Component {
             }
         };
         let { classes } = this.props;
-        let result = {};
-        let trendFunc = lsq(xArray, yArray, true, result);
-        console.log('RET: ', result);
+        let result = this.getTrendFunc()[1];
+        let result2 = regression.linear(this.getPointsArray(), {
+            order: 2,
+            precision: 5,
+        });
         return (
             <div>
                 <h3 className="my-3 text-center">Line Example</h3>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line data={data} options={options}/>
-                        <span>y = {result.m}*x + ({result.b})</span>
+                        <p>y = {result.m}*x + ({result.b})</p>
+                        <span>R^2 = {result2.r2}</span>
                         <div className='d-flex flex-row justify-content-between'>
-                            <Button className={classes.button} raised color="secondary" onClick={this.props.previousPage}>
+                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
                                 <Back className={classes.leftIcon} />
                                 Back
                             </Button>
-                            <Button className={classes.button} raised color="primary" onClick={this.nextPage}>
+                            <Button className={classes.button} variant="raised" color="primary" onClick={this.nextPage}>
                                 Next
                                 <Forward className={classes.rightIcon} />
                             </Button>
