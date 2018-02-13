@@ -177,6 +177,7 @@ class FinalTable extends Component {
         let func = this.props.trendFunc;
         let data = this.getRowData();
         data = data.map(point => {
+            // TODO вместо икса считает игрек!
             point.concentration = func(point.dencity);
             return point;
         });

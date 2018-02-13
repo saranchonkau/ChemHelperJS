@@ -7,8 +7,7 @@ import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
-import lsq from 'least-squares';
-import regression from 'regression';
+import {getTrendResult} from "../../utils";
 
 class Chart extends Component {
 
@@ -24,16 +23,8 @@ class Chart extends Component {
 
     getTrendData = () => {
         let data = this.getSelectedData();
-        let trendFunc = this.getTrendFunc()[0];
+        let trendFunc = getTrendResult(data).func;
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
-    };
-
-    getTrendFunc = () => {
-        let data = this.getSelectedData();
-        let xArray = data.map(point => point.x);
-        let yArray = data.map(point => point.y);
-        let result = {};
-        return [lsq(xArray, yArray, true, result), result];
     };
 
     getPointsArray = () => {
@@ -43,11 +34,7 @@ class Chart extends Component {
 
     nextPage = () => {
         let data = this.getSelectedData();
-        let xArray = data.map(point => point.x);
-        let yArray = data.map(point => point.y);
-        let result = {};
-        let func = lsq(yArray, xArray, true, result);
-        this.props.change('trendFunc', func);
+        this.props.change('trendFunc', getTrendResult(data).func);
         this.props.nextPage();
     };
 
@@ -158,19 +145,15 @@ class Chart extends Component {
             }
         };
         let { classes } = this.props;
-        let result = this.getTrendFunc()[1];
-        let result2 = regression.linear(this.getPointsArray(), {
-            order: 2,
-            precision: 5,
-        });
+        let result = getTrendResult(this.getSelectedData());
         return (
             <div>
                 <h3 className="my-3 text-center">Line Example</h3>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line data={data} options={options}/>
-                        <p>y = {result.m}*x + ({result.b})</p>
-                        <span>R^2 = {result2.r2}</span>
+                        <p>y = {result.slope}*x + ({result.intercept})</p>
+                        <span>R^2 = {result.rSquared}</span>
                         <div className='d-flex flex-row justify-content-between'>
                             <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
                                 <Back className={classes.leftIcon} />
