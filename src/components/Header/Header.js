@@ -36,15 +36,16 @@ class MenuAppBar extends React.Component {
                         {/*<IconButton className={classes.menuButton} color="inherit" aria-label="Menu">*/}
                             {/*<MenuIcon />*/}
                         {/*</IconButton>*/}
-                        <Typography type="title" color="inherit" className={classes.flex}>ChemHelper</Typography>
-                        <Typography type="title" color="inherit" className={classes.flex}>
-                            <a href={'/'} target="_blank">Main</a>
-                            {/*<NavLink to={'/'} exact style={{color: 'white'}} activeStyle={{color: 'red'}}>Main</NavLink>*/}
+                        <Typography variant="title" color="inherit" className={classes.flex}>ChemHelper</Typography>
+                        <Typography variant="title" color="inherit" className={classes.flex}>
+                            <NavLink to={'/'} exact style={{color: 'white'}} activeStyle={{color: 'red'}}>Main</NavLink>
                         </Typography>
-                        <Typography type="title" color="inherit" className={classes.flex}>
-                            <NavLink to={'/formula/yield'} exact style={{color: 'white'}} activeStyle={{color: 'red'}}>Formula</NavLink>
+                        <Typography variant="title" color="inherit" className={classes.flex}>
+                            <NavLink to={'/formula'} style={{color: 'white'}} activeStyle={{color: 'red'}}>
+                                Formula
+                            </NavLink>
                         </Typography>
-                        <Typography type="title" color="inherit" className={classes.flex}>
+                        <Typography variant="title" color="inherit" className={classes.flex}>
                             {/*<NavLink to={'/isotopes'} exact style={{color: 'white'}}>*/}
                                 Isotopes
                             {/*</NavLink>*/}
@@ -88,4 +89,3 @@ MenuAppBar.propTypes = {
 };
 
 export default withStyles(styles)(MenuAppBar);
-

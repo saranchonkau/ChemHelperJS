@@ -4,28 +4,29 @@ import { Provider } from 'react-redux';
 import { Router, HashRouter, Route, Switch } from 'react-router-dom';
 import history from '../../history';
 import Main from '../Main';
-import Yield from '../Yield';
+import FormulaPage from '../FormulaPage';
 
 const App = ({ store }) => (
     <Provider store={store}>
-        <Router history={history}>
+        <HashRouter>
             <Switch>
-                <Route exact path='/formula/yield' component={Yield}/>
+                <Route path='/formula' component={FormulaPage}/>
                 <Route exact path='/' component={Main}/>
             </Switch>
-        </Router>
+        </HashRouter>
     </Provider>
 );
 // const App = ({ store }) => (
 //     <Provider store={store}>
-//         <HashRouter>
+//         <Router history={history}>
 //             <Switch>
-//                 <Route exact path='/formula/yield' component={Yield}/>
+//                 <Route path='/formula' component={FormulaPage}/>
 //                 <Route exact path='/' component={Main}/>
 //             </Switch>
-//         </HashRouter>
+//         </Router>
 //     </Provider>
 // );
+
 App.propTypes = {
     store: PropTypes.object.isRequired
 };

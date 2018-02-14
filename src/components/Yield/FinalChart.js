@@ -6,7 +6,7 @@ import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
-import {getTrendResult, Units} from "../../utils";
+import {Equation, getTrendResult, Result, RSquared, Units} from "../../utils";
 
 class FinalChart extends Component {
 
@@ -25,7 +25,6 @@ class FinalChart extends Component {
     }
 
     calculateYield = slope => {
-        console.log('Slope : ', slope);
         let coefficient = 6.022140e6 * 1.602176;
         let yieldPerJoule = slope / this.props.solutionDensity;
         return this.props.unit === Units.moleculesPerHundredVolt ?
@@ -44,7 +43,7 @@ class FinalChart extends Component {
 
     getTrendData = () => {
         let data = this.getSelectedData();
-        let trendFunc = getTrendResult(data).func;
+        let trendFunc = getTrendResult(data).predictY;
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
@@ -112,8 +111,6 @@ class FinalChart extends Component {
                 }
             ]
         };
-        console.log('Data: ', data);
-
         const options = {
             legend: {
                 display: false
@@ -171,9 +168,17 @@ class FinalChart extends Component {
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line data={data} options={options}/>
-                        <p>y = {result.slope}*x + ({result.intercept})</p>
-                        <p>R^2 = {result.rSquared}</p>
-                        <span>Yield = {this.calculateYield(result.slope)} {this.props.unit}</span>
+                        <div style={{marginLeft: '5rem'}}>
+                            <Equation slope={result.slope} intercept={result.intercept}/>
+                            <br/>
+                            <RSquared rSquared={result.rSquared}/>
+                            <br/>
+                            <Result name={'Yield'}
+                                    value={this.calculateYield(result.slope)}
+                                    error={this.calculateYield(result.slopeError)}
+                                    unit={this.props.unit}
+                            />
+                        </div>
                         <div className='d-flex flex-row justify-content-between'>
                             <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
                                 <Back className={classes.leftIcon} />

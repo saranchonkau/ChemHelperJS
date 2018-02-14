@@ -7,7 +7,8 @@ import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
-import {getTrendResult} from "../../utils";
+import {getTrendResult, RSquared} from "../../utils";
+import {Equation} from "../../utils";
 
 class Chart extends Component {
 
@@ -23,7 +24,7 @@ class Chart extends Component {
 
     getTrendData = () => {
         let data = this.getSelectedData();
-        let trendFunc = getTrendResult(data).func;
+        let trendFunc = getTrendResult(data).predictY;
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
@@ -34,7 +35,7 @@ class Chart extends Component {
 
     nextPage = () => {
         let data = this.getSelectedData();
-        this.props.change('trendFunc', getTrendResult(data).func);
+        this.props.change('trendFunc', getTrendResult(data).predictX);
         this.props.nextPage();
     };
 
@@ -152,8 +153,9 @@ class Chart extends Component {
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line data={data} options={options}/>
-                        <p>y = {result.slope}*x + ({result.intercept})</p>
-                        <span>R^2 = {result.rSquared}</span>
+                        <Equation slope={result.slope} intercept={result.intercept}/>
+                        <br/>
+                        <RSquared rSquared={result.rSquared}/>
                         <div className='d-flex flex-row justify-content-between'>
                             <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
                                 <Back className={classes.leftIcon} />

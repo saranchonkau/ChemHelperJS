@@ -15,6 +15,7 @@ import { MenuItem } from 'material-ui/Menu';
 import {Units} from "../../utils";
 import NumberFormat from 'react-number-format';
 import {optionsCellStyle, RemoveRowRenderer} from "./Yield";
+import numeral from 'numeral';
 
 const cellStyle = {
     fontSize: '16px',
@@ -61,7 +62,6 @@ const DoseRateFormat = ({ inputRef, onChange, ...other }) => {
         />
     );
 };
-
 
 const numberParser = params => Number(params.newValue);
 
@@ -112,7 +112,14 @@ class FinalTable extends Component {
                     editable: true,
                     width: 60,
                     cellStyle: cellStyle,
-                    valueParser: numberParser
+                    valueParser: numberParser,
+                    valueFormatter: params => {
+                        if (Number.isNaN(params.value)) {
+                            return params.value;
+                        } else {
+                            return numeral(params.value).format('0.00000e+0');
+                        }
+                    }
                 },
                 { checkboxSelection: true, width: 30, headerName: 'On/Off', cellStyle: cellStyle},
                 { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: optionsCellStyle, cellClass: 'no-border'}
@@ -176,11 +183,7 @@ class FinalTable extends Component {
     calculateConcentrations = () => {
         let func = this.props.trendFunc;
         let data = this.getRowData();
-        data = data.map(point => {
-            // TODO вместо икса считает игрек!
-            point.concentration = func(point.dencity);
-            return point;
-        });
+        data.forEach(point => { point.concentration = func(point.dencity); });
         this.gridApi.setRowData(data);
         this.selectData();
     };
@@ -241,9 +244,9 @@ class FinalTable extends Component {
                         </div>
                         <div>
                             <h3 className="my-3 text-center">Enter parameters for calculating yield:</h3>
-                            <div className='d-table'>
+                            <div className='d-table' style={{fontSize: 16}}>
                                 <div className='d-table-row my-2'>
-                                    <div className='d-table-cell' style={{width: 160, fontSize: 16}}>
+                                    <div className='d-table-cell' style={{width: 180}}>
                                         Solution dencity &rho; :
                                     </div>
                                     <div className='d-table-cell'>
@@ -254,7 +257,7 @@ class FinalTable extends Component {
                                     </div>
                                 </div>
                                 <div className='d-table-row my-2'>
-                                    <div className='d-table-cell' style={{width: 160, fontSize: 16}}>Dose rate P :</div>
+                                    <div className='d-table-cell'>Dose rate P :</div>
                                     <div className='d-table-cell'>
                                         <Input value={this.state.doseRate}
                                                onChange={this.handleChange('doseRate')}
@@ -263,7 +266,7 @@ class FinalTable extends Component {
                                     </div>
                                 </div>
                                 <div className='d-table-row my-2'>
-                                    <div className='d-table-cell' style={{fontSize: 16}}>Unit of measure of yield:</div>
+                                    <div className='d-table-cell'>Unit of measure of yield:</div>
                                     <div className='d-table-cell'>
                                         <Select value={this.state.unit} onChange={this.handleChange('unit')}>
                                             <MenuItem value={Units.moleculesPerHundredVolt}>{Units.moleculesPerHundredVolt}</MenuItem>
