@@ -1,4 +1,4 @@
-const {app, BrowserWindow } = require('electron');
+const {app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = require('url');
 
@@ -11,7 +11,11 @@ function createWindow () {
     // Create the browser window.
     win = new BrowserWindow({
         width: 1000,
-        height: 600
+        height: 600,
+        webPreferences: {
+            nodeIntegration: false,
+            preload: __dirname + '/preload.js'
+        }
     });
 
 
@@ -28,6 +32,8 @@ function createWindow () {
         win = null
     })
 }
+
+// ipcMain.on('write', () => console.log('Write event!'));
 
 app.on('ready', createWindow);
 

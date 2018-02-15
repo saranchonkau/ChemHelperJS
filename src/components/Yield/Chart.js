@@ -7,8 +7,8 @@ import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
-import {getTrendResult, RSquared} from "../../utils";
-import {Equation} from "../../utils";
+import {getTrendResult, ReduxForms, RSquared} from "../../utils/utils";
+import {Equation} from "../../utils/utils";
 
 class Chart extends Component {
 
@@ -149,7 +149,8 @@ class Chart extends Component {
         let result = getTrendResult(this.getSelectedData());
         return (
             <div>
-                <h3 className="my-3 text-center">Line Example</h3>
+                <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
+                <h5 className="text-center">Calibration chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line data={data} options={options}/>
@@ -175,12 +176,12 @@ class Chart extends Component {
 
 Chart = connect(
     state => ({
-        data: getFormValues('Wizard')(state).initialData
+        data: getFormValues(ReduxForms.Yield)(state).initialData
     })
 )(Chart);
 
 export default reduxForm({
-    form: 'Wizard', // <------ same form name
+    form: ReduxForms.Yield, // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
     forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
 })(withStyles(styles)(Chart));

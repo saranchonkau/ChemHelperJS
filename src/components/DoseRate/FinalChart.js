@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {styles} from "./Yield";
+import {styles} from "../Yield/Yield";
 import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import Back from 'material-ui-icons/ArrowBack';
@@ -12,32 +12,29 @@ class FinalChart extends Component {
 
     constructor(props){
         super(props);
-        let {doseRate, finalData} = props;
-        let data = finalData.map(point => {
-            point.dose = doseRate * 60 * point.time;
-            return point;
-        });
+        let {finalData} = props;
+        let data = finalData.map(point => ({...point, time: point.time * 60}));
 
         this.state = {
             data: data
         };
     }
 
-    calculateYield = slope => {
+    calculateDoseRate = slope => {
         let coefficient = 6.022140e6 * 1.602176;
-        let yieldPerJoule = slope / this.props.solutionDensity;
+        let yieldPerJoule = slope / (this.props.solutionDensity * this.props.radYield);
         return this.props.unit === Units.moleculesPerHundredVolt ?
             yieldPerJoule * coefficient : yieldPerJoule;
     };
 
     getSelectedData = () => {
         return this.state.data.filter(point => point.isSelected)
-            .map( data => ({ x: data.dose, y: data.concentration }) );
+            .map( data => ({ x: data.time, y: data.concentration }) );
     };
 
     getUnselectedData = () => {
         return this.state.data.filter(point => !point.isSelected)
-            .map( data => ({ x: data.dose, y: data.concentration }) );
+            .map( data => ({ x: data.time, y: data.concentration }) );
     };
 
     getTrendData = () => {
@@ -47,10 +44,13 @@ class FinalChart extends Component {
     };
 
     render() {
-        let xArray = this.state.data.map(point => point.dose);
+        let xArray = this.state.data.map(point => point.time);
         let yArray = this.state.data.map(point => point.concentration);
         let diff = (Math.max.apply(Math, xArray) -
             Math.min.apply(Math, xArray)) * 0.05;
+        console.log('Selected: ', this.getSelectedData());
+        console.log('UnSelected: ', this.getUnselectedData());
+        console.log('Trend: ', this.getTrendData());
         let data = {
             datasets: [
                 {
@@ -116,7 +116,7 @@ class FinalChart extends Component {
                     // use label callback to return the desired label
                     label: (tooltipItem, data) => [
                         `Concentration: ${tooltipItem.yLabel} mol/l`,
-                        `Absorbed dose: ${tooltipItem.xLabel} Gray`,
+                        `Time: ${tooltipItem.xLabel} sec`,
                     ],
                     // remove title
                     title: (tooltipItem, data) => {
@@ -138,7 +138,7 @@ class FinalChart extends Component {
                     type: 'linear',
                     scaleLabel: {
                         display: true,
-                        labelString: 'Absorbed dose, Gray',
+                        labelString: 'Time, sec',
                         fontSize: 16,
                         fontStyle: 'bold'
                     },
@@ -155,7 +155,7 @@ class FinalChart extends Component {
         let result = getTrendResult(this.getSelectedData());
         return (
             <div>
-                <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
+                <h3 className="my-3 text-center">Dose rate calculation</h3>
                 <h5 className="text-center">Final chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
@@ -165,9 +165,9 @@ class FinalChart extends Component {
                             <br/>
                             <RSquared rSquared={result.rSquared}/>
                             <br/>
-                            <Result name={'Yield'}
-                                    value={this.calculateYield(result.slope)}
-                                    error={this.calculateYield(result.slopeError)}
+                            <Result name={'DoseRate'}
+                                    value={this.calculateDoseRate(result.slope)}
+                                    error={this.calculateDoseRate(result.slopeError)}
                                     unit={this.props.unit}
                             />
                         </div>
@@ -186,15 +186,15 @@ class FinalChart extends Component {
 
 FinalChart = connect(
     state => ({
-        finalData: getFormValues(ReduxForms.Yield)(state).finalData,
-        doseRate: getFormValues(ReduxForms.Yield)(state).doseRate,
-        solutionDensity: getFormValues(ReduxForms.Yield)(state).solutionDensity,
-        unit: getFormValues(ReduxForms.Yield)(state).unit,
+        finalData: getFormValues(ReduxForms.DoseRate)(state).finalData,
+        radYield: getFormValues(ReduxForms.DoseRate)(state).radYield,
+        solutionDensity: getFormValues(ReduxForms.DoseRate)(state).solutionDensity,
+        unit: getFormValues(ReduxForms.DoseRate)(state).unit,
     })
 )(FinalChart);
 
 export default reduxForm({
-    form: ReduxForms.Yield, // <------ same form name
+    form: ReduxForms.DoseRate, // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
     forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
 })(withStyles(styles)(FinalChart));

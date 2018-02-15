@@ -10,8 +10,9 @@ import AccountCircle from 'material-ui-icons/AccountCircle';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import styles from './HeaderStyles';
 import {NavLink} from 'react-router-dom';
+import isElectron from 'is-electron';
 
-class MenuAppBar extends React.Component {
+class Header extends React.Component {
     state = {
         anchorEl: null,
     };
@@ -25,6 +26,11 @@ class MenuAppBar extends React.Component {
     };
 
     render() {
+        // if (isElectron()) {
+        //     window.ipcRenderer.send('write');
+        // } else {
+        //     console.log('NOT ELECTRON');
+        // }
         const { classes } = this.props;
         const { anchorEl } = this.state;
         const open = Boolean(anchorEl);
@@ -84,8 +90,8 @@ class MenuAppBar extends React.Component {
     }
 }
 
-MenuAppBar.propTypes = {
+Header.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(MenuAppBar);
+export default withStyles(styles)(Header);

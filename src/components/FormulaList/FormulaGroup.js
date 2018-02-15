@@ -10,8 +10,7 @@ const styles = theme => ({
     },
 });
 
-
-class FormulaItem extends Component {
+class FormulaGroup extends Component {
     constructor(){
         super();
         this.state = {
@@ -22,23 +21,23 @@ class FormulaItem extends Component {
     handleClick = () => this.setState(prevState => ({open: !prevState.open}));
 
     render(){
-        const { title, children, classes } = this.props;
+        const { title, items, classes } = this.props;
         return (
             <React.Fragment>
                 <ListItem button onClick={this.handleClick}>
                     <ListItemText primary={title} />
                     {
-                        !!children && children.length > 0 &&
+                        !!items && items.length > 0 &&
                         (this.state.open ? <ExpandLess /> : <ExpandMore />)
                     }
                 </ListItem>
                 {
-                    !!children && children.length > 0 &&
+                    !!items && items.length > 0 &&
                     <Collapse in={this.state.open} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                             {
-                                children.map(({title, link}) => (
-                                    <NavLink exact to={link}>
+                                items.map(({title, link}, index) => (
+                                    <NavLink exact to={link} key={index}>
                                         <ListItem button className={classes.nested}>
                                             <ListItemText primary={title} />
                                         </ListItem>
@@ -53,9 +52,9 @@ class FormulaItem extends Component {
     }
 }
 
-FormulaItem.propTypes = {
+FormulaGroup.propTypes = {
     title: PropTypes.string.isRequired,
-    children: PropTypes.array
+    items: PropTypes.array
 };
 
-export default withStyles(styles)(FormulaItem);
+export default withStyles(styles)(FormulaGroup);

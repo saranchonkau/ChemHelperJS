@@ -8,7 +8,7 @@ import Forward from 'material-ui-icons/ArrowForward';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {ReduxForms, Units} from "../../utils/utils";
-import {finalData, initialData} from "../../utils/Data";
+import {finalData, initialData} from '../../utils/Data';
 
 const cellStyle = {
     fontSize: '16px',
@@ -33,17 +33,14 @@ export const styles = theme => ({
 });
 
 export class RemoveRowRenderer extends Component {
-    constructor(props){
-        super(props);
-    }
 
     removeRow = () => this.props.api.updateRowData({ remove: [this.props.data] });
 
     render(){
         return (
             <div className='d-flex align-items-center justify-content-center'>
-                <button type="button" className='bg-transparent'
-                        style={{outline: 'none', border: 'none', cursor: 'pointer'}}
+                <button type="button" className='bg-transparent border-0'
+                        style={{outline: 'none', cursor: 'pointer'}}
                         onClick={this.removeRow}
                 >
                     <span className='i fa fa-trash' style={{fontSize: 20, color: '#f50057'}}/>
@@ -159,7 +156,7 @@ class Yield extends Component {
         let { classes } = this.props;
         return (
             <div>
-               <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
+               <h3 className="my-3 text-center">Dose rate calculation</h3>
                <h5 className="text-center">Calibration table</h5>
                 <div className='d-flex flex-row justify-content-center'>
                     <div style={containerStyle} className="ag-theme-fresh">
@@ -187,18 +184,18 @@ class Yield extends Component {
 
 Yield = connect(
     state => ({
-        data: getFormValues(ReduxForms.Yield)(state).initialData
+        data: getFormValues(ReduxForms.DoseRate)(state).initialData
     })
 )(Yield);
 
 export default reduxForm({
-    form: ReduxForms.Yield, // <------ same form name
+    form: ReduxForms.DoseRate, // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
     forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
     initialValues: {
         initialData: initialData,
         finalData: finalData,
-        doseRate: 0,
+        radYield: 0,
         solutionDensity: 0,
         unit: Units.moleculesPerHundredVolt
     }

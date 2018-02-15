@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import List from 'material-ui/List';
-import FormulaItem from './FormulaItem';
+import FormulaGroup from './FormulaGroup';
 
 const styles = theme => ({
     root: {
@@ -24,21 +24,21 @@ class FormulaList extends React.Component {
         return (
             <div className={classes.root}>
                 <List component="nav">
-                    <FormulaItem title={'Nuclear chemistry'}/>
-                    <FormulaItem title={'Radiation chemistry'}
-                                 children={[
+                    <FormulaGroup title={'Nuclear chemistry'}/>
+                    <FormulaGroup title={'Radiation chemistry'}
+                                  items={[
                                      {title: 'Radiation chemistry yield', link: '/formula/yield'}
                                  ]}
                     />
-                    <FormulaItem title={'Dosimetry'}/>
+                    <FormulaGroup title={'Dosimetry'}
+                                  items={[
+                                     {title: 'Dose rate calculation', link: '/formula/doseRate'}
+                                 ]}
+                    />
                 </List>
             </div>
         );
     }
 }
-
-FormulaList.propTypes = {
-    classes: PropTypes.object.isRequired,
-};
 
 export default withStyles(styles)(FormulaList);

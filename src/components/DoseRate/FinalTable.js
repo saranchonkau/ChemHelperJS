@@ -9,12 +9,11 @@ import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import Select from 'material-ui/Select';
-import PropTypes from 'prop-types';
-import Input, { InputLabel } from 'material-ui/Input';
+import Input from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import {ReduxForms, Units} from "../../utils/utils";
 import NumberFormat from 'react-number-format';
-import {optionsCellStyle, RemoveRowRenderer} from "./Yield";
+import {optionsCellStyle, RemoveRowRenderer} from "../Yield/Yield";
 import numeral from 'numeral';
 
 const cellStyle = {
@@ -44,25 +43,6 @@ const DensityFormat = ({ inputRef, onChange, ...other }) => {
     );
 };
 
-const DoseRateFormat = ({ inputRef, onChange, ...other }) => {
-    return (
-        <NumberFormat
-            {...other}
-            ref={inputRef}
-            onValueChange={values => {
-                onChange({
-                    target: {
-                        value: values.value,
-                    },
-                });
-            }}
-            thousandSeparator
-            suffix=" Gy/s"
-            allowNegative={false}
-        />
-    );
-};
-
 const numberParser = params => Number(params.newValue);
 
 export const styles = theme => ({
@@ -84,7 +64,7 @@ class FinalTable extends Component {
         this.state = {
             data: props.finalData,
             solutionDensity: props.solutionDensity,
-            doseRate: props.doseRate,
+            radYield: props.radYield,
             unit: props.unit
         };
         this.gridOptions = {
@@ -161,7 +141,6 @@ class FinalTable extends Component {
             isSelected: true
         };
         let data = [...this.getRowData(), newRow];
-        console.log('data: ', data);
         this.setState({data});
         this.gridApi.setRowData(data);
     };
@@ -191,10 +170,10 @@ class FinalTable extends Component {
     getTableHeight = dataLength => 45 + dataLength * 26;
 
     nextPage = () => {
-        let {unit, doseRate, solutionDensity} = this.state;
+        let {unit, radYield, solutionDensity} = this.state;
         this.props.change('finalData', this.getRowData());
         this.props.change('unit', unit);
-        this.props.change('doseRate', doseRate);
+        this.props.change('radYield', radYield);
         this.props.change('solutionDensity', solutionDensity);
         this.props.nextPage();
     };
@@ -203,6 +182,25 @@ class FinalTable extends Component {
         this.setState({
             [name]: event.target.value,
         });
+    };
+
+    RadYieldFormat = ({ inputRef, onChange, ...other }) => {
+        return (
+            <NumberFormat
+                {...other}
+                ref={inputRef}
+                onValueChange={values => {
+                    onChange({
+                        target: {
+                            value: values.value,
+                        },
+                    });
+                }}
+                suffix={` ${this.state.unit}`}
+                thousandSeparator
+                allowNegative={false}
+            />
+        );
     };
 
     render() {
@@ -214,7 +212,7 @@ class FinalTable extends Component {
         let { classes } = this.props;
         return (
             <div>
-                <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
+                <h3 className="my-3 text-center">Dose rate calculation</h3>
                 <h5 className="text-center">Final table</h5>
                 <div className='d-flex flex-row justify-content-center'>
                     <div style={containerStyle} className="ag-theme-fresh">
@@ -237,14 +235,14 @@ class FinalTable extends Component {
                             </Button>
                             <Button className={classes.button} variant="raised" color="primary"
                                     onClick={this.nextPage}
-                                    disabled={!this.state.doseRate || !this.state.solutionDensity}
+                                    disabled={!this.state.radYield || !this.state.solutionDensity}
                             >
                                 Next
                                 <Forward className={classes.rightIcon} />
                             </Button>
                         </div>
                         <div>
-                            <h3 className="my-3 text-center">Enter parameters for calculating yield:</h3>
+                            <h3 className="my-3 text-center">Enter parameters for calculating dose rate:</h3>
                             <div className='d-table' style={{fontSize: 16}}>
                                 <div className='d-table-row my-2'>
                                     <div className='d-table-cell' style={{width: 180}}>
@@ -258,11 +256,12 @@ class FinalTable extends Component {
                                     </div>
                                 </div>
                                 <div className='d-table-row my-2'>
-                                    <div className='d-table-cell'>Dose rate P :</div>
+                                    <div className='d-table-cell'>Yield G :</div>
                                     <div className='d-table-cell'>
-                                        <Input value={this.state.doseRate}
-                                               onChange={this.handleChange('doseRate')}
-                                               inputComponent={DoseRateFormat}
+                                        <Input value={this.state.radYield}
+                                               onChange={this.handleChange('radYield')}
+                                               unit={this.state.unit}
+                                               inputComponent={this.RadYieldFormat}
                                         />
                                     </div>
                                 </div>
@@ -287,16 +286,16 @@ class FinalTable extends Component {
 
 FinalTable = connect(
     state => ({
-        trendFunc: getFormValues(ReduxForms.Yield)(state).trendFunc,
-        finalData: getFormValues(ReduxForms.Yield)(state).finalData,
-        doseRate: getFormValues(ReduxForms.Yield)(state).doseRate,
-        solutionDensity: getFormValues(ReduxForms.Yield)(state).solutionDensity,
-        unit: getFormValues(ReduxForms.Yield)(state).unit
+        trendFunc: getFormValues(ReduxForms.DoseRate)(state).trendFunc,
+        finalData: getFormValues(ReduxForms.DoseRate)(state).finalData,
+        radYield: getFormValues(ReduxForms.DoseRate)(state).radYield,
+        solutionDensity: getFormValues(ReduxForms.DoseRate)(state).solutionDensity,
+        unit: getFormValues(ReduxForms.DoseRate)(state).unit
     })
 )(FinalTable);
 
 export default reduxForm({
-    form: ReduxForms.Yield, // <------ same form name
+    form: ReduxForms.DoseRate, // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
     forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
 })(withStyles(styles)(FinalTable));

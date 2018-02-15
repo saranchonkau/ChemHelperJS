@@ -8,7 +8,10 @@ export const Units = {
     molPerJoule: 'mol/J'
 };
 
-
+export const ReduxForms = {
+    Yield: 'Yield',
+    DoseRate: 'DoseRate'
+};
 
 export const getTrendResult = data => {
     const result = {
