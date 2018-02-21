@@ -26,11 +26,6 @@ class Header extends React.Component {
     };
 
     render() {
-        // if (isElectron()) {
-        //     window.ipcRenderer.send('write');
-        // } else {
-        //     console.log('NOT ELECTRON');
-        // }
         const { classes } = this.props;
         const { anchorEl } = this.state;
         const open = Boolean(anchorEl);
@@ -52,9 +47,9 @@ class Header extends React.Component {
                             </NavLink>
                         </Typography>
                         <Typography variant="title" color="inherit" className={classes.flex}>
-                            {/*<NavLink to={'/isotopes'} exact style={{color: 'white'}}>*/}
-                                Isotopes
-                            {/*</NavLink>*/}
+                            <NavLink to={'/nuclides'} exact style={{color: 'white'}} activeStyle={{color: 'red'}}>
+                                Nuclides
+                            </NavLink>
                         </Typography>
                         <div>
                             <IconButton

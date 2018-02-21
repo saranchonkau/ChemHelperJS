@@ -1,11 +1,11 @@
 const {app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = require('url');
-
+const queries = require("./db/queries");
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win;
+var win;
 
 function createWindow () {
     // Create the browser window.
@@ -33,7 +33,13 @@ function createWindow () {
     })
 }
 
-// ipcMain.on('write', () => console.log('Write event!'));
+ipcMain.on('selectAll', () => {
+    queries.selectAll();
+});
+
+ipcMain.on('selectFirst10', () => {
+    queries.selectFirst10().then(rows => win.webContents.send('selectFirst10', rows));
+});
 
 app.on('ready', createWindow);
 

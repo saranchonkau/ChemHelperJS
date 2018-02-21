@@ -168,7 +168,7 @@ class FinalChart extends Component {
                             <Result name={'DoseRate'}
                                     value={this.calculateDoseRate(result.slope)}
                                     error={this.calculateDoseRate(result.slopeError)}
-                                    unit={this.props.unit}
+                                    unit={'Gy/s'}
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
