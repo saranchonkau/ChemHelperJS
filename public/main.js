@@ -18,7 +18,6 @@ function createWindow () {
         }
     });
 
-
     const startUrl = process.env.ELECTRON_START_URL || url.format({
         pathname: path.join(__dirname, '/../build/index.html'),
         protocol: 'file:',
@@ -33,12 +32,15 @@ function createWindow () {
     })
 }
 
-ipcMain.on('selectAll', () => {
-    queries.selectAll();
-});
+ipcMain.on('executeQuery', (event, query) => {
+    queries.executeQuery(query)
+        .then(result => event.sender.send('queryResponse', result));
+    }
+);
 
-ipcMain.on('selectFirst10', () => {
-    queries.selectFirst10().then(rows => win.webContents.send('selectFirst10', rows));
+ipcMain.on('countAll', (event, query) => {
+    queries.executeQuery(query)
+        .then(result => event.sender.send('countAll', result));
 });
 
 app.on('ready', createWindow);

@@ -7,13 +7,7 @@ const knex = require("knex")({
     }
 });
 
-module.exports.selectAll = () => {
-    knex.select('nucid').from('nuclides')
-        .then(rows => console.log('Rows: ', rows));
-};
-
-module.exports.selectFirst10 = () => {
-    return knex.raw('select * from nuclides limit 10');
-    knex.select().from('nuclides')
-        .then(rows => console.log('Rows: ', rows));
+exports.executeQuery = query => {
+    console.log('Query: ', query);
+    return knex.raw(query);
 };
