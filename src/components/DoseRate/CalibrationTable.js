@@ -9,6 +9,7 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {ReduxForms, Units} from "../../utils/utils";
 import {finalData, initialData} from '../../utils/Data';
+import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 
 const cellStyle = {
     fontSize: '16px',
@@ -31,24 +32,6 @@ export const styles = theme => ({
         marginLeft: theme.spacing.unit,
     },
 });
-
-export class RemoveRowRenderer extends Component {
-
-    removeRow = () => this.props.api.updateRowData({ remove: [this.props.data] });
-
-    render(){
-        return (
-            <div className='d-flex align-items-center justify-content-center'>
-                <button type="button" className='bg-transparent border-0'
-                        style={{outline: 'none', cursor: 'pointer'}}
-                        onClick={this.removeRow}
-                >
-                    <span className='i fa fa-trash' style={{fontSize: 20, color: '#f50057'}}/>
-                </button>
-            </div>
-        );
-    }
-}
 
 export const optionsCellStyle = {
     paddingLeft: '0px',

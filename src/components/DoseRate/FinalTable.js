@@ -13,8 +13,9 @@ import Input from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import {ReduxForms, Units} from "../../utils/utils";
 import NumberFormat from 'react-number-format';
-import {optionsCellStyle, RemoveRowRenderer} from "../Yield/Yield";
+import {optionsCellStyle} from "../Yield/Yield";
 import numeral from 'numeral';
+import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 
 const cellStyle = {
     fontSize: '16px',

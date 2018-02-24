@@ -5,12 +5,8 @@ import PropTypes from 'prop-types';
 
 const styles = theme => ({
     root: {
-
-        height: '100%',
-        // width: '100%',
-        maxWidth: '70%',
-        flex: '0 0 70%',
-        backgroundColor: theme.palette.background.paper,
+        width: '100%',
+        height: '100%'
     },
     nested: {
         paddingLeft: theme.spacing.unit * 4,
