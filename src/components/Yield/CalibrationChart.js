@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {styles} from "./Yield";
+import {styles} from "./CalibrationTable";
 import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import Forward from 'material-ui-icons/ArrowForward';
@@ -10,7 +10,7 @@ import {Line} from 'react-chartjs-2';
 import {getTrendResult, ReduxForms, RSquared} from "../../utils/utils";
 import {Equation} from "../../utils/utils";
 
-class Chart extends Component {
+class CalibrationChart extends Component {
 
     getSelectedData = () => {
         return this.props.data.filter(point => point.isSelected)
@@ -26,11 +26,6 @@ class Chart extends Component {
         let data = this.getSelectedData();
         let trendFunc = getTrendResult(data).predictY;
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
-    };
-
-    getPointsArray = () => {
-        return this.props.data.filter(point => point.isSelected)
-            .map( data => ([data.concentration, data.dencity]) );
     };
 
     nextPage = () => {
@@ -124,8 +119,15 @@ class Chart extends Component {
                     scaleLabel: {
                         display: true,
                         labelString: 'Optical density, D',
-                        fontSize: 16,
-                        fontStyle: 'bold'
+                        fontSize: 20,
+                        fontStyle: 'bold',
+                        fontFamily: 'KaTeX_Math',
+                        fontColor: '#212529'
+                    },
+                    ticks: {
+                        fontColor: '#212529',
+                        fontFamily: 'KaTeX_Math',
+                        fontSize: 17,
                     }
                 }],
                 xAxes: [{
@@ -133,26 +135,31 @@ class Chart extends Component {
                     scaleLabel: {
                         display: true,
                         labelString: 'Concentration, M',
-                        fontSize: 16,
-                        fontStyle: 'bold'
+                        fontSize: 20,
+                        fontStyle: 'bold',
+                        fontFamily: 'KaTeX_Math',
+                        fontColor: '#212529'
                     },
                     offset: true,
                     ticks: {
                         min: Math.min.apply(Math, xArray) - diff > 0 ?
                              Math.min.apply(Math, xArray) - diff : 0,
-                        max: Math.max.apply(Math, xArray) + diff
+                        max: Math.max.apply(Math, xArray) + diff,
+                        fontColor: '#212529',
+                        fontFamily: 'KaTeX_Math',
+                        fontSize: 17
                     }
                 }],
             }
         };
-        let { classes } = this.props;
-        let result = getTrendResult(this.getSelectedData());
+        const { classes } = this.props;
+        const result = getTrendResult(this.getSelectedData());
         return (
             <div>
                 <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
                 <h5 className="text-center">Calibration chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
-                    <div style={{width: 700, height: 600}}>
+                    <div style={{width: 700, height: '100%'}}>
                         <Line data={data} options={options}/>
                         <Equation slope={result.slope} intercept={result.intercept}/>
                         <br/>
@@ -174,14 +181,14 @@ class Chart extends Component {
     }
 }
 
-Chart = connect(
+CalibrationChart = connect(
     state => ({
         data: getFormValues(ReduxForms.Yield)(state).initialData
     })
-)(Chart);
+)(CalibrationChart);
 
 export default reduxForm({
     form: ReduxForms.Yield, // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
     forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
-})(withStyles(styles)(Chart));
+})(withStyles(styles)(CalibrationChart));

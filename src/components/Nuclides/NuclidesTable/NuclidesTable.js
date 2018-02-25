@@ -4,14 +4,9 @@ import 'ag-grid/dist/styles/ag-grid.css';
 import 'ag-grid/dist/styles/ag-theme-fresh.css';
 import isElectron from 'is-electron';
 import ReactPaginate from 'react-paginate';
-
-const cellStyle = {
-    fontSize: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    border: 'none'
-};
+import {cellStyle, suppressProps} from "../../App/StyleConstants";
+import {connect} from 'react-redux';
+import {getParam, getWhereParam, removeNull} from "../../../utils/query";
 
 class NuclidesTable extends Component {
 
@@ -25,10 +20,10 @@ class NuclidesTable extends Component {
         };
         this.gridOptions = {
             columnDefs: [
-                { unSortIcon: true, headerName: 'Z', field: 'z', width: 80, cellStyle: cellStyle},
-                { unSortIcon: true, headerName: 'N', field: 'n', width: 80, cellStyle: cellStyle},
-                { unSortIcon: true, headerName: 'Symbol', field: 'symbol', width: 130, cellStyle: cellStyle},
-                { unSortIcon: true, headerName: 'A', field: 'atomic_mass', width: 170, cellStyle: cellStyle,
+                { unSortIcon: true, headerName: 'Z', field: 'z', width: 80, cellStyle: cellStyle, ...suppressProps},
+                { unSortIcon: true, headerName: 'N', field: 'n', width: 80, cellStyle: cellStyle, ...suppressProps},
+                { unSortIcon: true, headerName: 'Symbol', field: 'symbol', width: 130, cellStyle: cellStyle, ...suppressProps},
+                { unSortIcon: true, headerName: 'A', field: 'atomic_mass', width: 170, cellStyle: cellStyle, ...suppressProps,
                     valueFormatter: params => {
                         let A = Number.parseFloat(params.value);
                         if (Number.isNaN(A)) {
@@ -42,17 +37,17 @@ class NuclidesTable extends Component {
             enableSorting: true,
             onSortChanged: params => {
                 const sortModel = params.api.getSortModel();
-                this.setState({sortModel});
-                this.loadData(this.state.page, sortModel);
+                this.setState({sortModel, currentPage: 0});
+                this.requestData(this.configureQuery({sort: sortModel, filter: this.props.filter}));
             },
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
                 sortDescending: '<i class="fa fa-sort-desc" style="color: black"/>',
                 sortUnSort: '<i class="fa fa-sort" style="color: gray"/>',
             },
-            enableColResize: true
+            headerHeight: 50,
+            rowHeight: 30
         };
-
     }
 
     componentDidMount(){
@@ -63,65 +58,94 @@ class NuclidesTable extends Component {
             window.ipcRenderer.on('countAll', (event, results) => {
                 this.setState({ count: results[0]['count(*)'] });
             });
-            this.loadData();
-            this.getCount();
+            const query = this.configureQuery({filter: this.props.filter});
+            this.requestData(query);
+            this.requestCount(query);
         }
     }
 
-    getCount = () => {
-        window.ipcRenderer.send('countAll', 'select count(*) from nuclides');
+    componentWillReceiveProps(nextProps){
+        if (this.props.filter.modCount !== nextProps.filter.modCount) {
+            this.setState({page: 0, sortModel: []});
+            const query = this.configureQuery({filter: nextProps.filter});
+            this.requestData(query);
+            this.requestCount(query);
+        }
+    }
+
+    configureQuery = ({sort = [], page = 0, filter = {}} ) => {
+        const sortParam = sort.map(obj => `${obj.colId} ${obj.sort.toUpperCase()}`).join(', ');
+        const pageParam = `limit ${page * 10}, 10`;
+        const filterParam = this.configureFilterParam(filter);
+        return removeNull([filterParam, sortParam && `order by ${sortParam}`, pageParam]).join(' ');
     };
 
-    loadData = (page = this.state.currentPage, sortModel = this.state.sortModel) => {
-        let sortParam = sortModel.map(sort => `${sort.colId} ${sort.sort.toUpperCase()}`).join(', ');
-        window.ipcRenderer.send('executeQuery',
-            `select * from nuclides ${sortParam ? `order by ${sortParam}` : ''} limit ${page * 10}, 10`
-        );
+    requestCount = (query = '') => window.ipcRenderer.send('countAll', `select count(*) from nuclides ${query}`);
+
+    requestData = (query = '') => window.ipcRenderer.send('executeQuery', `select * from nuclides ${query}`);
+
+    configureFilterParam = filter => {
+        return getWhereParam([
+            getParam('z', filter.z),
+            getParam('n', filter.n)
+        ]);
     };
 
-    getTableHeight = () => 45 + this.state.data.length * 26;
+    handlePageClick = ({selected}) => {
+        this.setState({currentPage: selected});
+        this.requestData(this.configureQuery({
+            sort: this.state.sortModel,
+            filter: this.props.filter,
+            page: selected
+        }));
+    };
+
+    getTableHeight = () => 64 + this.state.data.length * 30.5;
 
     onGridReady = params => {
         this.gridApi = params.api;
         this.columnApi = params.columnApi;
     };
 
-    handlePageClick = ({selected}) => {
-        this.setState({currentPage: selected});
-        this.loadData(selected);
-    };
-
     render(){
         const {data} = this.state;
         return (
-            <div className='w-100 py-4 px-4'>
-                <div className="ag-theme-fresh " style={{width: 500, height: this.getTableHeight()}}>
-                    <AgGridReact
-                        rowData={data}
-                        onGridReady={this.onGridReady}
-                        gridOptions={this.gridOptions}
+            <div className='w-100 d-flex justify-content-center py-3 px-3'>
+                <div style={{width: 500}}>
+                    <h2 className='text-center'>Database of nuclides</h2>
+                    <div className="ag-theme-blue " style={{height: this.getTableHeight()}}>
+                        <AgGridReact
+                            rowData={data}
+                            onGridReady={this.onGridReady}
+                            gridOptions={this.gridOptions}
+                        />
+                    </div>
+                    <ReactPaginate previousLabel={"Previous"}
+                                   nextLabel={"Next"}
+                                   breakLabel={<span className='page-link'>...</span>}
+                                   breakClassName={"page-item"}
+                                   pageCount={Math.ceil(this.state.count / 10)}
+                                   marginPagesDisplayed={2}
+                                   pageRangeDisplayed={5}
+                                   forcePage={this.state.currentPage}
+                                   onPageChange={this.handlePageClick}
+                                   containerClassName={"pagination mt-2"}
+                                   activeClassName={"active"}
+                                   pageClassName={'page-item'}
+                                   pageLinkClassName={'page-link'}
+                                   previousClassName={'page-item'}
+                                   nextClassName={'page-item'}
+                                   previousLinkClassName={'page-link'}
+                                   nextLinkClassName={'page-link'}
                     />
                 </div>
-                <ReactPaginate previousLabel={"Previous"}
-                               nextLabel={"Next"}
-                               breakLabel={<span className='page-link'>...</span>}
-                               breakClassName={"page-item"}
-                               pageCount={Math.ceil(this.state.count / 10)}
-                               marginPagesDisplayed={2}
-                               pageRangeDisplayed={5}
-                               onPageChange={this.handlePageClick}
-                               containerClassName={"pagination mt-2"}
-                               activeClassName={"active"}
-                               pageClassName={'page-item'}
-                               pageLinkClassName={'page-link'}
-                               previousClassName={'page-item'}
-                               nextClassName={'page-item'}
-                               previousLinkClassName={'page-link'}
-                               nextLinkClassName={'page-link'}
-                />
             </div>
         );
     }
 }
 
-export default NuclidesTable;
+export default connect(
+    state => ({
+        filter: state.filter
+    })
+)(NuclidesTable);

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { AgGridReact } from "ag-grid-react";
-import 'ag-grid/main-with-styles';
+import 'ag-grid/dist/styles/ag-grid.css';
+import 'ag-grid/dist/styles/ag-theme-blue.css';
 import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import PlusOne from 'material-ui-icons/PlusOne';
@@ -12,14 +13,7 @@ import {finalData, initialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import CheckBoxRenderer from '../../utils/cellRenderers/CheckBoxRenderer';
 import './table.css';
-
-const cellStyle = {
-    fontSize: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    border: 'none'
-};
+import {cellStyle, suppressProps} from "../App/StyleConstants";
 
 const numberParser = params => Number(params.newValue);
 
@@ -35,22 +29,7 @@ export const styles = theme => ({
     },
 });
 
-export const optionsCellStyle = {
-    paddingLeft: '0px',
-    paddingRight: '0px',
-    border: 'none'
-};
-
-const suppressProps = {
-    suppressMenu: true,
-    suppressMovable: true,
-    suppressFilter: true,
-    suppressResize: true,
-    suppressNavigable: true,
-    suppressToolPanel: true
-};
-
-class Yield extends Component {
+class CalibrationTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -62,7 +41,7 @@ class Yield extends Component {
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                 { headerName: 'Optical Dencity', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                 { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
-                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: optionsCellStyle, cellClass: 'no-border', ...suppressProps}
+                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
             ],
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
@@ -159,11 +138,11 @@ class Yield extends Component {
     }
 }
 
-Yield = connect(
+CalibrationTable = connect(
     state => ({
         data: getFormValues(ReduxForms.Yield)(state).initialData
     })
-)(Yield);
+)(CalibrationTable);
 
 export default reduxForm({
     form: ReduxForms.Yield, // <------ same form name
@@ -176,4 +155,4 @@ export default reduxForm({
         solutionDensity: 0,
         unit: Units.moleculesPerHundredVolt
     }
-})(withStyles(styles)(Yield));
+})(withStyles(styles)(CalibrationTable));

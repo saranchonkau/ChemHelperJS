@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { AgGridReact } from "ag-grid-react";
-import 'ag-grid/main-with-styles';
+import 'ag-grid/dist/styles/ag-grid.css';
+import 'ag-grid/dist/styles/ag-theme-blue.css';
 import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import PlusOne from 'material-ui-icons/PlusOne';
@@ -8,16 +9,11 @@ import Forward from 'material-ui-icons/ArrowForward';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {ReduxForms, Units} from "../../utils/utils";
-import {finalData, initialData} from '../../utils/Data';
+import {finalData, initialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
-
-const cellStyle = {
-    fontSize: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    border: 'none'
-};
+import CheckBoxRenderer from '../../utils/cellRenderers/CheckBoxRenderer';
+import '../Yield/table.css';
+import {cellStyle, suppressProps} from "../App/StyleConstants";
 
 const numberParser = params => Number(params.newValue);
 
@@ -33,13 +29,7 @@ export const styles = theme => ({
     },
 });
 
-export const optionsCellStyle = {
-    paddingLeft: '0px',
-    paddingRight: '0px',
-    border: 'none'
-};
-
-class Yield extends Component {
+class CalibrationTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -47,46 +37,34 @@ class Yield extends Component {
         };
         this.gridOptions = {
             columnDefs: [
-                { unSortIcon: true, headerName: '№', field: 'id', width: 25, cellStyle: cellStyle, suppressFilter: true },
-                { unSortIcon: true,
-                    headerName: 'Concentration',
-                    field: 'concentration',
-                    editable: true,
-                    width: 60,
-                    cellStyle: cellStyle,
-                    valueParser: numberParser
-                },
-                { unSortIcon: true,
-                    headerName: 'Optical Dencity',
-                    field: 'dencity',
-                    editable: true,
-                    width: 60,
-                    cellStyle: cellStyle,
-                    valueParser: numberParser
-                },
-                { checkboxSelection: true, width: 30, headerName: 'On/Off', cellStyle: cellStyle},
-                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: optionsCellStyle, cellClass: 'no-border'},
-
+                { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
+                { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                { headerName: 'Optical Dencity', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
+                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
             ],
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
                 sortDescending: '<i class="fa fa-sort-desc" style="color: black"/>',
-                sortUnSort: '<i class="fa fa-sort" style="color: gray"/>',
+                sortUnSort: '<i class="fa fa-sort" style="color: gray"/>'
             },
             enableSorting: true,
-            enableColResize: true,
             singleClickEdit: true,
             stopEditingWhenGridLosesFocus: true,
             enterMovesDownAfterEdit: true,
             suppressRowClickSelection: true,
             rowSelection: 'multiple',
+            onSelectionChanged: ({api}) => api.refreshCells({ columns: ['checkbox'], force: true }),
             onRowDataChanged: ({api}) => {
-                api.forEachNode(node => {
-                    if (node.data.isSelected) {
-                        node.setSelected(true);
-                    }
-                });
-            }
+                console.log('Row data changed');
+                this.checkNodeSelection(api);
+            },
+            onRowDataUpdated: (params) => {
+                console.log('Row data updated: ', params);
+                this.setState({data: this.getRowData()});
+            },
+            headerHeight: 50,
+            rowHeight: 30
         };
     }
 
@@ -99,9 +77,11 @@ class Yield extends Component {
     onGridReady = params => {
         this.gridApi = params.api;
         this.columnApi = params.columnApi;
+        this.checkNodeSelection(this.gridApi);
+    };
 
-        this.gridApi.sizeColumnsToFit();
-        this.gridApi.forEachNode(node => {
+    checkNodeSelection = gridApi => {
+        gridApi.forEachNode(node => {
             if (node.data.isSelected) {
                 node.setSelected(true);
             }
@@ -109,53 +89,46 @@ class Yield extends Component {
     };
 
     addRow = () => {
-        let newRow = {
-            id: this.state.data.length + 1,
+        const rowData = this.getRowData();
+        const newRow = {
+            id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
             concentration: 0.0,
             dencity: 0.0,
             isSelected: true
         };
-        let data = [...this.getRowData(), newRow];
-        this.setState({data});
-        this.gridApi.setRowData(data);
+        this.setState({data: [...rowData, newRow]});
     };
 
-    getTableHeight = dataLength => 45 + dataLength * 26;
+    getTableHeight = dataLength => 64 + dataLength * 30.5;
 
     nextPage = () => {
-        let initialData = [];
-        this.gridApi.forEachNode(node => initialData.push({...node.data, isSelected: node.selected}));
-        this.props.change('initialData', initialData);
+        this.props.change('initialData', this.getRowData());
         this.props.nextPage();
     };
 
     render() {
-        let containerStyle = {
-            height: this.getTableHeight(this.state.data.length),
-            width: 520,
-            align: 'center'
-        };
-
         let { classes } = this.props;
         return (
             <div>
-               <h3 className="my-3 text-center">Dose rate calculation</h3>
-               <h5 className="text-center">Calibration table</h5>
-                <div className='d-flex flex-row justify-content-center'>
-                    <div style={containerStyle} className="ag-theme-fresh">
-                        <AgGridReact
-                            rowData={this.state.data}
-                            onGridReady={this.onGridReady}
-                            gridOptions={this.gridOptions}
-                        />
+                <h3 className="my-3 text-center">Dose rate calculation</h3>
+                <h5 className="text-center">Calibration table</h5>
+                <div className='d-flex justify-content-center'>
+                    <div style={{width: 540}}>
+                        <div className="ag-theme-blue" style={{height: this.getTableHeight(this.state.data.length)}}>
+                            <AgGridReact
+                                rowData={this.state.data}
+                                onGridReady={this.onGridReady}
+                                gridOptions={this.gridOptions}
+                            />
+                        </div>
                         <div className='d-flex flex-row justify-content-between'>
                             <Button className={classes.button} variant="raised" color="secondary" onClick={this.addRow}>
-                                <PlusOne className={classes.leftIcon} />
+                                <PlusOne className={classes.leftIcon}/>
                                 Row
                             </Button>
                             <Button className={classes.button} variant="raised" color="primary" onClick={this.nextPage}>
                                 Next
-                                <Forward className={classes.rightIcon} />
+                                <Forward className={classes.rightIcon}/>
                             </Button>
                         </div>
                     </div>
@@ -165,11 +138,11 @@ class Yield extends Component {
     }
 }
 
-Yield = connect(
+CalibrationTable = connect(
     state => ({
         data: getFormValues(ReduxForms.DoseRate)(state).initialData
     })
-)(Yield);
+)(CalibrationTable);
 
 export default reduxForm({
     form: ReduxForms.DoseRate, // <------ same form name
@@ -182,4 +155,4 @@ export default reduxForm({
         solutionDensity: 0,
         unit: Units.moleculesPerHundredVolt
     }
-})(withStyles(styles)(Yield));
+})(withStyles(styles)(CalibrationTable));

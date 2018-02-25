@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { AgGridReact } from "ag-grid-react";
-import 'ag-grid/main-with-styles';
+import 'ag-grid/dist/styles/ag-grid.css';
+import 'ag-grid/dist/styles/ag-theme-blue.css';
 import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import PlusOne from 'material-ui-icons/PlusOne';
@@ -9,22 +10,14 @@ import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import Select from 'material-ui/Select';
-import PropTypes from 'prop-types';
-import Input, { InputLabel } from 'material-ui/Input';
+import Input  from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import {ReduxForms, Units} from "../../utils/utils";
 import NumberFormat from 'react-number-format';
-import {optionsCellStyle} from "./Yield";
 import numeral from 'numeral';
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
-
-const cellStyle = {
-    fontSize: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    border: 'none'
-};
+import {cellStyle, suppressProps} from "../App/StyleConstants";
+import CheckBoxRenderer from "../../utils/cellRenderers/CheckBoxRenderer";
 
 const DensityFormat = ({ inputRef, onChange, ...other }) => {
     return (
@@ -78,7 +71,6 @@ export const styles = theme => ({
     },
 });
 
-
 class FinalTable extends Component {
     constructor(props) {
         super(props);
@@ -90,30 +82,18 @@ class FinalTable extends Component {
         };
         this.gridOptions = {
             columnDefs: [
-                { unSortIcon: true, headerName: '№', field: 'id', width: 25, cellStyle: cellStyle, suppressFilter: true },
+                { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                 { unSortIcon: true,
                     headerName: 'Time, min',
                     field: 'time',
                     editable: true,
-                    width: 40,
+                    width: 130,
                     cellStyle: cellStyle,
                     valueParser: numberParser
                 },
-                { unSortIcon: true,
-                    headerName: 'Optical Dencity',
-                    field: 'dencity',
-                    editable: true,
-                    width: 50,
-                    cellStyle: cellStyle,
-                    valueParser: numberParser
-                },
-                { unSortIcon: true,
-                    headerName: 'Concentration, M',
-                    field: 'concentration',
-                    editable: true,
-                    width: 60,
-                    cellStyle: cellStyle,
-                    valueParser: numberParser,
+                { headerName: 'Optical Dencity', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
+                    valueParser: numberParser, unSortIcon: true, ...suppressProps,
                     valueFormatter: params => {
                         if (Number.isNaN(params.value)) {
                             return params.value;
@@ -122,8 +102,8 @@ class FinalTable extends Component {
                         }
                     }
                 },
-                { checkboxSelection: true, width: 30, headerName: 'On/Off', cellStyle: cellStyle},
-                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: optionsCellStyle, cellClass: 'no-border'}
+                { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
+                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
             ],
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
@@ -131,40 +111,49 @@ class FinalTable extends Component {
                 sortUnSort: '<i class="fa fa-sort" style="color: gray"/>',
             },
             enableSorting: true,
-            enableColResize: true,
             singleClickEdit: true,
             stopEditingWhenGridLosesFocus: true,
             enterMovesDownAfterEdit: true,
             suppressRowClickSelection: true,
             rowSelection: 'multiple',
+            onSelectionChanged: ({api}) => api.refreshCells({ columns: ['checkbox'], force: true }),
             onRowDataChanged: ({api}) => {
-                api.forEachNode(node => {
-                    if (node.data.isSelected) {
-                        node.setSelected(true);
-                    }
-                });
-            }
+                console.log('Row data changed');
+                this.checkNodeSelection(api);
+            },
+            onRowDataUpdated: (params) => {
+                console.log('Row data updated: ', params);
+                this.setState({data: this.getRowData()});
+            },
+            headerHeight: 50,
+            rowHeight: 30
         };
     }
+
+    checkNodeSelection = gridApi => {
+        gridApi.forEachNode(node => {
+            if (node.data.isSelected) {
+                node.setSelected(true);
+            }
+        });
+    };
 
     onGridReady = params => {
         this.gridApi = params.api;
         this.columnApi = params.columnApi;
-        this.gridApi.sizeColumnsToFit();
+        this.checkNodeSelection(this.gridApi);
     };
 
     addRow = () => {
-        let newRow = {
-            id: this.state.data.length + 1,
+        const rowData = this.getRowData();
+        const newRow = {
+            id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
             concentration: 0.0,
             dencity: 0.0,
             time: 0.0,
             isSelected: true
         };
-        let data = [...this.getRowData(), newRow];
-        console.log('data: ', data);
-        this.setState({data});
-        this.gridApi.setRowData(data);
+        this.setState({data: [...rowData, newRow]});
     };
 
     getRowData = () => {
@@ -173,23 +162,14 @@ class FinalTable extends Component {
         return array;
     };
 
-    selectData = () => {
-        this.gridApi.forEachNode(node => {
-            if (node.data.isSelected) {
-                node.setSelected(true);
-            }
-        });
-    };
-
     calculateConcentrations = () => {
         let func = this.props.trendFunc;
         let data = this.getRowData();
         data.forEach(point => { point.concentration = func(point.dencity); });
-        this.gridApi.setRowData(data);
-        this.selectData();
+        this.setState({data: data});
     };
 
-    getTableHeight = dataLength => 45 + dataLength * 26;
+    getTableHeight = dataLength => 64 + dataLength * 30.5;
 
     nextPage = () => {
         let {unit, doseRate, solutionDensity} = this.state;
@@ -207,32 +187,35 @@ class FinalTable extends Component {
     };
 
     render() {
-        let containerStyle = {
-            height: this.getTableHeight(this.state.data.length),
-            width: 650,
-            align: 'center'
-        };
         let { classes } = this.props;
         return (
             <div>
                 <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
                 <h5 className="text-center">Final table</h5>
-                <div className='d-flex flex-row justify-content-center'>
-                    <div style={containerStyle} className="ag-theme-fresh">
-                        <AgGridReact
-                            rowData={this.state.data}
-                            onGridReady={this.onGridReady}
-                            gridOptions={this.gridOptions}
-                        />
+                <div className='d-flex justify-content-center'>
+                    <div style={{width: 670}}>
+                        <div className="ag-theme-blue" style={{height: this.getTableHeight(this.state.data.length)}}>
+                            <AgGridReact
+                                rowData={this.state.data}
+                                onGridReady={this.onGridReady}
+                                gridOptions={this.gridOptions}
+                            />
+                        </div>
                         <div className='d-flex flex-row justify-content-between'>
-                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.calculateConcentrations}>
+                            <Button className={classes.button} variant="raised" color="secondary"
+                                    onClick={this.calculateConcentrations}
+                            >
                                 Calculate concentrations
                             </Button>
-                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.addRow}>
-                                <PlusOne className={classes.leftIcon} />
+                            <Button className={classes.button} variant="raised" color="secondary"
+                                    onClick={this.addRow}
+                            >
+                                <PlusOne className={classes.leftIcon}/>
                                 Row
                             </Button>
-                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
+                            <Button className={classes.button} variant="raised" color="secondary"
+                                    onClick={this.props.previousPage}
+                            >
                                 <Back className={classes.leftIcon} />
                                 Back
                             </Button>
@@ -244,41 +227,37 @@ class FinalTable extends Component {
                                 <Forward className={classes.rightIcon} />
                             </Button>
                         </div>
-                        <div>
-                            <h3 className="my-3 text-center">Enter parameters for calculating yield:</h3>
-                            <div className='d-table' style={{fontSize: 16}}>
-                                <div className='d-table-row my-2'>
-                                    <div className='d-table-cell' style={{width: 180}}>
-                                        Solution dencity &rho; :
-                                    </div>
-                                    <div className='d-table-cell'>
-                                        <Input value={this.state.solutionDensity}
-                                               onChange={this.handleChange('solutionDensity')}
-                                               inputComponent={DensityFormat}
-                                        />
-                                    </div>
-                                </div>
-                                <div className='d-table-row my-2'>
-                                    <div className='d-table-cell'>Dose rate P :</div>
-                                    <div className='d-table-cell'>
-                                        <Input value={this.state.doseRate}
-                                               onChange={this.handleChange('doseRate')}
-                                               inputComponent={DoseRateFormat}
-                                        />
-                                    </div>
-                                </div>
-                                <div className='d-table-row my-2'>
-                                    <div className='d-table-cell'>Unit of measure of yield:</div>
-                                    <div className='d-table-cell'>
-                                        <Select value={this.state.unit} onChange={this.handleChange('unit')}>
-                                            <MenuItem value={Units.moleculesPerHundredVolt}>{Units.moleculesPerHundredVolt}</MenuItem>
-                                            <MenuItem value={Units.molPerJoule}>{Units.molPerJoule}</MenuItem>
-                                        </Select>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
+                        <h3 className="my-3 text-center">Enter parameters for calculating yield:</h3>
+                        <table>
+                            <tbody>
+                            <tr>
+                                <td>Solution dencity &rho; :</td>
+                                <td>
+                                    <Input value={this.state.solutionDensity}
+                                           onChange={this.handleChange('solutionDensity')}
+                                           inputComponent={DensityFormat}/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Dose rate P :</td>
+                                <td>
+                                    <Input value={this.state.doseRate}
+                                           onChange={this.handleChange('doseRate')}
+                                           inputComponent={DoseRateFormat}
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style={{width: 180}}>Unit of measure of yield:</td>
+                                <td>
+                                    <Select value={this.state.unit} onChange={this.handleChange('unit')}>
+                                        <MenuItem value={Units.moleculesPerHundredVolt}>{Units.moleculesPerHundredVolt}</MenuItem>
+                                        <MenuItem value={Units.molPerJoule}>{Units.molPerJoule}</MenuItem>
+                                    </Select>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

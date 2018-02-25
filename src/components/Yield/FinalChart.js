@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {styles} from "./Yield";
+import {styles} from "./CalibrationTable";
 import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import Back from 'material-ui-icons/ArrowBack';
@@ -130,8 +130,15 @@ class FinalChart extends Component {
                     scaleLabel: {
                         display: true,
                         labelString: 'Concentration, M',
-                        fontSize: 16,
-                        fontStyle: 'bold'
+                        fontSize: 20,
+                        fontStyle: 'bold',
+                        fontFamily: 'KaTeX_Math',
+                        fontColor: '#212529'
+                    },
+                    ticks: {
+                        fontColor: '#212529',
+                        fontFamily: 'KaTeX_Math',
+                        fontSize: 17,
                     }
                 }],
                 xAxes: [{
@@ -139,14 +146,19 @@ class FinalChart extends Component {
                     scaleLabel: {
                         display: true,
                         labelString: 'Absorbed dose, Gray',
-                        fontSize: 16,
-                        fontStyle: 'bold'
+                        fontSize: 20,
+                        fontStyle: 'bold',
+                        fontFamily: 'KaTeX_Math',
+                        fontColor: '#212529'
                     },
                     offset: true,
                     ticks: {
                         min: Math.min.apply(Math, xArray) - diff > 0 ?
                             Math.min.apply(Math, xArray) - diff : 0,
-                        max: Math.max.apply(Math, xArray) + diff
+                        max: Math.max.apply(Math, xArray) + diff,
+                        fontColor: '#212529',
+                        fontFamily: 'KaTeX_Math',
+                        fontSize: 17
                     }
                 }],
             }
