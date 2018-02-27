@@ -87,7 +87,8 @@ class NuclidesTable extends Component {
     configureFilterParam = filter => {
         return getWhereParam([
             getParam('z', filter.z),
-            getParam('n', filter.n)
+            getParam('n', filter.n),
+            getParam('z + n', filter.a)
         ]);
     };
 
