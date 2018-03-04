@@ -17,6 +17,7 @@ import numeral from 'numeral';
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import CheckBoxRenderer from "../../utils/cellRenderers/CheckBoxRenderer";
+import {cloneDeep} from "lodash";
 
 const DensityFormat = ({ inputRef, onChange, ...other }) => {
     return (
@@ -37,10 +38,9 @@ const DensityFormat = ({ inputRef, onChange, ...other }) => {
     );
 };
 
-const RadYieldFormat = unit => ({ inputRef, onChange, ...other }) => {
+const RadYieldFormat = ({ inputRef, onChange, unit, ...other }) => {
     return (
         <NumberFormat
-            {...other}
             ref={inputRef}
             onValueChange={values => {
                 onChange({
@@ -52,10 +52,10 @@ const RadYieldFormat = unit => ({ inputRef, onChange, ...other }) => {
             suffix={` ${unit}`}
             thousandSeparator
             allowNegative={false}
+            {...other}
         />
     );
 };
-
 
 const numberParser = params => Number(params.newValue);
 
@@ -71,12 +71,11 @@ export const styles = theme => ({
     },
 });
 
-
 class FinalTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: props.finalData,
+            data: cloneDeep(props.finalData),
             solutionDensity: props.solutionDensity,
             radYield: props.radYield,
             unit: props.unit
@@ -85,7 +84,7 @@ class FinalTable extends Component {
             columnDefs: [
                 { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                 { headerName: 'Time, min', field: 'time', width: 130, editable: true, cellStyle: cellStyle, valueParser: numberParser, ...suppressProps, unSortIcon: true},
-                { headerName: 'Optical Dencity', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                { headerName: 'Optical Density', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
                     valueParser: numberParser, unSortIcon: true, ...suppressProps,
                     valueFormatter: params => {
@@ -111,14 +110,8 @@ class FinalTable extends Component {
             suppressRowClickSelection: true,
             rowSelection: 'multiple',
             onSelectionChanged: ({api}) => api.refreshCells({ columns: ['checkbox'], force: true }),
-            onRowDataChanged: ({api}) => {
-                console.log('Row data changed');
-                this.checkNodeSelection(api);
-            },
-            onRowDataUpdated: (params) => {
-                console.log('Row data updated: ', params);
-                this.setState({data: this.getRowData()});
-            },
+            onRowDataChanged: ({api}) => this.checkNodeSelection(api),
+            onRowDataUpdated: () => this.setState({data: this.getRowData()}),
             headerHeight: 50,
             rowHeight: 30
         };
@@ -157,9 +150,9 @@ class FinalTable extends Component {
     };
 
     calculateConcentrations = () => {
-        let func = this.props.trendFunc;
+        const { trendFunc } = this.props;
         let data = this.getRowData();
-        data.forEach(point => { point.concentration = func(point.dencity); });
+        data.forEach(point => { point.concentration = trendFunc(point.dencity); });
         this.setState({data: data});
     };
 
@@ -237,8 +230,8 @@ class FinalTable extends Component {
                                 <td>
                                     <Input value={this.state.radYield}
                                            onChange={this.handleChange('radYield')}
-                                           unit={this.state.unit}
-                                           inputComponent={RadYieldFormat(this.state.unit)}
+                                           inputProps={{unit: this.state.unit}}
+                                           inputComponent={RadYieldFormat}
                                     />
                                 </td>
                             </tr>

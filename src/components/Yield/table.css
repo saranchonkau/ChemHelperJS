@@ -47,3 +47,8 @@ body {
 .ag-theme-blue .ag-body {
     background-color: #e6e3e3;
 }
+
+.ag-sort-order {
+    color: black;
+    font-size: 14px;
+}

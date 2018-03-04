@@ -7,6 +7,7 @@ import ReactPaginate from 'react-paginate';
 import {cellStyle, suppressProps} from "../../App/StyleConstants";
 import {connect} from 'react-redux';
 import {getParam, getWhereParam, removeNull} from "../../../utils/query";
+import '../../Yield/table.css';
 
 class NuclidesTable extends Component {
 
@@ -16,15 +17,15 @@ class NuclidesTable extends Component {
             data: [],
             count: 0,
             currentPage: 0,
-            sortModel: []
+            sortModel: [{colId: 'z', sort: 'asc'}, {colId: 'n', sort: 'asc'}]
         };
         this.gridOptions = {
             columnDefs: [
-                { unSortIcon: true, headerName: 'ID', field: 'nucid', width: 90, cellStyle: cellStyle, ...suppressProps},
-                { unSortIcon: true, headerName: 'Z', field: 'z', width: 80, cellStyle: cellStyle, ...suppressProps},
-                { unSortIcon: true, headerName: 'N', field: 'n', width: 80, cellStyle: cellStyle, ...suppressProps},
+                { unSortIcon: true, headerName: 'ID', field: 'nucid', width: 90, cellStyle: cellStyle, ...suppressProps, suppressSorting: true},
+                { unSortIcon: true, headerName: 'Z', field: 'z', width: 80, cellStyle: cellStyle, ...suppressProps, sort: 'asc'},
+                { unSortIcon: true, headerName: 'N', field: 'n', width: 80, cellStyle: cellStyle, ...suppressProps, sort: 'asc'},
                 { unSortIcon: true, headerName: 'Symbol', field: 'symbol', width: 130, cellStyle: cellStyle, ...suppressProps},
-                { unSortIcon: true, headerName: 'A', field: 'atomic_mass', width: 170, cellStyle: cellStyle, ...suppressProps,
+                { unSortIcon: true, headerName: 'A', field: 'atomic_mass', width: 170, cellStyle: cellStyle, ...suppressProps, suppressSorting: true,
                     valueFormatter: params => {
                         let A = Number.parseFloat(params.value);
                         if (Number.isNaN(A)) {
@@ -37,7 +38,7 @@ class NuclidesTable extends Component {
             ],
             enableSorting: true,
             onSortChanged: params => {
-                const sortModel = params.api.getSortModel();
+                const sortModel = params.api.getSortModel();+
                 this.setState({sortModel, currentPage: 0});
                 this.requestData(this.configureQuery({sort: sortModel, filter: this.props.filter}));
             },
@@ -74,11 +75,15 @@ class NuclidesTable extends Component {
         }
     }
 
-    configureQuery = ({sort = [], page = 0, filter = {}} ) => {
+    configureQuery = ({sort = this.state.sortModel, page = 0, filter = {}} ) => {
         const sortParam = sort.map(obj => `${obj.colId} ${obj.sort.toUpperCase()}`).join(', ');
         const pageParam = `limit ${page * 10}, 10`;
         const filterParam = this.configureFilterParam(filter);
-        return removeNull([filterParam, sortParam && `order by ${sortParam}`, pageParam]).join(' ');
+        return removeNull([
+            filterParam,
+            sortParam && `order by ${sortParam}`,
+            pageParam
+        ]).join(' ');
     };
 
     requestCount = (query = '') => window.ipcRenderer.send('countAll', `select count(*) from nuclides ${query}`);

@@ -6,14 +6,15 @@ import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import PlusOne from 'material-ui-icons/PlusOne';
 import Forward from 'material-ui-icons/ArrowForward';
-import { reduxForm, getFormValues} from 'redux-form';
+import {reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
-import {ReduxForms, Units} from "../../utils/utils";
-import {finalData, initialData} from "../../utils/Data";
+import {ReduxForms} from "../../utils/utils";
+import {getInitialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import CheckBoxRenderer from '../../utils/cellRenderers/CheckBoxRenderer';
 import './table.css';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
+import {cloneDeep} from "lodash";
 
 const numberParser = params => Number(params.newValue);
 
@@ -33,13 +34,13 @@ class CalibrationTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: props.data
+            data: cloneDeep(props.data)
         };
         this.gridOptions = {
             columnDefs: [
                 { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
-                { headerName: 'Optical Dencity', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                { headerName: 'Optical Density', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                 { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
                 { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
             ],
@@ -55,10 +56,7 @@ class CalibrationTable extends Component {
             suppressRowClickSelection: true,
             rowSelection: 'multiple',
             onSelectionChanged: ({api}) => api.refreshCells({ columns: ['checkbox'], force: true }),
-            onRowDataChanged: ({api}) => {
-                console.log('Row data changed');
-                this.checkNodeSelection(api);
-            },
+            onRowDataChanged: ({api}) => this.checkNodeSelection(api),
             onRowDataUpdated: (params) => {
                 console.log('Row data updated: ', params);
                 this.setState({data: this.getRowData()});
@@ -148,11 +146,4 @@ export default reduxForm({
     form: ReduxForms.Yield, // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
     forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
-    initialValues: {
-        initialData: initialData,
-        finalData: finalData,
-        doseRate: 0,
-        solutionDensity: 0,
-        unit: Units.moleculesPerHundredVolt
-    }
 })(withStyles(styles)(CalibrationTable));

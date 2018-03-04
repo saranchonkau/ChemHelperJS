@@ -6,14 +6,15 @@ import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
 import PlusOne from 'material-ui-icons/PlusOne';
 import Forward from 'material-ui-icons/ArrowForward';
-import { reduxForm, getFormValues} from 'redux-form';
+import {reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
-import {ReduxForms, Units} from "../../utils/utils";
-import {finalData, initialData} from "../../utils/Data";
+import {ReduxForms} from "../../utils/utils";
+import {getInitialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import CheckBoxRenderer from '../../utils/cellRenderers/CheckBoxRenderer';
 import '../Yield/table.css';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
+import {cloneDeep} from "lodash";
 
 const numberParser = params => Number(params.newValue);
 
@@ -33,7 +34,7 @@ class CalibrationTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: props.data
+            data: cloneDeep(props.data)
         };
         this.gridOptions = {
             columnDefs: [
@@ -147,12 +148,5 @@ CalibrationTable = connect(
 export default reduxForm({
     form: ReduxForms.DoseRate, // <------ same form name
     destroyOnUnmount: false, // <------ preserve form data
-    forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
-    initialValues: {
-        initialData: initialData,
-        finalData: finalData,
-        radYield: 0,
-        solutionDensity: 0,
-        unit: Units.moleculesPerHundredVolt
-    }
+    forceUnregisterOnUnmount: true // <------ unregister fields on unmount
 })(withStyles(styles)(CalibrationTable));

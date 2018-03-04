@@ -18,6 +18,7 @@ import numeral from 'numeral';
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import CheckBoxRenderer from "../../utils/cellRenderers/CheckBoxRenderer";
+import {cloneDeep} from "lodash";
 
 const DensityFormat = ({ inputRef, onChange, ...other }) => {
     return (
@@ -75,7 +76,7 @@ class FinalTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: props.finalData,
+            data: cloneDeep(props.finalData),
             solutionDensity: props.solutionDensity,
             doseRate: props.doseRate,
             unit: props.unit
