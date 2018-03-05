@@ -92,7 +92,7 @@ class FinalTable extends Component {
                     cellStyle: cellStyle,
                     valueParser: numberParser
                 },
-                { headerName: 'Optical Dencity', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
                     valueParser: numberParser, unSortIcon: true, ...suppressProps,
                     valueFormatter: params => {
@@ -150,7 +150,7 @@ class FinalTable extends Component {
         const newRow = {
             id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
             concentration: 0.0,
-            dencity: 0.0,
+            density: 0.0,
             time: 0.0,
             isSelected: true
         };
@@ -166,7 +166,7 @@ class FinalTable extends Component {
     calculateConcentrations = () => {
         let func = this.props.trendFunc;
         let data = this.getRowData();
-        data.forEach(point => { point.concentration = func(point.dencity); });
+        data.forEach(point => { point.concentration = func(point.density); });
         this.setState({data: data});
     };
 
@@ -232,7 +232,7 @@ class FinalTable extends Component {
                         <table>
                             <tbody>
                             <tr>
-                                <td>Solution dencity &rho; :</td>
+                                <td>Solution density &rho; :</td>
                                 <td>
                                     <Input value={this.state.solutionDensity}
                                            onChange={this.handleChange('solutionDensity')}

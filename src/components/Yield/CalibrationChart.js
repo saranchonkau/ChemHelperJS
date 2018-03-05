@@ -14,12 +14,12 @@ class CalibrationChart extends Component {
 
     getSelectedData = () => {
         return this.props.data.filter(point => point.isSelected)
-            .map( data => ({ x: data.concentration, y: data.dencity }) );
+            .map( data => ({ x: data.concentration, y: data.density }) );
     };
 
     getUnselectedData = () => {
         return this.props.data.filter(point => !point.isSelected)
-            .map( data => ({ x: data.concentration, y: data.dencity }) );
+            .map( data => ({ x: data.concentration, y: data.density }) );
     };
 
     getTrendData = () => {

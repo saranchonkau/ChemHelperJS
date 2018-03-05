@@ -40,7 +40,7 @@ class CalibrationTable extends Component {
             columnDefs: [
                 { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
-                { headerName: 'Optical Dencity', field: 'dencity', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                 { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
                 { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
             ],
@@ -94,7 +94,7 @@ class CalibrationTable extends Component {
         const newRow = {
             id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
             concentration: 0.0,
-            dencity: 0.0,
+            density: 0.0,
             isSelected: true
         };
         this.setState({data: [...rowData, newRow]});
