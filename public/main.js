@@ -23,6 +23,7 @@ function createWindow () {
         protocol: 'file:',
         slashes: true
     });
+    console.log('START_URL: ', startUrl);
     win.loadURL(startUrl);
 
 

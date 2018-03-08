@@ -1,4 +1,11 @@
 import { createBrowserHistory, createHashHistory } from 'history';
 
-export default createBrowserHistory();
-// export default createHashHistory();
+let history;
+
+if (process.env.ELECTRON_START_URL) {
+    history = createBrowserHistory();
+} else {
+    history = createHashHistory();
+}
+
+export default history;

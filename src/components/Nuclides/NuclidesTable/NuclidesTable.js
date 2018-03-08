@@ -8,6 +8,7 @@ import {cellStyle, suppressProps} from "../../App/StyleConstants";
 import {connect} from 'react-redux';
 import {getParam, getWhereParam, removeNull} from "../../../utils/query";
 import '../../Yield/table.css';
+import {openNuclideDetails} from "../NuclideDetails/NuclideDetailsActionCreators";
 
 class NuclidesTable extends Component {
 
@@ -42,6 +43,9 @@ class NuclidesTable extends Component {
                 this.setState({sortModel, currentPage: 0});
                 this.requestData(this.configureQuery({sort: sortModel, filter: this.props.filter}));
             },
+            onRowClicked: ({data}) => {
+                console.log('Data: ', data);
+                this.props.dispatch(openNuclideDetails(data))},
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
                 sortDescending: '<i class="fa fa-sort-desc" style="color: black"/>',
