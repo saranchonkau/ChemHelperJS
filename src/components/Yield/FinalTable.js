@@ -32,7 +32,6 @@ const DensityFormat = ({ inputRef, onChange, ...other }) => {
                     },
                 });
             }}
-            thousandSeparator
             suffix=" g/ml"
             allowNegative={false}
         />
@@ -51,7 +50,6 @@ const DoseRateFormat = ({ inputRef, onChange, ...other }) => {
                     },
                 });
             }}
-            thousandSeparator
             suffix=" Gy/s"
             allowNegative={false}
         />

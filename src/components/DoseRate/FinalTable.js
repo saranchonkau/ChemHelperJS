@@ -31,7 +31,6 @@ const DensityFormat = ({ inputRef, onChange, ...other }) => {
                     },
                 });
             }}
-            thousandSeparator
             suffix=" g/ml"
             allowNegative={false}
         />
@@ -50,7 +49,6 @@ const RadYieldFormat = ({ inputRef, onChange, unit, ...other }) => {
                 });
             }}
             suffix={` ${unit}`}
-            thousandSeparator
             allowNegative={false}
             {...other}
         />
