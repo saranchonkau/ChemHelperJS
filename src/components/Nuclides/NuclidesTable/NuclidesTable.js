@@ -72,7 +72,7 @@ class NuclidesTable extends Component {
 
     componentWillReceiveProps(nextProps){
         if (this.props.filter.modCount !== nextProps.filter.modCount) {
-            this.setState({page: 0, sortModel: []});
+            this.setState({page: 0});
             const query = this.configureQuery({filter: nextProps.filter});
             this.requestData(query);
             this.requestCount(query);

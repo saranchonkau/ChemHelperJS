@@ -41,6 +41,10 @@ class FilterBar extends Component {
             [name]: event.target.value
         });
     };
+	
+	componentWillUnmount(){
+		this.props.clearFilter();
+	}
 
     render(){
         const {z, n, symbol, a} = this.state;
@@ -81,6 +85,7 @@ class FilterBar extends Component {
 export default connect(
     null,
     dispatch => ({
-        filter: data => dispatch(filterNuclides(data))
+        filter: data => dispatch(filterNuclides(data)),
+		clearFilter: () => dispatch(filterNuclides({}))
     })
 )(withStyles(styles)(FilterBar));

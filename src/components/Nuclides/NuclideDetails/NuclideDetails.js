@@ -87,6 +87,10 @@ const NuclidesDetails = ({open, nuclide, onClose}) => (
                          value={handleValue(nuclide.mass_excess, nuclide.mass_excess_unc, 'kiloelectron-volts')}
                          tooltip={'Difference between the Atomic Mass, expressed in AMU, and A'}
                     />
+					<Row header={'Abundance (%)'}
+                         value={nuclide.abundance}
+                    />
+
                     <Row header={'Binding/A'}
                          value={handleValue(nuclide.binding, nuclide.binding_unc,  'kiloelectron-volts')}
                          tooltip={'Binding energy per nucleon. The Binding energy is the energy required to separate all protons and neutron from the nuclide.'}
@@ -97,11 +101,37 @@ const NuclidesDetails = ({open, nuclide, onClose}) => (
                     />
                     <Row header={'Sn'}
                          value={handleValue(nuclide.sn, nuclide.sn_unc, 'keV')}
-                         tooltip={'Separation energy. The energy needed to remove one neutron from a nuclide.'}
+                         tooltip={'Separation energy. The energy needed to remove one neutron from a nuclide'}
                     />
                     <Row header={'Sp'}
                          value={handleValue(nuclide.sp, nuclide.sp_unc, 'keV')}
-                         tooltip={'Separation energy. The energy needed to remove one proton from a nuclide.'}
+                         tooltip={'Separation energy. The energy needed to remove one proton from a nuclide'}
+                    />
+                    <Row header={'Charge radius R'}
+                         value={handleValue(nuclide.radii_val, null, 'fm')}
+                         tooltip={'Root-mean-square of the nuclear charge radius, expressed in fm'}
+                    />
+                    <Row header={'Q\u03B2'}
+                         value={handleValue(nuclide.beta_decay_en, nuclide.beta_decay_en_unc, 'keV')}
+                         tooltip={'Energy of \u03B2 decay'}
+                    />
+                    <Row header={'Q\u03B1'}
+                         value={handleValue(nuclide.qa, nuclide.qa_unc, 'keV')}
+                         tooltip={'Energy of \u03B1 decay'}
+                    />
+                    <Row header={'Q\u03B2'}
+                         value={handleValue(nuclide.qec, nuclide.qec_unc, 'keV')}
+                         tooltip={'Energy of electron capture'}
+                    />
+                    <Row header={'Electric Quadrupole Moment Q'}
+                         value={handleValue(nuclide.el_mom, null, 'barn')}
+                         tooltip={'Second multipole expansion of the nucleus electric moment. Measured in barns'}
+                    />
+                    <Row header={'Thermal neutron capture cross section'}
+                         value={handleValue(nuclide.ther_capture, null, 'barn')}
+                    />
+                    <Row header={'Westcott g factor'}
+                         value={handleValue(nuclide.westcott_g)}
                     />
                 </TableBody>
             </Table>

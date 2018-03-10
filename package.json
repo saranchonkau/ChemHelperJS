@@ -65,16 +65,19 @@
     ]
   },
   "scripts": {
+	"build-win-32": "build --em.main=build/main.js --win --ia32",
+	"build-win-64": "build --em.main=build/main.js --win --x64",
+	"build-linux": "build --em.main=build/main.js --linux",
     "dist": "build --em.main=build/main.js",
     "start": "nf start -p 3000",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron": "electron .",
-    "electron-dev": "ELECTRON_START_URL=http://localhost:3000 electron .",
+    "electron-dev": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
     "react-start": "react-scripts start",
     "package": "electron-packager .",
     "postinstall": "electron-builder install-app-deps",
-    "rebuild": "electron-rebuild --module-dir public"
+    "rebuild": "electron-rebuild -f -w sqlite3 --module-dir public"
   }
 }
