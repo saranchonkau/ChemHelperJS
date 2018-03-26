@@ -8,6 +8,9 @@ import 'font-awesome/css/font-awesome.min.css';
 import 'bootstrap/dist/js/bootstrap.min';
 import 'typeface-roboto';
 import './components/App/App.css';
+import './components/App/table.css';
+import 'ag-grid/dist/styles/ag-grid.css';
+import 'ag-grid/dist/styles/ag-theme-blue.css';
 
 ReactDOM.render(
     <App store={store}/>,

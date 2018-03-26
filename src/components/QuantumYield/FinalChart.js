@@ -4,8 +4,7 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
 import {
-    Equation, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue,
-    Units
+    Equation, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue
 } from "../../utils/utils";
 import {chartOptions, datasets} from "../../utils/charts";
 import BackButton from '../Others/BackButton';
@@ -16,42 +15,41 @@ class FinalChart extends Component {
 
     constructor(props){
         super(props);
-        let {doseRate, finalData} = props;
-        let data = finalData.map(point => {
-            point.dose = doseRate * 60 * point.time;
-            return point;
-        });
-
         this.state = {
-            data: data
+            dataForChart: props.finalData.map(data => ({
+                x: data.time * 60 * props.lightIntensity / 1e18,
+                y: data.concentration,
+                isSelected: data.isSelected
+            })),
+            dataForCalculation: props.finalData.filter(point => point.isSelected)
+                .map(point => ({
+                    x: point.time * 60,
+                    y: point.concentration
+                }))
         };
     }
 
-    calculateYield = slope => {
-        let coefficient = 6.022140e6 * 1.602176;
-        let yieldPerJoule = slope / this.props.solutionDensity;
-        return this.props.unit === Units.moleculesPerHundredVolt ?
-            yieldPerJoule * coefficient : yieldPerJoule;
+    calculateQuantumYield = slope => {
+        const {volume, lightIntensity} = this.props;
+        return (6.022140e23 * volume * slope) / (1000 * lightIntensity);
     };
 
-    getSelectedData = () => {
-        return this.state.data.filter(point => point.isSelected)
-            .map( data => ({ x: data.dose, y: data.concentration }) );
-    };
+    getSelectedData = () => this.state.dataForChart.filter(point => point.isSelected);
 
-    getUnselectedData = () => {
-        return this.state.data.filter(point => !point.isSelected)
-            .map( data => ({ x: data.dose, y: data.concentration }) );
-    };
+    getUnselectedData = () => this.state.dataForChart.filter(point => !point.isSelected);
 
     getTrendData = () => {
         let data = this.getSelectedData();
+        console.log(this.state.dataForChart);
+        console.log(getTrendResult(this.state.dataForChart));
         let trendFunc = getTrendResult(data).predictY;
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
     getChartProps = () => {
-        const xArray = this.state.data.map(point => point.dose);
+        const xArray = this.state.dataForChart.map(point => point.x);
+        console.log('ARRAY: ', xArray);
+        console.log('MIN: ', suggestMinValue(xArray));
         return {
             data: {
                 datasets: [
@@ -63,9 +61,9 @@ class FinalChart extends Component {
             options: chartOptions({
                 tooltipLabelCallback: (tooltipItem, data) => [
                     `Concentration: ${tooltipItem.yLabel} mol/l`,
-                    `Absorbed dose: ${tooltipItem.xLabel} Gray`,
+                    `Light intensity: ${tooltipItem.xLabel} E-18 photon/s`,
                 ],
-                xLabel: 'Absorbed dose, Gray',
+                xLabel: 'Light intensity I * E-18, photon/s',
                 yLabel: 'Concentration, M',
                 xTicksMin: suggestMinValue(xArray),
                 xTicksMax: suggestMaxValue(xArray)
@@ -74,27 +72,28 @@ class FinalChart extends Component {
     };
 
     render() {
+        const {dataForCalculation} = this.state;
         const { classes, previousPage } = this.props;
-        const result = getTrendResult(this.getSelectedData());
-        console.log('Trend result: ', result);
+        const resultForChart = getTrendResult(this.getSelectedData());
+        const result = getTrendResult(dataForCalculation);
+        console.log('Result: ', result);
         return (
             <div>
-                <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
+                <h3 className="my-3 text-center">Quantum yield calculation</h3>
                 <h5 className="text-center">Final chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line {...this.getChartProps()}/>
                         <div style={{marginLeft: '5rem'}}>
-                            <Equation slope={result.slope} intercept={result.intercept}/>
+                            <Equation slope={resultForChart.slope} intercept={resultForChart.intercept}/>
                             <br/>
-                            <RSquared rSquared={result.rSquared}/>
+                            <RSquared rSquared={resultForChart.rSquared}/>
                             <br/>
                             <span style={{fontFamily: 'KaTeX_Math'}}>Confidence interval: 95%</span>
                             <br/>
-                            <Result name={'Yield'}
-                                    value={this.calculateYield(result.slope)}
-                                    error={this.calculateYield(result.slopeConfidenceInterval)}
-                                    unit={this.props.unit}
+                            <Result name={'Quantum Yield'}
+                                    value={this.calculateQuantumYield(result.slope)}
+                                    error={this.calculateQuantumYield(result.slopeConfidenceInterval)}
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
@@ -109,15 +108,14 @@ class FinalChart extends Component {
 
 FinalChart = connect(
     state => ({
-        finalData: getFormValues(ReduxForms.Yield)(state).finalData,
-        doseRate: getFormValues(ReduxForms.Yield)(state).doseRate,
-        solutionDensity: getFormValues(ReduxForms.Yield)(state).solutionDensity,
-        unit: getFormValues(ReduxForms.Yield)(state).unit,
+        finalData: getFormValues(ReduxForms.QuantumYield)(state).finalData,
+        volume: getFormValues(ReduxForms.QuantumYield)(state).volume,
+        lightIntensity: getFormValues(ReduxForms.QuantumYield)(state).lightIntensity,
     })
 )(FinalChart);
 
 export default reduxForm({
-    form: ReduxForms.Yield,
-    destroyOnUnmount: false,
-    forceUnregisterOnUnmount: true,
+    form: ReduxForms.QuantumYield, // <------ same form name
+    destroyOnUnmount: false, // <------ preserve form data
+    forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
 })(withStyles(styles)(FinalChart));

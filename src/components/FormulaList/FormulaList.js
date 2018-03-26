@@ -35,6 +35,11 @@ class FormulaList extends React.Component {
                                      {title: 'Dose rate calculation', link: '/formula/doseRate'}
                                  ]}
                     />
+                    <FormulaGroup title={'Photochemistry'}
+                                  items={[
+                                     {title: 'Quantum yield', link: '/formula/quantumYield'}
+                                 ]}
+                    />
                 </List>
             </div>
         );

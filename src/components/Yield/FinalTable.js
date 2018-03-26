@@ -2,81 +2,35 @@ import React, {Component} from 'react';
 import { AgGridReact } from "ag-grid-react";
 import 'ag-grid/dist/styles/ag-grid.css';
 import 'ag-grid/dist/styles/ag-theme-blue.css';
-import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
-import PlusOne from 'material-ui-icons/PlusOne';
-import Forward from 'material-ui-icons/ArrowForward';
-import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import Select from 'material-ui/Select';
-import Input  from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
 import {ReduxForms, Units} from "../../utils/utils";
-import NumberFormat from 'react-number-format';
 import numeral from 'numeral';
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import CheckBoxRenderer from "../../utils/cellRenderers/CheckBoxRenderer";
 import {cloneDeep} from "lodash";
+import {numberParser} from "../../utils/utils";
+import ControlledNumberInput from "../Others/ControlledInput";
+import NextButton from '../Others/NextButton';
+import BackButton from '../Others/BackButton';
+import AddRowButton from '../Others/AddRowButton';
 
-const DensityFormat = ({ inputRef, onChange, ...other }) => {
-    return (
-        <NumberFormat
-            {...other}
-            ref={inputRef}
-            onValueChange={values => {
-                onChange({
-                    target: {
-                        value: values.value,
-                    },
-                });
-            }}
-            suffix=" g/ml"
-            allowNegative={false}
-        />
-    );
-};
-
-const DoseRateFormat = ({ inputRef, onChange, ...other }) => {
-    return (
-        <NumberFormat
-            {...other}
-            ref={inputRef}
-            onValueChange={values => {
-                onChange({
-                    target: {
-                        value: values.value,
-                    },
-                });
-            }}
-            suffix=" Gy/s"
-            allowNegative={false}
-        />
-    );
-};
-
-const numberParser = params => Number(params.newValue);
-
-export const styles = theme => ({
-    button: {
-        margin: theme.spacing.unit,
-    },
-    leftIcon: {
-        marginRight: theme.spacing.unit,
-    },
-    rightIcon: {
-        marginLeft: theme.spacing.unit,
-    },
-});
+const styles = theme => ({});
 
 class FinalTable extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             data: cloneDeep(props.finalData),
             solutionDensity: props.solutionDensity,
+            solutionDensityError: '',
             doseRate: props.doseRate,
+            doseRateError: '',
             unit: props.unit
         };
         this.gridOptions = {
@@ -90,7 +44,6 @@ class FinalTable extends Component {
                     cellStyle: cellStyle,
                     valueParser: numberParser
                 },
-                { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
                     valueParser: numberParser, unSortIcon: true, ...suppressProps,
                     valueFormatter: params => {
@@ -148,7 +101,6 @@ class FinalTable extends Component {
         const newRow = {
             id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
             concentration: 0.0,
-            density: 0.0,
             time: 0.0,
             isSelected: true
         };
@@ -159,13 +111,6 @@ class FinalTable extends Component {
         let array = [];
         this.gridApi.forEachNode(node => array.push({...node.data, isSelected: node.selected}));
         return array;
-    };
-
-    calculateConcentrations = () => {
-        let func = this.props.trendFunc;
-        let data = this.getRowData();
-        data.forEach(point => { point.concentration = func(point.density); });
-        this.setState({data: data});
     };
 
     getTableHeight = dataLength => 64 + dataLength * 30.5;
@@ -185,71 +130,75 @@ class FinalTable extends Component {
         });
     };
 
+    handleNumberChange = name => event => {
+        let initialValue = event.target.value;
+        const parsedValue = Number.parseFloat(initialValue);
+        if (Number.isNaN(parsedValue)) {
+            this.setState({
+                [name]: initialValue,
+                [`${name}Error`]: 'It must be a number',
+            });
+        } else {
+            this.setState({
+                [name]: parsedValue,
+                [`${name}Error`]: '',
+            });
+        }
+    };
+
+    isCorrectData = () => {
+        const { solutionDensity, solutionDensityError, doseRate, doseRateError } = this.state;
+        return ( solutionDensity && doseRate ) && ( !solutionDensityError && !doseRateError );
+    };
+
     render() {
-        let { classes } = this.props;
+        let { classes, previousPage } = this.props;
+        const { doseRate, doseRateError, solutionDensity, solutionDensityError, unit, data } = this.state;
         return (
             <div>
                 <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
                 <h5 className="text-center">Final table</h5>
                 <div className='d-flex justify-content-center'>
-                    <div style={{width: 670}}>
-                        <div className="ag-theme-blue" style={{height: this.getTableHeight(this.state.data.length)}}>
+                    <div style={{width: 500}}>
+                        <div className="ag-theme-blue" style={{height: this.getTableHeight(data.length)}}>
                             <AgGridReact
-                                rowData={this.state.data}
+                                rowData={data}
                                 onGridReady={this.onGridReady}
                                 gridOptions={this.gridOptions}
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
-                            <Button className={classes.button} variant="raised" color="secondary"
-                                    onClick={this.calculateConcentrations}
-                            >
-                                Calculate concentrations
-                            </Button>
-                            <Button className={classes.button} variant="raised" color="secondary"
-                                    onClick={this.addRow}
-                            >
-                                <PlusOne className={classes.leftIcon}/>
-                                Row
-                            </Button>
-                            <Button className={classes.button} variant="raised" color="secondary"
-                                    onClick={this.props.previousPage}
-                            >
-                                <Back className={classes.leftIcon} />
-                                Back
-                            </Button>
-                            <Button className={classes.button} variant="raised" color="primary"
-                                    onClick={this.nextPage}
-                                    disabled={!this.state.doseRate || !this.state.solutionDensity}
-                            >
-                                Next
-                                <Forward className={classes.rightIcon} />
-                            </Button>
+                            <BackButton onClick={previousPage}/>
+                            <AddRowButton onClick={this.addRow}/>
+                            <NextButton onClick={this.nextPage} disabled={!this.isCorrectData()}/>
                         </div>
-                        <h3 className="my-3 text-center">Enter parameters for calculating yield:</h3>
+                        <h5 className="my-3 text-center">Enter parameters for calculating yield:</h5>
                         <table>
                             <tbody>
                             <tr>
-                                <td>Solution density &rho; :</td>
+                                <td>Solution density &rho; (g/ml):</td>
                                 <td>
-                                    <Input value={this.state.solutionDensity}
-                                           onChange={this.handleChange('solutionDensity')}
-                                           inputComponent={DensityFormat}/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Dose rate P :</td>
-                                <td>
-                                    <Input value={this.state.doseRate}
-                                           onChange={this.handleChange('doseRate')}
-                                           inputComponent={DoseRateFormat}
+                                    <ControlledNumberInput id={'solutionDensity-input'}
+                                                           value={solutionDensity}
+                                                           onChange={this.handleNumberChange('solutionDensity')}
+                                                           error={solutionDensityError}
                                     />
                                 </td>
                             </tr>
                             <tr>
-                                <td style={{width: 180}}>Unit of measure of yield:</td>
+                                <td>Dose rate P (Gy/s):</td>
                                 <td>
-                                    <Select value={this.state.unit} onChange={this.handleChange('unit')}>
+                                    <ControlledNumberInput id={'doseRate-input'}
+                                                     value={doseRate}
+                                                     onChange={this.handleNumberChange('doseRate')}
+                                                     error={doseRateError}
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style={{width: 200}}>Unit of measure of yield:</td>
+                                <td>
+                                    <Select value={unit} onChange={this.handleChange('unit')}>
                                         <MenuItem value={Units.moleculesPerHundredVolt}>{Units.moleculesPerHundredVolt}</MenuItem>
                                         <MenuItem value={Units.molPerJoule}>{Units.molPerJoule}</MenuItem>
                                     </Select>
@@ -266,7 +215,6 @@ class FinalTable extends Component {
 
 FinalTable = connect(
     state => ({
-        trendFunc: getFormValues(ReduxForms.Yield)(state).trendFunc,
         finalData: getFormValues(ReduxForms.Yield)(state).finalData,
         doseRate: getFormValues(ReduxForms.Yield)(state).doseRate,
         solutionDensity: getFormValues(ReduxForms.Yield)(state).solutionDensity,
@@ -275,7 +223,7 @@ FinalTable = connect(
 )(FinalTable);
 
 export default reduxForm({
-    form: ReduxForms.Yield, // <------ same form name
-    destroyOnUnmount: false, // <------ preserve form data
-    forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
+    form: ReduxForms.Yield,
+    destroyOnUnmount: false,
+    forceUnregisterOnUnmount: true,
 })(withStyles(styles)(FinalTable));

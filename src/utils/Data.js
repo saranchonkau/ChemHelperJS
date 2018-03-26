@@ -1,3 +1,26 @@
+export const initialOpticalDensityData = [
+    {
+        id: 1,
+        density: 0.015,
+        isSelected: true
+    },
+    {
+        id: 2,
+        density: 0.025,
+        isSelected: true
+    },
+    {
+        id: 3,
+        density: 0.03,
+        isSelected: true
+    },
+    {
+        id: 4,
+        density: 0.122,
+        isSelected: true
+    }
+];
+
 export const initialData = [
     {
         id: 1,

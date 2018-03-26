@@ -5,9 +5,7 @@ import 'ag-grid/dist/styles/ag-theme-blue.css';
 import { withStyles } from 'material-ui/styles';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
-import Select from 'material-ui/Select';
-import { MenuItem } from 'material-ui/Menu';
-import {ReduxForms, Units} from "../../utils/utils";
+import {ReduxForms} from "../../utils/utils";
 import numeral from 'numeral';
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
@@ -19,23 +17,30 @@ import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
 
-export const styles = theme => ({});
+const styles = theme => ({});
 
 class FinalTable extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             data: cloneDeep(props.finalData),
-            solutionDensity: props.solutionDensity,
-            solutionDensityError: '',
-            radYield: props.radYield,
-            radYieldError: '',
-            unit: props.unit
+            lightIntensity: props.lightIntensity,
+            lightIntensityError: '',
+            volume: props.volume,
+            volumeError: ''
         };
         this.gridOptions = {
             columnDefs: [
                 { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
-                { headerName: 'Time, min', field: 'time', width: 130, editable: true, cellStyle: cellStyle, valueParser: numberParser, ...suppressProps, unSortIcon: true},
+                { unSortIcon: true,
+                    headerName: 'Time, min',
+                    field: 'time',
+                    editable: true,
+                    width: 130,
+                    cellStyle: cellStyle,
+                    valueParser: numberParser
+                },
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
                     valueParser: numberParser, unSortIcon: true, ...suppressProps,
                     valueFormatter: params => {
@@ -61,8 +66,14 @@ class FinalTable extends Component {
             suppressRowClickSelection: true,
             rowSelection: 'multiple',
             onSelectionChanged: ({api}) => api.refreshCells({ columns: ['checkbox'], force: true }),
-            onRowDataChanged: ({api}) => this.checkNodeSelection(api),
-            onRowDataUpdated: () => this.setState({data: this.getRowData()}),
+            onRowDataChanged: ({api}) => {
+                console.log('Row data changed');
+                this.checkNodeSelection(api);
+            },
+            onRowDataUpdated: (params) => {
+                console.log('Row data updated: ', params);
+                this.setState({data: this.getRowData()});
+            },
             headerHeight: 50,
             rowHeight: 30
         };
@@ -102,18 +113,11 @@ class FinalTable extends Component {
     getTableHeight = dataLength => 64 + dataLength * 30.5;
 
     nextPage = () => {
-        let {unit, radYield, solutionDensity} = this.state;
+        const {unit, volume, lightIntensity} = this.state;
         this.props.change('finalData', this.getRowData());
-        this.props.change('unit', unit);
-        this.props.change('radYield', radYield);
-        this.props.change('solutionDensity', solutionDensity);
+        this.props.change('volume', volume);
+        this.props.change('lightIntensity', lightIntensity);
         this.props.nextPage();
-    };
-
-    handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value,
-        });
     };
 
     handleNumberChange = name => event => {
@@ -133,18 +137,18 @@ class FinalTable extends Component {
     };
 
     isCorrectData = () => {
-        const { solutionDensity, solutionDensityError, radYield, radYieldError } = this.state;
-        return ( solutionDensity && radYield ) && ( !solutionDensityError && !radYieldError );
+        const { volume, volumeError, lightIntensity, lightIntensityError } = this.state;
+        return ( volume && lightIntensity ) && ( !volumeError && !lightIntensityError );
     };
 
     render() {
+        const { volume, volumeError, lightIntensity, lightIntensityError, data } = this.state;
         let { classes, previousPage } = this.props;
-        const { radYield, radYieldError, solutionDensity, solutionDensityError, unit, data } = this.state;
         return (
             <div>
-                <h3 className="my-3 text-center">Dose rate calculation</h3>
+                <h3 className="my-3 text-center">Quantum yield calculation</h3>
                 <h5 className="text-center">Final table</h5>
-                <div className='d-flex flex-row justify-content-center'>
+                <div className='d-flex justify-content-center'>
                     <div style={{width: 500}}>
                         <div className="ag-theme-blue" style={{height: this.getTableHeight(data.length)}}>
                             <AgGridReact
@@ -158,38 +162,29 @@ class FinalTable extends Component {
                             <AddRowButton onClick={this.addRow}/>
                             <NextButton onClick={this.nextPage} disabled={!this.isCorrectData()}/>
                         </div>
-                        <h5 className="my-3 text-center">Enter parameters for calculating dose rate:</h5>
+                        <h5 className="my-3 text-center">Enter parameters for calculating quantum yield:</h5>
                         <table>
                             <tbody>
-                            <tr>
-                                <td>Solution density &rho; (g/ml):</td>
-                                <td>
-                                    <ControlledNumberInput id={'solutionDensity-input'}
-                                                           value={solutionDensity}
-                                                           onChange={this.handleNumberChange('solutionDensity')}
-                                                           error={solutionDensityError}
-                                    />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{`Yield G : (${unit})`}</td>
-                                <td>
-                                    <ControlledNumberInput id={'radYield-input'}
-                                                           value={radYield}
-                                                           onChange={this.handleNumberChange('radYield')}
-                                                           error={radYieldError}
-                                    />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style={{width: 200}}>Unit of measure of yield:</td>
-                                <td>
-                                    <Select value={this.state.unit} onChange={this.handleChange('unit')}>
-                                        <MenuItem value={Units.moleculesPerHundredVolt}>{Units.moleculesPerHundredVolt}</MenuItem>
-                                        <MenuItem value={Units.molPerJoule}>{Units.molPerJoule}</MenuItem>
-                                    </Select>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td style={{width: 130}}>Light intensity I (photon/s):</td>
+                                    <td>
+                                        <ControlledNumberInput id={'lightIntensity-input'}
+                                                               value={lightIntensity}
+                                                               onChange={this.handleNumberChange('lightIntensity')}
+                                                               error={lightIntensityError}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Volume V (ml):</td>
+                                    <td>
+                                        <ControlledNumberInput id={'volume-input'}
+                                                               value={volume}
+                                                               onChange={this.handleNumberChange('volume')}
+                                                               error={volumeError}
+                                        />
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -201,15 +196,15 @@ class FinalTable extends Component {
 
 FinalTable = connect(
     state => ({
-        finalData: getFormValues(ReduxForms.DoseRate)(state).finalData,
-        radYield: getFormValues(ReduxForms.DoseRate)(state).radYield,
-        solutionDensity: getFormValues(ReduxForms.DoseRate)(state).solutionDensity,
-        unit: getFormValues(ReduxForms.DoseRate)(state).unit
+        trendFunc: getFormValues(ReduxForms.QuantumYield)(state).trendFunc,
+        finalData: getFormValues(ReduxForms.QuantumYield)(state).finalData,
+        lightIntensity: getFormValues(ReduxForms.QuantumYield)(state).lightIntensity,
+        volume: getFormValues(ReduxForms.QuantumYield)(state).volume,
     })
 )(FinalTable);
 
 export default reduxForm({
-    form: ReduxForms.DoseRate,
+    form: ReduxForms.QuantumYield,
     destroyOnUnmount: false,
     forceUnregisterOnUnmount: true,
 })(withStyles(styles)(FinalTable));

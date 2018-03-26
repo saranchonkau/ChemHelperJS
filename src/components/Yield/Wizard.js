@@ -1,29 +1,44 @@
 import React from 'react';
-import CalibrationTable from './CalibrationTable';
-import CalibrationChart from './CalibrationChart';
 import FinalTable from './FinalTable';
 import FinalChart from './FinalChart';
 import PagesManager from '../Others/PagesManager';
 import {ReduxForms, Units} from "../../utils/utils";
-import {finalData, initialData} from "../../utils/Data";
+import {finalData, initialData, initialOpticalDensityData} from "../../utils/Data";
 import {reduxForm} from "redux-form";
+import CalculationWaySelection from '../ConcentrationCalculation/CalculationWaySelection';
+import CalibrationTable from '../ConcentrationCalculation/CalibrationTable';
+import CalibrationChart from '../ConcentrationCalculation/CalibrationChart';
+import OpticalDensityTable from '../ConcentrationCalculation/OpticalDensityTable';
+import CalculationWithMAC from '../ConcentrationCalculation/CalculationWithMAC';
 
-const Wizard = PagesManager({pages: [
-        CalibrationTable,
-        CalibrationChart,
-        FinalTable,
-        FinalChart
-    ]});
+const pageTitle = 'Radiation chemistry yield from chart';
+const pageProps = { title: pageTitle, form: ReduxForms.Yield };
+
+const Wizard = PagesManager({ pages: [
+    { component: CalculationWaySelection, props: { title: pageTitle }},
+    { component: CalculationWithMAC, props: { ...pageProps }},
+    { component: CalibrationTable, props: { ...pageProps }},
+    { component: CalibrationChart, props: { ...pageProps }},
+    { component: OpticalDensityTable, props: { ...pageProps }},
+    { component: FinalTable },
+    { component: FinalChart }
+]});
 
 export default reduxForm({
-    form: ReduxForms.Yield, // <------ same form name
-    destroyOnUnmount: true, // <------ preserve form data
-    forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
+    form: ReduxForms.Yield,
+    destroyOnUnmount: true,
+    forceUnregisterOnUnmount: true,
     initialValues: {
+
         initialData: initialData,
+
+        opticalDensityData: initialOpticalDensityData,
+        pathLength: 0,
+        MAC: 0,
+
         finalData: finalData,
-        doseRate: 0,
-        solutionDensity: 0,
+        doseRate: '',
+        solutionDensity: '',
         unit: Units.moleculesPerHundredVolt
     }
 })(Wizard);

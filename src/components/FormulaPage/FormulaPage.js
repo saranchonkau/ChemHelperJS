@@ -1,10 +1,10 @@
 import React from 'react';
 import Header from "../Header";
 import FormulaList from "../FormulaList";
-import Yield from "../Yield/Wizard";
-import DoseRate from "../DoseRate/Wizard";
-import history from "../../history";
-import {Router, HashRouter, Route, Switch} from "react-router-dom";
+import Yield from "../Yield";
+import QuantumYield from "../QuantumYield";
+import DoseRate from "../DoseRate";
+import {Route, Switch} from "react-router-dom";
 
 const FormulaPage = () => (
     <React.Fragment>
@@ -17,6 +17,7 @@ const FormulaPage = () => (
                     />
                     <Route exact path='/formula/yield' component={Yield}/>
                     <Route exact path='/formula/doseRate' component={DoseRate}/>
+                    <Route exact path='/formula/quantumYield' component={QuantumYield}/>
                 </Switch>
         </div>
     </React.Fragment>

@@ -1,12 +1,16 @@
 import React, {Component} from 'react';
-import {styles} from "../Yield/CalibrationTable";
-import Button from 'material-ui/Button';
 import { withStyles } from 'material-ui/styles';
-import Back from 'material-ui-icons/ArrowBack';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
-import {Equation, getTrendResult, ReduxForms, Result, RSquared, Units} from "../../utils/utils";
+import {
+    Equation, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue,
+    Units
+} from "../../utils/utils";
+import {chartOptions, datasets} from "../../utils/charts";
+import BackButton from '../Others/BackButton';
+
+const styles = theme => ({});
 
 class FinalChart extends Component {
 
@@ -43,127 +47,32 @@ class FinalChart extends Component {
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
+    getChartProps = () => {
+        const xArray = this.state.data.map(point => point.time);
+        return {
+            data: {
+                datasets: [
+                    datasets.selectedData({data: this.getSelectedData()}),
+                    datasets.unselectedData({data: this.getUnselectedData()}),
+                    datasets.trendData({data: this.getTrendData()})
+                ]
+            },
+            options: chartOptions({
+                tooltipLabelCallback: (tooltipItem, data) => [
+                    `Concentration: ${tooltipItem.yLabel} mol/l`,
+                    `Time: ${tooltipItem.xLabel} sec`,
+                ],
+                xLabel: 'Time, sec',
+                yLabel: 'Concentration, M',
+                xTicksMin: suggestMinValue(xArray),
+                xTicksMax: suggestMaxValue(xArray)
+            })
+        };
+    };
+
+
     render() {
-        let xArray = this.state.data.map(point => point.time);
-        let yArray = this.state.data.map(point => point.concentration);
-        let diff = (Math.max.apply(Math, xArray) -
-            Math.min.apply(Math, xArray)) * 0.05;
-        console.log('Selected: ', this.getSelectedData());
-        console.log('UnSelected: ', this.getUnselectedData());
-        console.log('Trend: ', this.getTrendData());
-        let data = {
-            datasets: [
-                {
-                    showLine: false,
-                    fill: false,
-                    pointBorderColor: 'green',
-                    pointBackgroundColor: 'green',
-                    pointBorderWidth: 1,
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: 'green',
-                    pointHoverBorderColor: 'rgba(220,220,220,1)',
-                    pointHoverBorderWidth: 2,
-                    pointRadius: 3,
-                    pointHitRadius: 10,
-                    data: this.getSelectedData()
-                },
-                {
-                    showLine: false,
-                    pointBorderColor: 'red',
-                    pointBackgroundColor: 'red',
-                    pointBorderWidth: 1,
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: 'red',
-                    pointHoverBorderColor: 'rgba(220,220,220,1)',
-                    pointHoverBorderWidth: 2,
-                    pointRadius: 3,
-                    pointHitRadius: 10,
-                    data: this.getUnselectedData()
-                },
-                {
-                    fill: false,
-                    lineTension: 0,
-                    backgroundColor: 'rgba(75,192,192,0.4)',
-                    borderColor: 'rgba(75,192,192,1)',
-                    borderCapStyle: 'butt',
-                    borderDash: [],
-                    borderDashOffset: 0.0,
-                    borderJoinStyle: 'miter',
-                    pointBorderColor: 'green',
-                    pointBackgroundColor: 'green',
-                    pointBorderWidth: 1,
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-                    pointHoverBorderColor: 'rgba(220,220,220,1)',
-                    pointHoverBorderWidth: 2,
-                    pointRadius: 0,
-                    pointHitRadius: 10,
-                    data: this.getTrendData()
-                }
-            ]
-        };
-        const options = {
-            legend: {
-                display: false
-            },
-            hover: {
-                mode: 'point'
-            },
-            tooltips: {
-                displayColors: false,
-                bodyFontSize: 16,
-                callbacks: {
-                    // use label callback to return the desired label
-                    label: (tooltipItem, data) => [
-                        `Concentration: ${tooltipItem.yLabel} mol/l`,
-                        `Time: ${tooltipItem.xLabel} sec`,
-                    ],
-                    // remove title
-                    title: (tooltipItem, data) => {
-                        return;
-                    }
-                }
-            },
-            scales: {
-                yAxes: [{
-                    type: 'linear',
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Concentration, M',
-                        fontSize: 20,
-                        fontStyle: 'bold',
-                        fontFamily: 'KaTeX_Math',
-                        fontColor: '#212529'
-                    },
-                    ticks: {
-                        fontColor: '#212529',
-                        fontFamily: 'KaTeX_Math',
-                        fontSize: 17,
-                    }
-                }],
-                xAxes: [{
-                    type: 'linear',
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Time, sec',
-                        fontSize: 20,
-                        fontStyle: 'bold',
-                        fontFamily: 'KaTeX_Math',
-                        fontColor: '#212529'
-                    },
-                    offset: true,
-                    ticks: {
-                        min: Math.min.apply(Math, xArray) - diff > 0 ?
-                            Math.min.apply(Math, xArray) - diff : 0,
-                        max: Math.max.apply(Math, xArray) + diff,
-                        fontColor: '#212529',
-                        fontFamily: 'KaTeX_Math',
-                        fontSize: 17
-                    }
-                }],
-            }
-        };
-        let { classes } = this.props;
+        let { classes, previousPage } = this.props;
         let result = getTrendResult(this.getSelectedData());
         return (
             <div>
@@ -171,23 +80,19 @@ class FinalChart extends Component {
                 <h5 className="text-center">Final chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
-                        <Line data={data} options={options}/>
+                        <Line {...this.getChartProps()}/>
                         <div style={{marginLeft: '5rem'}}>
-                            <Equation slope={result.slope} intercept={result.intercept}/>
-                            <br/>
-                            <RSquared rSquared={result.rSquared}/>
-                            <br/>
+                            <Equation slope={result.slope} intercept={result.intercept}/><br/>
+                            <RSquared rSquared={result.rSquared}/><br/>
+                            <span style={{fontFamily: 'KaTeX_Math'}}>Confidence interval: 95%</span><br/>
                             <Result name={'DoseRate'}
                                     value={this.calculateDoseRate(result.slope)}
-                                    error={this.calculateDoseRate(result.slopeError)}
+                                    error={this.calculateDoseRate(result.slopeConfidenceInterval)}
                                     unit={'Gy/s'}
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
-                            <Button className={classes.button} variant="raised" color="secondary" onClick={this.props.previousPage}>
-                                <Back className={classes.leftIcon} />
-                                Back
-                            </Button>
+                            <BackButton onClick={previousPage}/>
                         </div>
                     </div>
                 </div>
@@ -206,7 +111,7 @@ FinalChart = connect(
 )(FinalChart);
 
 export default reduxForm({
-    form: ReduxForms.DoseRate, // <------ same form name
-    destroyOnUnmount: false, // <------ preserve form data
-    forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
+    form: ReduxForms.DoseRate,
+    destroyOnUnmount: false,
+    forceUnregisterOnUnmount: true,
 })(withStyles(styles)(FinalChart));

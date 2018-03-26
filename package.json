@@ -65,9 +65,9 @@
     ]
   },
   "scripts": {
-	"build-win-32": "build --em.main=build/main.js --win --ia32",
-	"build-win-64": "build --em.main=build/main.js --win --x64",
-	"build-linux": "build --em.main=build/main.js --linux",
+    "build-win-32": "build --em.main=build/main.js --win --ia32",
+    "build-win-64": "build --em.main=build/main.js --win --x64",
+    "build-linux": "build --em.main=build/main.js --linux",
     "dist": "build --em.main=build/main.js",
     "start": "nf start -p 3000",
     "build": "react-scripts build",

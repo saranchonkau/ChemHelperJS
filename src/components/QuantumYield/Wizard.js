@@ -2,7 +2,7 @@ import React from 'react';
 import FinalTable from './FinalTable';
 import FinalChart from './FinalChart';
 import PagesManager from '../Others/PagesManager';
-import {ReduxForms, Units} from "../../utils/utils";
+import {ReduxForms} from "../../utils/utils";
 import {finalData, initialData, initialOpticalDensityData} from "../../utils/Data";
 import {reduxForm} from "redux-form";
 import CalculationWaySelection from '../ConcentrationCalculation/CalculationWaySelection';
@@ -11,8 +11,8 @@ import CalibrationChart from '../ConcentrationCalculation/CalibrationChart';
 import OpticalDensityTable from '../ConcentrationCalculation/OpticalDensityTable';
 import CalculationWithMAC from '../ConcentrationCalculation/CalculationWithMAC';
 
-const pageTitle = 'Dose rate calculation';
-const pageProps = { title: pageTitle, form: ReduxForms.DoseRate };
+const pageTitle = 'Quantum yield calculation';
+const pageProps = { title: pageTitle, form: ReduxForms.QuantumYield };
 
 const Wizard = PagesManager({ pages: [
     { component: CalculationWaySelection, props: { title: pageTitle }},
@@ -25,7 +25,7 @@ const Wizard = PagesManager({ pages: [
 ]});
 
 export default reduxForm({
-    form: ReduxForms.DoseRate,
+    form: ReduxForms.QuantumYield,
     destroyOnUnmount: true,
     forceUnregisterOnUnmount: true,
     initialValues: {
@@ -37,8 +37,7 @@ export default reduxForm({
         MAC: 0,
 
         finalData: finalData,
-        radYield: '',
-        solutionDensity: '',
-        unit: Units.moleculesPerHundredVolt
+        lightIntensity: '',
+        volume: ''
     }
 })(Wizard);

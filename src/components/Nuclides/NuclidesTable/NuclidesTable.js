@@ -7,7 +7,7 @@ import ReactPaginate from 'react-paginate';
 import {cellStyle, suppressProps} from "../../App/StyleConstants";
 import {connect} from 'react-redux';
 import {getParam, getWhereParam, removeNull} from "../../../utils/query";
-import '../../Yield/table.css';
+import '../../App/table.css';
 import {openNuclideDetails} from "../NuclideDetails/NuclideDetailsActionCreators";
 
 class NuclidesTable extends Component {

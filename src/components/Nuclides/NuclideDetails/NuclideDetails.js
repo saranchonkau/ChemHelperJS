@@ -54,13 +54,6 @@ const handleValue = (value, uncertainty, unit) => {
         result = `${result} ${unit}`;
     }
     return result || null;
-    // if (value !== null && uncertainty !== null) {
-    //     return `${value} &#177; ${uncertainty}`;
-    // } else if (value !== null) {
-    //     return value;
-    // } else {
-    //     return null;
-    // }
 };
 
 const NuclidesDetails = ({open, nuclide, onClose}) => (
@@ -74,7 +67,7 @@ const NuclidesDetails = ({open, nuclide, onClose}) => (
         <DialogContent>
             <Table>
                 <TableBody>
-                    <Row header={'Nuclide ID'} value={nuclide.nucid} tooltip={'ID'}/>
+                    <Row header={'Nuclide ID'} value={nuclide.nucid}/>
                     <Row header={'Atomic number'} value={nuclide.z}/>
                     <Row header={'Neutrons count'} value={nuclide.n}/>
                     <Row header={'Symbol'} value={nuclide.symbol}/>

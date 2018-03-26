@@ -7,6 +7,9 @@ import {withStyles} from "material-ui";
 const styles = {
     body: {
         fontSize: 'inherit'
+    },
+    tooltip: {
+        fontSize: 17
     }
 };
 
@@ -17,7 +20,7 @@ const Row = ({header, value, tooltip, classes}) => (
             <TableRow>
                 <TableCell className={classes.body}>
                     { tooltip ?
-                        <Tooltip title={tooltip}><div>{header} :</div></Tooltip> :
+                        <Tooltip title={tooltip} classes={{ tooltip: classes.tooltip }}><div>{header} :</div></Tooltip> :
                         `${header} :`
                     }
                 </TableCell>
