@@ -5,7 +5,7 @@ import 'ag-grid/dist/styles/ag-theme-blue.css';
 import { withStyles } from 'material-ui/styles';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
-import {ReduxForms} from "../../utils/utils";
+import {calculateRowId, ReduxForms} from "../../utils/utils";
 import numeral from 'numeral';
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
@@ -96,7 +96,7 @@ class FinalTable extends Component {
     addRow = () => {
         const rowData = this.getRowData();
         const newRow = {
-            id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
+            id: calculateRowId(rowData.map(data => data.id)),
             concentration: 0.0,
             time: 0.0,
             isSelected: true
@@ -113,11 +113,16 @@ class FinalTable extends Component {
     getTableHeight = dataLength => 64 + dataLength * 30.5;
 
     nextPage = () => {
-        const {unit, volume, lightIntensity} = this.state;
+        const {volume, lightIntensity} = this.state;
         this.props.change('finalData', this.getRowData());
         this.props.change('volume', volume);
         this.props.change('lightIntensity', lightIntensity);
         this.props.nextPage();
+    };
+
+    previousPage = () => {
+        this.props.change('finalData', this.getRowData());
+        this.props.previousPage();
     };
 
     handleNumberChange = name => event => {
@@ -158,7 +163,7 @@ class FinalTable extends Component {
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
-                            <BackButton onClick={previousPage}/>
+                            <BackButton onClick={this.previousPage}/>
                             <AddRowButton onClick={this.addRow}/>
                             <NextButton onClick={this.nextPage} disabled={!this.isCorrectData()}/>
                         </div>

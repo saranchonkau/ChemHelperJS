@@ -5,7 +5,7 @@ const initialState = {
     modCount: 0
 };
 
-const hadleFilterData = ({z, n, a}) => {
+const handleFilterData = ({z, n, a}) => {
     const data = {...initialState};
     data.z = Number.parseInt(z, 10) || 0;
     data.n = Number.parseInt(n, 10) || 0;
@@ -15,7 +15,7 @@ const hadleFilterData = ({z, n, a}) => {
 
 const filterBarReducer = (state = initialState, action) => {
     switch (action.type) {
-        case 'FILTER_NUCLIDES': return {...hadleFilterData(action.data), modCount: state.modCount + 1};
+        case 'FILTER_NUCLIDES': return {...handleFilterData(action.data), modCount: state.modCount + 1};
         default: return state;
     }
 };

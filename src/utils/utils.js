@@ -32,6 +32,14 @@ export const ConcentrationCalculationWays = {
     CALIBRATION_TABLE_WAY: PageNumbers.CALIBRATION_TABLE_WAY.toString(10),
 };
 
+export const ExcelPatternTypes = {
+    RAD_CHEM_YIELD: 'RAD_CHEM_YIELD',
+    DOSE_RATE: 'DOSE_RATE',
+    QUANTUM_YIELD: 'QUANTUM_YIELD',
+    CALIBRATION_TABLE: 'CALIBRATION_TABLE',
+    OPTICAL_DENSITY_TABLE: 'OPTICAL_DENSITY_TABLE'
+};
+
 window.globalTrendFunction = () => {
     return getTrendResult([
         {x: 1.47, y: 52.21},
@@ -115,9 +123,12 @@ export const getTrendWithoutIntercept = data => {
     const result = {
         slope: 0,
         slopeError: 0,
+        slopeConfidenceInterval: 0,
+        studentCoefficient: 0,
         rSquared: 0,
         predictY: null,
-        predictX: null
+        predictX: null,
+        sums: {}
     };
 
     let sumX = 0;
@@ -245,5 +256,20 @@ export const suggestMaxValue = array => {
 export const minFromArray = array => Math.min.apply(Math, array);
 
 export const maxFromArray = array => Math.max.apply(Math, array);
+
+export const calculateRowId = idArray => {
+    if (idArray.length > 0) {
+        return maxFromArray(idArray) + 1;
+    } else {
+        return 1;
+    }
+};
+
+export const replaceAll = (string, omit, place, prevstring) => {
+    if (prevstring && string === prevstring)
+        return string;
+    prevstring = string.replace(omit, place);
+    return replaceAll(prevstring, omit, place, string)
+};
 
 export {Equation, RSquared, Result};

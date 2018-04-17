@@ -10,7 +10,7 @@ import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import CheckBoxRenderer from '../../utils/cellRenderers/CheckBoxRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import {cloneDeep} from "lodash";
-import {numberParser} from "../../utils/utils";
+import {calculateRowId, numberParser} from "../../utils/utils";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
@@ -76,7 +76,7 @@ const CalibrationTableWrapper = ({form, ...rest}) => {
         addRow = () => {
             const rowData = this.getRowData();
             const newRow = {
-                id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
+                id: calculateRowId(rowData.map(data => data.id)),
                 concentration: 0.0,
                 density: 0.0,
                 isSelected: true

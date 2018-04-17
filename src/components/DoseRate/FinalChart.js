@@ -4,11 +4,14 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
 import {
-    Equation, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue,
+    Equation, ExcelPatternTypes, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue,
     Units
 } from "../../utils/utils";
 import {chartOptions, datasets} from "../../utils/charts";
 import BackButton from '../Others/BackButton';
+import SavePatternButton from "../Others/SavePatternButton";
+import CopyButton from "../Others/CopyButton";
+import {createDoseRateTSVFile} from "../../utils/excel/doseRate";
 
 const styles = theme => ({});
 
@@ -17,11 +20,10 @@ class FinalChart extends Component {
     constructor(props){
         super(props);
         let {finalData} = props;
-        let data = finalData.map(point => ({...point, time: point.time * 60}));
-
-        this.state = {
-            data: data
-        };
+        this.data = finalData.map(point => ({...point, time: point.time * 60}));
+        this.result = getTrendResult(this.getSelectedData());
+        this.doseRate = this.calculateDoseRate(this.result.slope);
+        this.confidenceInterval = this.calculateDoseRate(this.result.slopeConfidenceInterval);
     }
 
     calculateDoseRate = slope => {
@@ -32,12 +34,12 @@ class FinalChart extends Component {
     };
 
     getSelectedData = () => {
-        return this.state.data.filter(point => point.isSelected)
+        return this.data.filter(point => point.isSelected)
             .map( data => ({ x: data.time, y: data.concentration }) );
     };
 
     getUnselectedData = () => {
-        return this.state.data.filter(point => !point.isSelected)
+        return this.data.filter(point => !point.isSelected)
             .map( data => ({ x: data.time, y: data.concentration }) );
     };
 
@@ -47,8 +49,15 @@ class FinalChart extends Component {
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
+    getExportData = () => ({
+        ...this.props.allValues,
+        finalData: this.data.filter(point => point.isSelected),
+        doseRate: this.doseRate,
+        confidenceInterval: this.confidenceInterval
+    });
+
     getChartProps = () => {
-        const xArray = this.state.data.map(point => point.time);
+        const xArray = this.data.map(point => point.time);
         return {
             data: {
                 datasets: [
@@ -73,7 +82,6 @@ class FinalChart extends Component {
 
     render() {
         let { classes, previousPage } = this.props;
-        let result = getTrendResult(this.getSelectedData());
         return (
             <div>
                 <h3 className="my-3 text-center">Dose rate calculation</h3>
@@ -82,17 +90,19 @@ class FinalChart extends Component {
                     <div style={{width: 700, height: 600}}>
                         <Line {...this.getChartProps()}/>
                         <div style={{marginLeft: '5rem'}}>
-                            <Equation slope={result.slope} intercept={result.intercept}/><br/>
-                            <RSquared rSquared={result.rSquared}/><br/>
+                            <Equation slope={this.result.slope} intercept={this.result.intercept}/><br/>
+                            <RSquared rSquared={this.result.rSquared}/><br/>
                             <span style={{fontFamily: 'KaTeX_Math'}}>Confidence interval: 95%</span><br/>
                             <Result name={'DoseRate'}
-                                    value={this.calculateDoseRate(result.slope)}
-                                    error={this.calculateDoseRate(result.slopeConfidenceInterval)}
+                                    value={this.doseRate}
+                                    error={this.confidenceInterval}
                                     unit={'Gy/s'}
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
                             <BackButton onClick={previousPage}/>
+                            <CopyButton text={createDoseRateTSVFile({data: this.getExportData()})}/>
+                            <SavePatternButton patternType={ExcelPatternTypes.DOSE_RATE}/>
                         </div>
                     </div>
                 </div>
@@ -107,6 +117,7 @@ FinalChart = connect(
         radYield: getFormValues(ReduxForms.DoseRate)(state).radYield,
         solutionDensity: getFormValues(ReduxForms.DoseRate)(state).solutionDensity,
         unit: getFormValues(ReduxForms.DoseRate)(state).unit,
+        allValues: getFormValues(ReduxForms.DoseRate)(state)
     })
 )(FinalChart);
 

@@ -4,11 +4,15 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
 import {
-    Equation, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue,
+    Equation, ExcelPatternTypes, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue,
     Units
 } from "../../utils/utils";
 import {chartOptions, datasets} from "../../utils/charts";
 import BackButton from '../Others/BackButton';
+import isElectron from 'is-electron';
+import {createYieldTSVFile} from "../../utils/excel/radChemYield";
+import CopyButton from "../Others/CopyButton";
+import SavePatternButton from "../Others/SavePatternButton";
 
 const styles = theme => ({});
 
@@ -17,14 +21,13 @@ class FinalChart extends Component {
     constructor(props){
         super(props);
         let {doseRate, finalData} = props;
-        let data = finalData.map(point => {
+        this.data = finalData.map(point => {
             point.dose = doseRate * 60 * point.time;
             return point;
         });
-
-        this.state = {
-            data: data
-        };
+        this.result = getTrendResult(this.getSelectedData());
+        this.yield = this.calculateYield(this.result.slope);
+        this.confidenceInterval = this.calculateYield(this.result.slopeConfidenceInterval);
     }
 
     calculateYield = slope => {
@@ -35,12 +38,12 @@ class FinalChart extends Component {
     };
 
     getSelectedData = () => {
-        return this.state.data.filter(point => point.isSelected)
+        return this.data.filter(point => point.isSelected)
             .map( data => ({ x: data.dose, y: data.concentration }) );
     };
 
     getUnselectedData = () => {
-        return this.state.data.filter(point => !point.isSelected)
+        return this.data.filter(point => !point.isSelected)
             .map( data => ({ x: data.dose, y: data.concentration }) );
     };
 
@@ -50,8 +53,31 @@ class FinalChart extends Component {
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
+    getExportData = () => ({
+        ...this.props.allValues,
+        finalData: this.data.filter(point => point.isSelected),
+        yield: this.yield,
+        confidenceInterval: this.confidenceInterval
+    });
+
+/*
+    exportTableDataOnly = () => {
+        if (isElectron()) {
+            window.ipcRenderer.send('exportTableDataOnly', this.getExportData());
+        }
+        this.handleClose();
+    };
+
+    exportTableDataWithCharts = () => {
+        if (isElectron()) {
+            window.ipcRenderer.send('exportTableDataWithCharts', this.getExportData());
+        }
+        this.handleClose();
+    };
+*/
+
     getChartProps = () => {
-        const xArray = this.state.data.map(point => point.dose);
+        const xArray = this.data.map(point => point.dose);
         return {
             data: {
                 datasets: [
@@ -69,14 +95,13 @@ class FinalChart extends Component {
                 yLabel: 'Concentration, M',
                 xTicksMin: suggestMinValue(xArray),
                 xTicksMax: suggestMaxValue(xArray)
-            })
+            }),
+            redraw: true
         };
     };
 
     render() {
         const { classes, previousPage } = this.props;
-        const result = getTrendResult(this.getSelectedData());
-        console.log('Trend result: ', result);
         return (
             <div>
                 <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
@@ -85,20 +110,22 @@ class FinalChart extends Component {
                     <div style={{width: 700, height: 600}}>
                         <Line {...this.getChartProps()}/>
                         <div style={{marginLeft: '5rem'}}>
-                            <Equation slope={result.slope} intercept={result.intercept}/>
+                            <Equation slope={this.result.slope} intercept={this.result.intercept}/>
                             <br/>
-                            <RSquared rSquared={result.rSquared}/>
+                            <RSquared rSquared={this.result.rSquared}/>
                             <br/>
                             <span style={{fontFamily: 'KaTeX_Math'}}>Confidence interval: 95%</span>
                             <br/>
                             <Result name={'Yield'}
-                                    value={this.calculateYield(result.slope)}
-                                    error={this.calculateYield(result.slopeConfidenceInterval)}
+                                    value={this.yield}
+                                    error={this.confidenceInterval}
                                     unit={this.props.unit}
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
                             <BackButton onClick={previousPage}/>
+                            <CopyButton text={createYieldTSVFile({data: this.getExportData()})}/>
+                            <SavePatternButton patternType={ExcelPatternTypes.RAD_CHEM_YIELD}/>
                         </div>
                     </div>
                 </div>
@@ -113,6 +140,7 @@ FinalChart = connect(
         doseRate: getFormValues(ReduxForms.Yield)(state).doseRate,
         solutionDensity: getFormValues(ReduxForms.Yield)(state).solutionDensity,
         unit: getFormValues(ReduxForms.Yield)(state).unit,
+        allValues: getFormValues(ReduxForms.Yield)(state)
     })
 )(FinalChart);
 

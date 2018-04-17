@@ -4,10 +4,13 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
 import {
-    Equation, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue
+    Equation, ExcelPatternTypes, getTrendResult, ReduxForms, Result, RSquared, suggestMaxValue, suggestMinValue
 } from "../../utils/utils";
 import {chartOptions, datasets} from "../../utils/charts";
 import BackButton from '../Others/BackButton';
+import SavePatternButton from "../Others/SavePatternButton";
+import CopyButton from "../Others/CopyButton";
+import {createQuantumYieldTSVFile} from "../../utils/excel/quantumYield";
 
 const styles = theme => ({});
 
@@ -45,6 +48,10 @@ class FinalChart extends Component {
         let trendFunc = getTrendResult(data).predictY;
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
+
+    // getExportData = () => {
+    //
+    // };
 
     getChartProps = () => {
         const xArray = this.state.dataForChart.map(point => point.x);
@@ -98,6 +105,8 @@ class FinalChart extends Component {
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
                             <BackButton onClick={previousPage}/>
+                            {/*<CopyButton text={createQuantumYieldTSVFile({data: this.getExportData()})}/>*/}
+                            {/*<SavePatternButton patternType={ExcelPatternTypes.QUANTUM_YIELD}/>*/}
                         </div>
                     </div>
                 </div>

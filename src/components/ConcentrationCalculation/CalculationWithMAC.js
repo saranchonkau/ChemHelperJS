@@ -9,11 +9,16 @@ import {getInitialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import {cloneDeep} from "lodash";
-import {numberParser, PageNumbers} from "../../utils/utils";
+import {calculateRowId, ExcelPatternTypes, maxFromArray, numberParser, PageNumbers} from "../../utils/utils";
 import ControlledNumberInput from "../Others/ControlledInput";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
+import MaterialButton from '../Others/MaterialButton';
+import numeral from 'numeral';
+import SavePatternButton from "../Others/SavePatternButton";
+import CopyButton from "../Others/CopyButton";
+import {createOpticalDensityTableTSVFile} from "../../utils/excel/opticalDensityTable";
 
 export const styles = theme => ({});
 
@@ -33,6 +38,16 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
                 columnDefs: [
                     { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                     { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                    { headerName: 'Concentration', field: 'concentration', width: 175, editable: true, cellStyle: cellStyle,
+                        valueParser: numberParser, unSortIcon: true, ...suppressProps,
+                        valueFormatter: params => {
+                            if (Number.isNaN(params.value)) {
+                                return params.value;
+                            } else {
+                                return numeral(params.value).format('0.0000000e+0');
+                            }
+                        }
+                    },
                     { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
                 ],
                 icons: {
@@ -54,7 +69,7 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
 
         getRowData = () => {
             let array = [];
-            this.gridApi.forEachNode(node => array.push({...node.data}));
+            this.gridApi && this.gridApi.forEachNode(node => array.push({...node.data}));
             return array;
         };
 
@@ -66,7 +81,7 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
         addRow = () => {
             const rowData = this.getRowData();
             const newRow = {
-                id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
+                id: calculateRowId(rowData.map(data => data.id)),
                 density: 0.0,
                 isSelected: true
             };
@@ -76,18 +91,39 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
         getTableHeight = dataLength => 64 + dataLength * 30.5;
 
         modifyFinalData = () => {
-            return this.state.data.map(point => ({
-                id: point.id,
-                time: 0.0,
-                concentration: point.density / (this.state.pathLength * this.state.MAC),
-                density: point.density,
-                isSelected: true
-            }));
+            return this.state.data.map(point => {
+                const foundPoint = this.props.finalData.find(finalPoint => finalPoint.id === point.id);
+                return {
+                    id: point.id,
+                    time: foundPoint ? foundPoint.time : 0.0,
+                    concentration: point.density / (this.state.pathLength * this.state.MAC),
+                    density: point.density,
+                    isSelected: true
+                };
+            });
         };
+
+        calculateConcentrations = () => {
+            const data = this.getRowData();
+            data.forEach(point => { point.concentration = point.density / (this.state.pathLength * this.state.MAC); });
+            this.setState({data: data});
+        };
+
+        getOpticalDensityData = () => {
+            const data = this.getRowData();
+            data.forEach(point => { point.concentration = point.density / (this.state.pathLength * this.state.MAC); });
+            return data;
+        };
+
+        getExportData = () => ({
+            opticalDensityData: this.getOpticalDensityData(),
+            pathLength: this.state.pathLength,
+            MAC: this.state.MAC
+        });
 
         nextPage = () => {
             this.props.change('finalData', this.modifyFinalData());
-            this.props.change('opticalDensityData', this.getRowData());
+            this.props.change('opticalDensityData', this.getOpticalDensityData());
             this.props.change('pathLength', this.state.pathLength);
             this.props.change('MAC', this.state.MAC);
             this.props.goToPage(PageNumbers.FINAL_TABLE);
@@ -122,13 +158,13 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
 
         render() {
             const { classes, title } = this.props;
-            const { pathLength, pathLengthError, MAC, MACError } = this.state;
+            const { pathLength, pathLengthError, MAC, MACError, data } = this.state;
             return (
                 <React.Fragment>
                     <h3 className="my-3 text-center">{title}</h3>
-                    <h5 className="text-center">Calculation with molar attenuation coefficient</h5>
+                    <h5 className="text-center">Calculation with molar extinction coefficient</h5>
                     <div className='d-flex justify-content-center'>
-                        <div style={{width: 540}}>
+                        <div style={{width: 600}}>
                             <div className="ag-theme-blue" style={{height: this.getTableHeight(this.state.data.length)}}>
                                 <AgGridReact
                                     rowData={this.state.data}
@@ -138,6 +174,10 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
                             </div>
                             <div className='d-flex flex-row justify-content-between'>
                                 <BackButton onClick={this.previousPage}/>
+                                <MaterialButton text={'Calculate concentrations'}
+                                                onClick={this.calculateConcentrations}
+                                                disabled={!this.isCorrectData() || data.length === 0}
+                                />
                                 <AddRowButton onClick={this.addRow}/>
                                 <NextButton onClick={this.nextPage} disabled={!this.isCorrectData()}/>
                             </div>
@@ -166,7 +206,12 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
                                 </tr>
                                 </tbody>
                             </table>
-
+                            <div className='d-flex justify-content-end'>
+                                <CopyButton text={createOpticalDensityTableTSVFile({data: this.getExportData()})}
+                                            disabled={!this.isCorrectData()}
+                                />
+                                <SavePatternButton patternType={ExcelPatternTypes.OPTICAL_DENSITY_TABLE}/>
+                            </div>
                         </div>
                     </div>
                 </React.Fragment>
@@ -179,6 +224,7 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
             data: getFormValues(form)(state).opticalDensityData,
             pathLength: getFormValues(form)(state).pathLength,
             MAC: getFormValues(form)(state).MAC,
+            finalData: getFormValues(form)(state).finalData
         })
     )(CalculationWithMAC);
 

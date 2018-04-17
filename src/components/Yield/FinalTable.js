@@ -7,7 +7,7 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
-import {ReduxForms, Units} from "../../utils/utils";
+import {calculateRowId, ReduxForms, Units} from "../../utils/utils";
 import numeral from 'numeral';
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
@@ -99,7 +99,7 @@ class FinalTable extends Component {
     addRow = () => {
         const rowData = this.getRowData();
         const newRow = {
-            id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
+            id: calculateRowId(rowData.map(data => data.id)),
             concentration: 0.0,
             time: 0.0,
             isSelected: true
@@ -122,6 +122,11 @@ class FinalTable extends Component {
         this.props.change('doseRate', doseRate);
         this.props.change('solutionDensity', solutionDensity);
         this.props.nextPage();
+    };
+
+    previousPage = () => {
+        this.props.change('finalData', this.getRowData());
+        this.props.previousPage();
     };
 
     handleChange = name => event => {
@@ -168,7 +173,7 @@ class FinalTable extends Component {
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
-                            <BackButton onClick={previousPage}/>
+                            <BackButton onClick={this.previousPage}/>
                             <AddRowButton onClick={this.addRow}/>
                             <NextButton onClick={this.nextPage} disabled={!this.isCorrectData()}/>
                         </div>

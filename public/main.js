@@ -1,8 +1,8 @@
-const {app, BrowserWindow, ipcMain } = require('electron');
+const {app, BrowserWindow, ipcMain, clipboard } = require('electron');
 const path = require('path');
 const url = require('url');
 const queries = require("./db/queries");
-
+const excel = require("./excel/excel");
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var win;
@@ -26,7 +26,6 @@ function createWindow () {
     console.log('START_URL: ', startUrl);
     win.loadURL(startUrl);
 
-
     // Emitted when the window is closed.
     win.on('closed', () => {
         win = null
@@ -42,6 +41,24 @@ ipcMain.on('executeQuery', (event, query) => {
 ipcMain.on('countAll', (event, query) => {
     queries.executeQuery(query)
         .then(result => event.sender.send('countAll', result));
+});
+
+/*
+ipcMain.on('exportTableDataOnly', (event, data) => {
+    excel.exportTableDataOnly({ mainWindow: win, data });
+});
+
+ipcMain.on('exportTableDataWithCharts', (event, data) => {
+    excel.exportTableDataWithCharts({ mainWindow: win, data });
+});
+*/
+
+ipcMain.on('saveExcelPattern', (event, type) => {
+    excel.savePattern({ mainWindow: win, type });
+});
+
+ipcMain.on('copyToClipboard', (event, text) => {
+    clipboard.writeText(text);
 });
 
 app.on('ready', createWindow);

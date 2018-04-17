@@ -15,7 +15,7 @@ const pageTitle = 'Quantum yield calculation';
 const pageProps = { title: pageTitle, form: ReduxForms.QuantumYield };
 
 const Wizard = PagesManager({ pages: [
-    { component: CalculationWaySelection, props: { title: pageTitle }},
+    { component: CalculationWaySelection, props: { ...pageProps }},
     { component: CalculationWithMAC, props: { ...pageProps }},
     { component: CalibrationTable, props: { ...pageProps }},
     { component: CalibrationChart, props: { ...pageProps }},

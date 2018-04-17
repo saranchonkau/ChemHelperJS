@@ -9,10 +9,12 @@ import {getInitialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import {cloneDeep} from "lodash";
-import {numberParser} from "../../utils/utils";
+import {calculateRowId, numberParser} from "../../utils/utils";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
+import MaterialButton from "../Others/MaterialButton";
+import numeral from 'numeral';
 
 export const styles = theme => ({});
 
@@ -22,16 +24,22 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
         constructor(props) {
             super(props);
             this.state = {
-                data: cloneDeep(props.data),
-                pathLength: props.pathLength,
-                pathLengthError: '',
-                MAC: props.MAC,
-                MACError: ''
+                data: cloneDeep(props.data)
             };
             this.gridOptions = {
                 columnDefs: [
                     { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                     { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
+                    { headerName: 'Concentration', field: 'concentration', width: 175, editable: true, cellStyle: cellStyle,
+                        valueParser: numberParser, unSortIcon: true, ...suppressProps,
+                        valueFormatter: params => {
+                            if (Number.isNaN(params.value)) {
+                                return params.value;
+                            } else {
+                                return numeral(params.value).format('0.0000000e+0');
+                            }
+                        }
+                    },
                     { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
                 ],
                 icons: {
@@ -65,7 +73,7 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
         addRow = () => {
             const rowData = this.getRowData();
             const newRow = {
-                id: Math.max.apply(null, rowData.map(data => data.id)) + 1,
+                id: calculateRowId(rowData.map(data => data.id)),
                 density: 0.0,
                 isSelected: true
             };
@@ -75,13 +83,22 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
         getTableHeight = dataLength => 64 + dataLength * 30.5;
 
         modifyFinalData = () => {
-           return this.state.data.map(point => ({
-               id: point.id,
-               time: 0.0,
-               concentration: this.props.trendFunc(point.density),
-               density: point.density,
-               isSelected: true
-           }));
+            return this.state.data.map(point => {
+                const foundPoint = this.props.finalData.find(finalPoint => finalPoint.id === point.id);
+                return {
+                    id: point.id,
+                    time: foundPoint ? foundPoint.time : 0.0,
+                    concentration: this.props.trendFunc(point.density),
+                    density: point.density,
+                    isSelected: true
+                };
+            });
+        };
+
+        calculateConcentrations = () => {
+            const data = this.getRowData();
+            data.forEach(point => { point.concentration = this.props.trendFunc(point.density); });
+            this.setState({data: data});
         };
 
         nextPage = () => {
@@ -113,7 +130,7 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
                     <h3 className="my-3 text-center">{title}</h3>
                     <h5 className="text-center">Optical density table</h5>
                     <div className='d-flex justify-content-center'>
-                        <div style={{width: 540}}>
+                        <div style={{width: 600}}>
                             <div className="ag-theme-blue" style={{height: this.getTableHeight(this.state.data.length)}}>
                                 <AgGridReact
                                     rowData={this.state.data}
@@ -123,6 +140,10 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
                             </div>
                             <div className='d-flex flex-row justify-content-between'>
                                 <BackButton onClick={previousPage}/>
+                                <MaterialButton text={'Calculate concentrations'}
+                                                onClick={this.calculateConcentrations}
+                                                disabled={this.state.data.length === 0}
+                                />
                                 <AddRowButton onClick={this.addRow}/>
                                 <NextButton onClick={this.nextPage}/>
                             </div>
@@ -137,6 +158,7 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
         state => ({
             data: getFormValues(form)(state).opticalDensityData,
             trendFunc: getFormValues(form)(state).trendFunc,
+            finalData: getFormValues(form)(state).finalData
         })
     )(OpticalDensityTable);
 

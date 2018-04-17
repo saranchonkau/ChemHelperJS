@@ -3,16 +3,21 @@ import { withStyles } from 'material-ui/styles';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';
-import {getTrendResult, RSquared, suggestMaxValue, suggestMinValue} from "../../utils/utils";
+import {ExcelPatternTypes, getTrendResult, RSquared, suggestMaxValue, suggestMinValue} from "../../utils/utils";
 import {Equation} from "../../utils/utils";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import {chartOptions, datasets} from "../../utils/charts";
+import CopyButton from "../Others/CopyButton";
+import SavePatternButton from "../Others/SavePatternButton";
+import {createCalibrationTableTSVFile} from "../../utils/excel/calibrationTable";
 
 const styles = theme => ({});
 
 const CalibrationChartWrapper = ({ form, ...rest }) => {
     class CalibrationChart extends Component {
+
+        getExportData = () => this.props.data.filter(point => point.isSelected);
 
         getSelectedData = () => {
             return this.props.data.filter(point => point.isSelected)
@@ -73,6 +78,8 @@ const CalibrationChartWrapper = ({ form, ...rest }) => {
                             <RSquared rSquared={result.rSquared}/>
                             <div className='d-flex flex-row justify-content-between'>
                                 <BackButton onClick={previousPage}/>
+                                <CopyButton text={createCalibrationTableTSVFile({data: this.getExportData()})}/>
+                                <SavePatternButton patternType={ExcelPatternTypes.CALIBRATION_TABLE}/>
                                 <NextButton onClick={this.nextPage}/>
                             </div>
                         </div>
