@@ -8,7 +8,9 @@ import {cellStyle, suppressProps} from "../../App/StyleConstants";
 import {connect} from 'react-redux';
 import {getParam, getWhereParam, removeNull} from "../../../utils/query";
 import '../../App/table.css';
-import {openNuclideDetails} from "../NuclideDetails/NuclideDetailsActionCreators";
+import {stateSelectors} from "../FilterBar/filterBarReducer";
+import {bindActionCreators} from "redux";
+import {actionCreators} from "../NuclideDetails/nuclideDetailsReducer";
 
 class NuclidesTable extends Component {
 
@@ -45,7 +47,7 @@ class NuclidesTable extends Component {
             },
             onRowClicked: ({data}) => {
                 console.log('Data: ', data);
-                this.props.dispatch(openNuclideDetails(data))},
+                this.props.openNuclideDetails(data)},
             icons: {
                 sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
                 sortDescending: '<i class="fa fa-sort-desc" style="color: black"/>',
@@ -111,7 +113,7 @@ class NuclidesTable extends Component {
         }));
     };
 
-    getTableHeight = () => 64 + this.state.data.length * 30.5;
+    getTableHeight = () => 64 + 10 * 30.5;
 
     onGridReady = params => {
         this.gridApi = params.api;
@@ -156,7 +158,6 @@ class NuclidesTable extends Component {
 }
 
 export default connect(
-    state => ({
-        filter: state.filter
-    })
+    state => ({ filter: stateSelectors.getFilter(state) }),
+    dispatch => bindActionCreators(actionCreators, dispatch)
 )(NuclidesTable);

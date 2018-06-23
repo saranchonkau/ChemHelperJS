@@ -11,7 +11,7 @@ import CalibrationChart from '../ConcentrationCalculation/CalibrationChart';
 import OpticalDensityTable from '../ConcentrationCalculation/OpticalDensityTable';
 import CalculationWithMAC from '../ConcentrationCalculation/CalculationWithMAC';
 
-const pageTitle = 'Radiation chemistry yield from chart';
+const pageTitle = 'Radiation chemical yield';
 const pageProps = { title: pageTitle, form: ReduxForms.Yield };
 
 const Wizard = PagesManager({ pages: [

@@ -11,7 +11,7 @@ import CalibrationChart from '../ConcentrationCalculation/CalibrationChart';
 import OpticalDensityTable from '../ConcentrationCalculation/OpticalDensityTable';
 import CalculationWithMAC from '../ConcentrationCalculation/CalculationWithMAC';
 
-const pageTitle = 'Dose rate calculation';
+const pageTitle = 'Dose rate';
 const pageProps = { title: pageTitle, form: ReduxForms.DoseRate };
 
 const Wizard = PagesManager({ pages: [

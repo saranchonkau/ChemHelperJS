@@ -11,7 +11,7 @@ import CalibrationChart from '../ConcentrationCalculation/CalibrationChart';
 import OpticalDensityTable from '../ConcentrationCalculation/OpticalDensityTable';
 import CalculationWithMAC from '../ConcentrationCalculation/CalculationWithMAC';
 
-const pageTitle = 'Quantum yield calculation';
+const pageTitle = 'Quantum yield';
 const pageProps = { title: pageTitle, form: ReduxForms.QuantumYield };
 
 const Wizard = PagesManager({ pages: [

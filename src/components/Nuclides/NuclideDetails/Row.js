@@ -20,8 +20,8 @@ const Row = ({header, value, tooltip, classes}) => (
             <TableRow>
                 <TableCell className={classes.body}>
                     { tooltip ?
-                        <Tooltip title={tooltip} classes={{ tooltip: classes.tooltip }}><div>{header} :</div></Tooltip> :
-                        `${header} :`
+                        <Tooltip title={tooltip} classes={{ tooltip: classes.tooltip }}>{header}</Tooltip> :
+                        header
                     }
                 </TableCell>
                 <TableCell className={classes.body}>{value}</TableCell>
@@ -31,7 +31,7 @@ const Row = ({header, value, tooltip, classes}) => (
 );
 
 Row.propTypes = {
-    header: PropTypes.string.isRequired,
+    header: PropTypes.node.isRequired,
     value: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.number

@@ -1,5 +1,5 @@
 import React from 'react';
-import Input, { InputLabel } from 'material-ui/Input';
+import Input from 'material-ui/Input';
 import { FormControl, FormHelperText } from 'material-ui/Form';
 import PropTypes from 'prop-types';
 

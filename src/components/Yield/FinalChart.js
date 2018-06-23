@@ -21,13 +21,10 @@ class FinalChart extends Component {
     constructor(props){
         super(props);
         let {doseRate, finalData} = props;
-        this.data = finalData.map(point => {
-            point.dose = doseRate * 60 * point.time;
-            return point;
-        });
+        this.data = finalData.map(point => ({ ...point, dose: doseRate * 60 * point.time }));
         this.result = getTrendResult(this.getSelectedData());
         this.yield = this.calculateYield(this.result.slope);
-        this.confidenceInterval = this.calculateYield(this.result.slopeConfidenceInterval);
+        this.confidenceInterval = this.result.slopeConfidenceInterval && this.calculateYield(this.result.slopeConfidenceInterval);
     }
 
     calculateYield = slope => {
@@ -60,22 +57,6 @@ class FinalChart extends Component {
         confidenceInterval: this.confidenceInterval
     });
 
-/*
-    exportTableDataOnly = () => {
-        if (isElectron()) {
-            window.ipcRenderer.send('exportTableDataOnly', this.getExportData());
-        }
-        this.handleClose();
-    };
-
-    exportTableDataWithCharts = () => {
-        if (isElectron()) {
-            window.ipcRenderer.send('exportTableDataWithCharts', this.getExportData());
-        }
-        this.handleClose();
-    };
-*/
-
     getChartProps = () => {
         const xArray = this.data.map(point => point.dose);
         return {
@@ -104,7 +85,7 @@ class FinalChart extends Component {
         const { classes, previousPage } = this.props;
         return (
             <div>
-                <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
+                <h3 className="my-3 text-center">Radiation chemical yield</h3>
                 <h5 className="text-center">Final chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>

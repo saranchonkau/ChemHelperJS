@@ -4,6 +4,10 @@ import {Tex} from 'react-tex';
 import PropTypes from 'prop-types';
 import {calculateStudentCoefficient} from "./statiscticsDistributions";
 
+export const dotRegexp = /[,/\u0431\u044E]/;
+export const finalNumberRegexp = /^[\+\-]?\d*\.?\d+(?:[Ee][\+\-]?\d{1,2})?$/;
+export const intermediateNumberRegexp = /^[\+\-]?(?:\d*(?:\.?(?:\d+(?:(?:(?:[Ee]\+)|(?:[Ee]\-)|(?:[Ee]))?(?:\d{1,2})?)?)?)?)?$/;
+
 export const Units = {
     moleculesPerHundredVolt: 'molecules/100eV',
     molPerJoule: 'mol/J'
@@ -81,7 +85,7 @@ export const getTrendWithIntercept = data => {
         predictX: null,
         sums: {}
     };
-
+    console.log('TREND DATA: ', data);
     let sumX = 0;
     let sumY = 0;
     let sumXY = 0;
@@ -104,18 +108,21 @@ export const getTrendWithIntercept = data => {
     data.forEach(({x, y}) => varSum += Math.pow(y - result.slope * x - result.intercept, 2));
 
     const delta = N * sumXX - sumX*sumX;
-    const vari = 1.0 / (N - 2.0) * varSum;
 
-    result.studentCoefficient = Math.abs(calculateStudentCoefficient(N - 2, 0.025));
-    result.interceptError = Math.sqrt(vari / delta * sumXX);
-    result.interceptConfidenceInterval = result.interceptError * result.studentCoefficient;
-    result.slopeError = Math.sqrt(N / delta * vari);
-    result.slopeConfidenceInterval = result.slopeError * result.studentCoefficient;
+    if (N > 2) {
+        const vari = 1.0 / (N - 2.0) * varSum;
+        result.interceptError = Math.sqrt(vari / delta * sumXX);
+        result.slopeError = Math.sqrt(N / delta * vari);
+        result.studentCoefficient = Math.abs(calculateStudentCoefficient(N - 2, 0.025));
+        result.slopeConfidenceInterval = result.slopeError * result.studentCoefficient;
+        result.interceptConfidenceInterval = result.interceptError * result.studentCoefficient;
+    }
+
     result.rSquared = Math.pow((N * sumXY - sumX * sumY)/Math.sqrt((N * sumXX - sumX * sumX)*(N * sumYY - sumY * sumY)),2);
     result.predictY = x => result.slope * x + result.intercept;
     result.predictX = y => (y - result.intercept) / result.slope;
 
-    result.sums = { sumX, sumY, sumXY, sumXX, sumYY, N, delta, vari };
+    // result.sums = { sumX, sumY, sumXY, sumXX, sumYY, N, delta, vari };
     return result;
 };
 
@@ -229,7 +236,18 @@ Result.propTypes = {
     unit: PropTypes.string
 };
 
-export const numberParser = params => Number(params.newValue.replace(',', '.'));
+export const numberParser = params => {
+    const newValue = params.newValue.replace(dotRegexp, '.').replace(/[\u0435\u0443]/, 'e');
+    return Number.parseFloat(newValue);
+};
+
+export const numberFormatter = params => {
+    if (Number.isNaN(params.value)) {
+        return params.value;
+    } else {
+        return numeral(params.value).format('0.00000e+0');
+    }
+};
 
 export const suggestMinValue = array => {
     const min = minFromArray(array);

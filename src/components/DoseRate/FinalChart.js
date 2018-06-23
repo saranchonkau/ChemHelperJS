@@ -23,7 +23,7 @@ class FinalChart extends Component {
         this.data = finalData.map(point => ({...point, time: point.time * 60}));
         this.result = getTrendResult(this.getSelectedData());
         this.doseRate = this.calculateDoseRate(this.result.slope);
-        this.confidenceInterval = this.calculateDoseRate(this.result.slopeConfidenceInterval);
+        this.confidenceInterval = this.result.slopeConfidenceInterval && this.calculateDoseRate(this.result.slopeConfidenceInterval);
     }
 
     calculateDoseRate = slope => {
@@ -84,7 +84,7 @@ class FinalChart extends Component {
         let { classes, previousPage } = this.props;
         return (
             <div>
-                <h3 className="my-3 text-center">Dose rate calculation</h3>
+                <h3 className="my-3 text-center">Dose rate</h3>
                 <h5 className="text-center">Final chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>

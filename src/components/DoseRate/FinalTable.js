@@ -7,17 +7,16 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
-import {calculateRowId, ReduxForms, Units} from "../../utils/utils";
-import numeral from 'numeral';
+import {calculateRowId, numberFormatter, ReduxForms, Units} from "../../utils/utils";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import CheckBoxRenderer from "../../utils/cellRenderers/CheckBoxRenderer";
 import {cloneDeep} from "lodash";
 import {numberParser} from "../../utils/utils";
-import ControlledNumberInput from "../Others/ControlledInput";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
+import MaterialNumberInput from "../Others/MaterialNumberInput";
 
 export const styles = theme => ({});
 
@@ -37,14 +36,7 @@ class FinalTable extends Component {
                 { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                 { headerName: 'Time, min', field: 'time', width: 130, editable: true, cellStyle: cellStyle, valueParser: numberParser, ...suppressProps, unSortIcon: true},
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
-                    valueParser: numberParser, unSortIcon: true, ...suppressProps,
-                    valueFormatter: params => {
-                        if (Number.isNaN(params.value)) {
-                            return params.value;
-                        } else {
-                            return numeral(params.value).format('0.00000e+0');
-                        }
-                    }
+                    valueParser: numberParser, unSortIcon: true, ...suppressProps, valueFormatter: numberFormatter
                 },
                 { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
                 { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
@@ -105,8 +97,8 @@ class FinalTable extends Component {
         let {unit, radYield, solutionDensity} = this.state;
         this.props.change('finalData', this.getRowData());
         this.props.change('unit', unit);
-        this.props.change('radYield', radYield);
-        this.props.change('solutionDensity', solutionDensity);
+        this.props.change('radYield', Number.parseFloat(radYield));
+        this.props.change('solutionDensity', Number.parseFloat(solutionDensity));
         this.props.nextPage();
     };
 
@@ -115,27 +107,9 @@ class FinalTable extends Component {
         this.props.previousPage();
     };
 
-    handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value,
-        });
-    };
+    handleChange = name => event => this.setState({ [name]: event.target.value });
 
-    handleNumberChange = name => event => {
-        let initialValue = event.target.value;
-        const parsedValue = Number.parseFloat(initialValue);
-        if (Number.isNaN(parsedValue)) {
-            this.setState({
-                [name]: initialValue,
-                [`${name}Error`]: 'It must be a number',
-            });
-        } else {
-            this.setState({
-                [name]: parsedValue,
-                [`${name}Error`]: '',
-            });
-        }
-    };
+    handleNumberChange = name => ({ value, error }) => this.setState({ [name]: value, [`${name}Error`]: error });
 
     isCorrectData = () => {
         const { solutionDensity, solutionDensityError, radYield, radYieldError } = this.state;
@@ -147,7 +121,7 @@ class FinalTable extends Component {
         const { radYield, radYieldError, solutionDensity, solutionDensityError, unit, data } = this.state;
         return (
             <div>
-                <h3 className="my-3 text-center">Dose rate calculation</h3>
+                <h3 className="my-3 text-center">Dose rate</h3>
                 <h5 className="text-center">Final table</h5>
                 <div className='d-flex flex-row justify-content-center'>
                     <div style={{width: 500}}>
@@ -169,20 +143,18 @@ class FinalTable extends Component {
                             <tr>
                                 <td>Solution density &rho; (g/ml):</td>
                                 <td>
-                                    <ControlledNumberInput id={'solutionDensity-input'}
-                                                           value={solutionDensity}
-                                                           onChange={this.handleNumberChange('solutionDensity')}
-                                                           error={solutionDensityError}
+                                    <MaterialNumberInput id={'solutionDensity-input'}
+                                                         initialValue={solutionDensity}
+                                                         onChange={this.handleNumberChange('solutionDensity')}
                                     />
                                 </td>
                             </tr>
                             <tr>
                                 <td>{`Yield G : (${unit})`}</td>
                                 <td>
-                                    <ControlledNumberInput id={'radYield-input'}
-                                                           value={radYield}
-                                                           onChange={this.handleNumberChange('radYield')}
-                                                           error={radYieldError}
+                                    <MaterialNumberInput id={'radYield-input'}
+                                                         initialValue={radYield}
+                                                         onChange={this.handleNumberChange('radYield')}
                                     />
                                 </td>
                             </tr>
@@ -204,12 +176,14 @@ class FinalTable extends Component {
     }
 }
 
+const formSelector = state => getFormValues(ReduxForms.DoseRate)(state);
+
 FinalTable = connect(
     state => ({
-        finalData: getFormValues(ReduxForms.DoseRate)(state).finalData,
-        radYield: getFormValues(ReduxForms.DoseRate)(state).radYield,
-        solutionDensity: getFormValues(ReduxForms.DoseRate)(state).solutionDensity,
-        unit: getFormValues(ReduxForms.DoseRate)(state).unit
+        finalData: formSelector(state).finalData,
+        radYield: formSelector(state).radYield,
+        solutionDensity: formSelector(state).solutionDensity,
+        unit: formSelector(state).unit
     })
 )(FinalTable);
 

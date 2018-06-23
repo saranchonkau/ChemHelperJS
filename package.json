@@ -1,6 +1,6 @@
 {
   "name": "chem-helper-js",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "author": "Ivan Saranchonkau <ivan.saranchenkov@gmail.com>",
   "dependencies": {
@@ -19,7 +19,7 @@
     "aphrodite": "^1.2.5",
     "bootstrap": "^4.0.0",
     "chart.js": "^2.7.1",
-    "electron": "^1.8.2",
+    "electron": "^1.7.15",
     "electron-builder": "^19.56.2",
     "electron-packager": "^10.1.2",
     "electron-rebuild": "^1.7.3",
@@ -31,11 +31,10 @@
     "material-ui-icons": "^1.0.0-beta.17",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.0",
-    "react": "^16.2.0",
+    "react": "^16.4.1",
     "react-chartjs-2": "^2.7.0",
     "react-dom": "^16.2.0",
     "react-dom-factories": "^1.0.2",
-    "react-number-format": "^3.1.5",
     "react-paginate": "^5.1.0",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.2.2",
@@ -56,7 +55,7 @@
   "build": {
     "productName": "ChemHelper",
     "appId": "by.bsu.chemistry",
-    "electronVersion": "1.8.2",
+    "electronVersion": "1.7.15",
     "asar": false,
     "win": {
       "target": "nsis"

@@ -9,12 +9,11 @@ import {getInitialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import {cloneDeep} from "lodash";
-import {calculateRowId, numberParser} from "../../utils/utils";
+import {calculateRowId, numberFormatter, numberParser} from "../../utils/utils";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
 import MaterialButton from "../Others/MaterialButton";
-import numeral from 'numeral';
 
 export const styles = theme => ({});
 
@@ -31,14 +30,7 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
                     { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                     { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                     { headerName: 'Concentration', field: 'concentration', width: 175, editable: true, cellStyle: cellStyle,
-                        valueParser: numberParser, unSortIcon: true, ...suppressProps,
-                        valueFormatter: params => {
-                            if (Number.isNaN(params.value)) {
-                                return params.value;
-                            } else {
-                                return numeral(params.value).format('0.0000000e+0');
-                            }
-                        }
+                        valueParser: numberParser, unSortIcon: true, ...suppressProps, valueFormatter: numberFormatter
                     },
                     { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
                 ],
@@ -105,22 +97,6 @@ const OpticalDensityTableWrapper = ({form, ...rest}) => {
             this.props.change('finalData', this.modifyFinalData());
             this.props.change('opticalDensityData', this.getRowData());
             this.props.nextPage();
-        };
-
-        handleNumberChange = name => event => {
-            let initialValue = event.target.value;
-            const parsedValue = Number.parseFloat(initialValue);
-            if (Number.isNaN(parsedValue)) {
-                this.setState({
-                    [name]: initialValue,
-                    [`${name}Error`]: 'It must be a number',
-                });
-            } else {
-                this.setState({
-                    [name]: parsedValue,
-                    [`${name}Error`]: '',
-                });
-            }
         };
 
         render() {

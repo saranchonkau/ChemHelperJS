@@ -18,18 +18,10 @@ class FinalChart extends Component {
 
     constructor(props){
         super(props);
-        this.state = {
-            dataForChart: props.finalData.map(data => ({
-                x: data.time * 60 * props.lightIntensity / 1e18,
-                y: data.concentration,
-                isSelected: data.isSelected
-            })),
-            dataForCalculation: props.finalData.filter(point => point.isSelected)
-                .map(point => ({
-                    x: point.time * 60,
-                    y: point.concentration
-                }))
-        };
+        this.data = props.finalData.map(point => ({ ...point, time: point.time * 60 }));
+        this.result = getTrendResult(this.getSelectedData());
+        this.quantumYield = this.calculateQuantumYield(this.result.slope);
+        this.confidenceInterval = this.result.slopeConfidenceInterval && this.calculateQuantumYield(this.result.slopeConfidenceInterval);
     }
 
     calculateQuantumYield = slope => {
@@ -37,26 +29,26 @@ class FinalChart extends Component {
         return (6.022140e23 * volume * slope) / (1000 * lightIntensity);
     };
 
-    getSelectedData = () => this.state.dataForChart.filter(point => point.isSelected);
+    getSelectedData = () => this.data.filter(point => point.isSelected).map( data => ({ x: data.time, y: data.concentration }));
 
-    getUnselectedData = () => this.state.dataForChart.filter(point => !point.isSelected);
+    getUnselectedData = () => this.data.filter(point => !point.isSelected).map( data => ({ x: data.time, y: data.concentration }));
 
     getTrendData = () => {
         let data = this.getSelectedData();
-        console.log(this.state.dataForChart);
-        console.log(getTrendResult(this.state.dataForChart));
         let trendFunc = getTrendResult(data).predictY;
         return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
     };
 
-    // getExportData = () => {
-    //
-    // };
+    getExportData = () => ({
+        volume: this.props.volume,
+        lightIntensity: this.props.lightIntensity,
+        finalData: this.data.filter(point => point.isSelected),
+        quantumYield: this.quantumYield,
+        confidenceInterval: this.confidenceInterval
+    });
 
     getChartProps = () => {
-        const xArray = this.state.dataForChart.map(point => point.x);
-        console.log('ARRAY: ', xArray);
-        console.log('MIN: ', suggestMinValue(xArray));
+        const xArray = this.data.map(point => point.time);
         return {
             data: {
                 datasets: [
@@ -68,9 +60,9 @@ class FinalChart extends Component {
             options: chartOptions({
                 tooltipLabelCallback: (tooltipItem, data) => [
                     `Concentration: ${tooltipItem.yLabel} mol/l`,
-                    `Light intensity: ${tooltipItem.xLabel} E-18 photon/s`,
+                    `Time: ${tooltipItem.xLabel} sec`,
                 ],
-                xLabel: 'Light intensity I * E-18, photon/s',
+                xLabel: 'Time, sec',
                 yLabel: 'Concentration, M',
                 xTicksMin: suggestMinValue(xArray),
                 xTicksMax: suggestMaxValue(xArray)
@@ -79,34 +71,30 @@ class FinalChart extends Component {
     };
 
     render() {
-        const {dataForCalculation} = this.state;
         const { classes, previousPage } = this.props;
-        const resultForChart = getTrendResult(this.getSelectedData());
-        const result = getTrendResult(dataForCalculation);
-        console.log('Result: ', result);
         return (
             <div>
-                <h3 className="my-3 text-center">Quantum yield calculation</h3>
+                <h3 className="my-3 text-center">Quantum yield</h3>
                 <h5 className="text-center">Final chart</h5>
                 <div  className="d-flex flex-row justify-content-center">
                     <div style={{width: 700, height: 600}}>
                         <Line {...this.getChartProps()}/>
                         <div style={{marginLeft: '5rem'}}>
-                            <Equation slope={resultForChart.slope} intercept={resultForChart.intercept}/>
+                            <Equation slope={this.result.slope} intercept={this.result.intercept}/>
                             <br/>
-                            <RSquared rSquared={resultForChart.rSquared}/>
+                            <RSquared rSquared={this.result.rSquared}/>
                             <br/>
                             <span style={{fontFamily: 'KaTeX_Math'}}>Confidence interval: 95%</span>
                             <br/>
                             <Result name={'Quantum Yield'}
-                                    value={this.calculateQuantumYield(result.slope)}
-                                    error={this.calculateQuantumYield(result.slopeConfidenceInterval)}
+                                    value={this.quantumYield}
+                                    error={this.confidenceInterval}
                             />
                         </div>
                         <div className='d-flex flex-row justify-content-between'>
                             <BackButton onClick={previousPage}/>
-                            {/*<CopyButton text={createQuantumYieldTSVFile({data: this.getExportData()})}/>*/}
-                            {/*<SavePatternButton patternType={ExcelPatternTypes.QUANTUM_YIELD}/>*/}
+                            <CopyButton text={createQuantumYieldTSVFile({data: this.getExportData()})}/>
+                            <SavePatternButton patternType={ExcelPatternTypes.QUANTUM_YIELD}/>
                         </div>
                     </div>
                 </div>

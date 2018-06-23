@@ -12,9 +12,7 @@ const FormulaPage = () => (
         <div className='d-flex'>
             <FormulaList/>
                 <Switch>
-                    <Route exact path='/formula'
-                           component={() => <h3>Click on left list :)</h3>}
-                    />
+                    <Route exact path='/formula' component={() => <div/>}/>
                     <Route exact path='/formula/yield' component={Yield}/>
                     <Route exact path='/formula/doseRate' component={DoseRate}/>
                     <Route exact path='/formula/quantumYield' component={QuantumYield}/>

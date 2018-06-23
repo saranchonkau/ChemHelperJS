@@ -7,17 +7,16 @@ import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
-import {calculateRowId, ReduxForms, Units} from "../../utils/utils";
-import numeral from 'numeral';
+import {calculateRowId, numberFormatter, ReduxForms, Units} from "../../utils/utils";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import CheckBoxRenderer from "../../utils/cellRenderers/CheckBoxRenderer";
 import {cloneDeep} from "lodash";
 import {numberParser} from "../../utils/utils";
-import ControlledNumberInput from "../Others/ControlledInput";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
+import MaterialNumberInput from "../Others/MaterialNumberInput";
 
 const styles = theme => ({});
 
@@ -45,14 +44,7 @@ class FinalTable extends Component {
                     valueParser: numberParser
                 },
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
-                    valueParser: numberParser, unSortIcon: true, ...suppressProps,
-                    valueFormatter: params => {
-                        if (Number.isNaN(params.value)) {
-                            return params.value;
-                        } else {
-                            return numeral(params.value).format('0.00000e+0');
-                        }
-                    }
+                    valueParser: numberParser, unSortIcon: true, ...suppressProps, valueFormatter: numberFormatter
                 },
                 { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
                 { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
@@ -119,8 +111,8 @@ class FinalTable extends Component {
         let {unit, doseRate, solutionDensity} = this.state;
         this.props.change('finalData', this.getRowData());
         this.props.change('unit', unit);
-        this.props.change('doseRate', doseRate);
-        this.props.change('solutionDensity', solutionDensity);
+        this.props.change('doseRate', Number.parseFloat(doseRate));
+        this.props.change('solutionDensity', Number.parseFloat(solutionDensity));
         this.props.nextPage();
     };
 
@@ -129,27 +121,9 @@ class FinalTable extends Component {
         this.props.previousPage();
     };
 
-    handleChange = name => event => {
-        this.setState({
-            [name]: event.target.value,
-        });
-    };
+    handleChange = name => event => this.setState({ [name]: event.target.value });
 
-    handleNumberChange = name => event => {
-        let initialValue = event.target.value;
-        const parsedValue = Number.parseFloat(initialValue);
-        if (Number.isNaN(parsedValue)) {
-            this.setState({
-                [name]: initialValue,
-                [`${name}Error`]: 'It must be a number',
-            });
-        } else {
-            this.setState({
-                [name]: parsedValue,
-                [`${name}Error`]: '',
-            });
-        }
-    };
+    handleNumberChange = name => ({ value, error }) => this.setState({ [name]: value, [`${name}Error`]: error });
 
     isCorrectData = () => {
         const { solutionDensity, solutionDensityError, doseRate, doseRateError } = this.state;
@@ -158,10 +132,10 @@ class FinalTable extends Component {
 
     render() {
         let { classes, previousPage } = this.props;
-        const { doseRate, doseRateError, solutionDensity, solutionDensityError, unit, data } = this.state;
+        const { doseRate, solutionDensity, unit, data } = this.state;
         return (
             <div>
-                <h3 className="my-3 text-center">Radiation chemistry yield from chart</h3>
+                <h3 className="my-3 text-center">Radiation chemical yield</h3>
                 <h5 className="text-center">Final table</h5>
                 <div className='d-flex justify-content-center'>
                     <div style={{width: 500}}>
@@ -183,20 +157,18 @@ class FinalTable extends Component {
                             <tr>
                                 <td>Solution density &rho; (g/ml):</td>
                                 <td>
-                                    <ControlledNumberInput id={'solutionDensity-input'}
-                                                           value={solutionDensity}
-                                                           onChange={this.handleNumberChange('solutionDensity')}
-                                                           error={solutionDensityError}
+                                    <MaterialNumberInput id={'solutionDensity-input'}
+                                                         initialValue={solutionDensity}
+                                                         onChange={this.handleNumberChange('solutionDensity')}
                                     />
                                 </td>
                             </tr>
                             <tr>
                                 <td>Dose rate P (Gy/s):</td>
                                 <td>
-                                    <ControlledNumberInput id={'doseRate-input'}
-                                                     value={doseRate}
-                                                     onChange={this.handleNumberChange('doseRate')}
-                                                     error={doseRateError}
+                                    <MaterialNumberInput id={'doseRate-input'}
+                                                         initialValue={doseRate}
+                                                         onChange={this.handleNumberChange('doseRate')}
                                     />
                                 </td>
                             </tr>

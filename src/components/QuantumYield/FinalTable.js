@@ -5,17 +5,16 @@ import 'ag-grid/dist/styles/ag-theme-blue.css';
 import { withStyles } from 'material-ui/styles';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
-import {calculateRowId, ReduxForms} from "../../utils/utils";
-import numeral from 'numeral';
+import {calculateRowId, numberFormatter, ReduxForms} from "../../utils/utils";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import CheckBoxRenderer from "../../utils/cellRenderers/CheckBoxRenderer";
 import {cloneDeep} from "lodash";
 import {numberParser} from "../../utils/utils";
-import ControlledNumberInput from "../Others/ControlledInput";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
+import MaterialNumberInput from "../Others/MaterialNumberInput";
 
 const styles = theme => ({});
 
@@ -42,14 +41,7 @@ class FinalTable extends Component {
                     valueParser: numberParser
                 },
                 { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
-                    valueParser: numberParser, unSortIcon: true, ...suppressProps,
-                    valueFormatter: params => {
-                        if (Number.isNaN(params.value)) {
-                            return params.value;
-                        } else {
-                            return numeral(params.value).format('0.00000e+0');
-                        }
-                    }
+                    valueParser: numberParser, unSortIcon: true, ...suppressProps, valueFormatter: numberFormatter
                 },
                 { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
                 { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
@@ -115,8 +107,8 @@ class FinalTable extends Component {
     nextPage = () => {
         const {volume, lightIntensity} = this.state;
         this.props.change('finalData', this.getRowData());
-        this.props.change('volume', volume);
-        this.props.change('lightIntensity', lightIntensity);
+        this.props.change('volume', Number.parseFloat(volume));
+        this.props.change('lightIntensity', Number.parseFloat(lightIntensity));
         this.props.nextPage();
     };
 
@@ -125,21 +117,7 @@ class FinalTable extends Component {
         this.props.previousPage();
     };
 
-    handleNumberChange = name => event => {
-        let initialValue = event.target.value;
-        const parsedValue = Number.parseFloat(initialValue);
-        if (Number.isNaN(parsedValue)) {
-            this.setState({
-                [name]: initialValue,
-                [`${name}Error`]: 'It must be a number',
-            });
-        } else {
-            this.setState({
-                [name]: parsedValue,
-                [`${name}Error`]: '',
-            });
-        }
-    };
+    handleNumberChange = name => ({ value, error }) => this.setState({ [name]: value, [`${name}Error`]: error });
 
     isCorrectData = () => {
         const { volume, volumeError, lightIntensity, lightIntensityError } = this.state;
@@ -151,7 +129,7 @@ class FinalTable extends Component {
         let { classes, previousPage } = this.props;
         return (
             <div>
-                <h3 className="my-3 text-center">Quantum yield calculation</h3>
+                <h3 className="my-3 text-center">Quantum yield</h3>
                 <h5 className="text-center">Final table</h5>
                 <div className='d-flex justify-content-center'>
                     <div style={{width: 500}}>
@@ -173,8 +151,8 @@ class FinalTable extends Component {
                                 <tr>
                                     <td style={{width: 130}}>Light intensity I (photon/s):</td>
                                     <td>
-                                        <ControlledNumberInput id={'lightIntensity-input'}
-                                                               value={lightIntensity}
+                                        <MaterialNumberInput id={'lightIntensity-input'}
+                                                               initialValue={lightIntensity}
                                                                onChange={this.handleNumberChange('lightIntensity')}
                                                                error={lightIntensityError}
                                         />
@@ -183,10 +161,10 @@ class FinalTable extends Component {
                                 <tr>
                                     <td>Volume V (ml):</td>
                                     <td>
-                                        <ControlledNumberInput id={'volume-input'}
-                                                               value={volume}
-                                                               onChange={this.handleNumberChange('volume')}
-                                                               error={volumeError}
+                                        <MaterialNumberInput id={'volume-input'}
+                                                             initialValue={volume}
+                                                             onChange={this.handleNumberChange('volume')}
+                                                             error={volumeError}
                                         />
                                     </td>
                                 </tr>

@@ -9,16 +9,18 @@ import {getInitialData} from "../../utils/Data";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
 import {cloneDeep} from "lodash";
-import {calculateRowId, ExcelPatternTypes, maxFromArray, numberParser, PageNumbers} from "../../utils/utils";
-import ControlledNumberInput from "../Others/ControlledInput";
+import {
+    calculateRowId, ExcelPatternTypes, numberFormatter, numberParser,
+    PageNumbers
+} from "../../utils/utils";
 import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
 import MaterialButton from '../Others/MaterialButton';
-import numeral from 'numeral';
 import SavePatternButton from "../Others/SavePatternButton";
 import CopyButton from "../Others/CopyButton";
 import {createOpticalDensityTableTSVFile} from "../../utils/excel/opticalDensityTable";
+import MaterialNumberInput from "../Others/MaterialNumberInput";
 
 export const styles = theme => ({});
 
@@ -39,14 +41,7 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
                     { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
                     { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
                     { headerName: 'Concentration', field: 'concentration', width: 175, editable: true, cellStyle: cellStyle,
-                        valueParser: numberParser, unSortIcon: true, ...suppressProps,
-                        valueFormatter: params => {
-                            if (Number.isNaN(params.value)) {
-                                return params.value;
-                            } else {
-                                return numeral(params.value).format('0.0000000e+0');
-                            }
-                        }
+                        valueParser: numberParser, unSortIcon: true, ...suppressProps, valueFormatter: numberFormatter
                     },
                     { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
                 ],
@@ -69,7 +64,7 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
 
         getRowData = () => {
             let array = [];
-            this.gridApi && this.gridApi.forEachNode(node => array.push({...node.data}));
+            this.gridApi.forEachNode(node => array.push({...node.data}));
             return array;
         };
 
@@ -110,9 +105,11 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
         };
 
         getOpticalDensityData = () => {
-            const data = this.getRowData();
-            data.forEach(point => { point.concentration = point.density / (this.state.pathLength * this.state.MAC); });
-            return data;
+            const data = this.gridApi ? this.getRowData() : this.state.data;
+            return data.map(point => ({
+                ...point,
+                concentration: point.density / (this.state.pathLength * this.state.MAC)
+            }));
         };
 
         getExportData = () => ({
@@ -124,8 +121,8 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
         nextPage = () => {
             this.props.change('finalData', this.modifyFinalData());
             this.props.change('opticalDensityData', this.getOpticalDensityData());
-            this.props.change('pathLength', this.state.pathLength);
-            this.props.change('MAC', this.state.MAC);
+            this.props.change('pathLength', Number.parseFloat(this.state.pathLength));
+            this.props.change('MAC', Number.parseFloat(this.state.MAC));
             this.props.goToPage(PageNumbers.FINAL_TABLE);
         };
 
@@ -135,21 +132,7 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
             this.props.previousPage();
         };
 
-        handleNumberChange = name => event => {
-            let initialValue = event.target.value;
-            const parsedValue = Number.parseFloat(initialValue);
-            if (Number.isNaN(parsedValue)) {
-                this.setState({
-                    [name]: initialValue,
-                    [`${name}Error`]: 'It must be a number',
-                });
-            } else {
-                this.setState({
-                    [name]: parsedValue,
-                    [`${name}Error`]: '',
-                });
-            }
-        };
+        handleNumberChange = name => ({ value, error }) => this.setState({ [name]: value, [`${name}Error`]: error });
 
         isCorrectData = () => {
             const { pathLength, pathLengthError, MAC, MACError } = this.state;
@@ -187,20 +170,18 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
                                 <tr>
                                     <td>Path length (cm):</td>
                                     <td>
-                                        <ControlledNumberInput id={'pathLength-input'}
-                                                               value={pathLength}
-                                                               onChange={this.handleNumberChange('pathLength')}
-                                                               error={pathLengthError}
+                                        <MaterialNumberInput id={'pathLength-input'}
+                                                             initialValue={pathLength}
+                                                             onChange={this.handleNumberChange('pathLength')}
                                         />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style={{width: 200}}>Molar attenuation coefficient &#949; (l/(mol&middot;cm)):</td>
                                     <td>
-                                        <ControlledNumberInput id={'MAC-input'}
-                                                               value={MAC}
-                                                               onChange={this.handleNumberChange('MAC')}
-                                                               error={MACError}
+                                        <MaterialNumberInput id={'MAC-input'}
+                                                             initialValue={MAC}
+                                                             onChange={this.handleNumberChange('MAC')}
                                         />
                                     </td>
                                 </tr>

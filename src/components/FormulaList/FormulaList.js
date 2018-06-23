@@ -24,15 +24,14 @@ class FormulaList extends React.Component {
         return (
             <div className={classes.root}>
                 <List component="nav">
-                    <FormulaGroup title={'Nuclear chemistry'}/>
                     <FormulaGroup title={'Radiation chemistry'}
                                   items={[
-                                     {title: 'Radiation chemistry yield', link: '/formula/yield'}
+                                     {title: 'Radiation chemical yield', link: '/formula/yield'}
                                  ]}
                     />
                     <FormulaGroup title={'Dosimetry'}
                                   items={[
-                                     {title: 'Dose rate calculation', link: '/formula/doseRate'}
+                                     {title: 'Dose rate', link: '/formula/doseRate'}
                                  ]}
                     />
                     <FormulaGroup title={'Photochemistry'}

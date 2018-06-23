@@ -58,8 +58,9 @@ const PagesManager = ({pages}) => {
                 };
                 return pages.map(page => {
                     const Page = page.component;
-                    return <Page {...{...pageProps, ...page.props}}/>;
-                })
+                    const props = {...pageProps, ...page.props};
+                    return <Page {...props}/>;
+                });
             };
 
             nextPage = () => this.setState(prevState => ({ page: prevState.page.createNextPageAndLink() }));

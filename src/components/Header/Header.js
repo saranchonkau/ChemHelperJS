@@ -34,13 +34,7 @@ class Header extends React.Component {
             <div className={classes.root}>
                 <AppBar position="static" className={classes.root}>
                     <Toolbar>
-                        {/*<IconButton className={classes.menuButton} color="inherit" aria-label="Menu">*/}
-                            {/*<MenuIcon />*/}
-                        {/*</IconButton>*/}
                         <Typography variant="title" color="inherit" className={classes.flex}>ChemHelper</Typography>
-                        <Typography variant="title" color="inherit" className={classes.flex}>
-                            <NavLink to={'/'} exact style={{color: 'white'}} activeStyle={{color: 'red'}}>Main</NavLink>
-                        </Typography>
                         <Typography variant="title" color="inherit" className={classes.flex}>
                             <NavLink to={'/formula'} style={{color: 'white'}} activeStyle={{color: 'red'}}>
                                 Formula
@@ -51,33 +45,6 @@ class Header extends React.Component {
                                 Nuclides
                             </NavLink>
                         </Typography>
-                        <div>
-                            <IconButton
-                                aria-owns={open ? 'menu-appbar' : null}
-                                aria-haspopup="true"
-                                onClick={this.handleMenu}
-                                color="inherit"
-                            >
-                                <AccountCircle />
-                            </IconButton>
-                            <Menu
-                                id="menu-appbar"
-                                anchorEl={anchorEl}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={open}
-                                onClose={this.handleClose}
-                            >
-                                <MenuItem onClick={this.handleClose}>Profile</MenuItem>
-                                <MenuItem onClick={this.handleClose}>My account</MenuItem>
-                            </Menu>
-                            </div>
                     </Toolbar>
                 </AppBar>
             </div>
