@@ -1,7 +1,7 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import { withStyles } from 'material-ui/styles';
-import FileDownload from 'material-ui-icons/FileDownload';
+import Button from '@material-ui/core/Button';
+import { withStyles } from '@material-ui/core/styles';
+import FileDownload from '@material-ui/icons/FileDownload';
 import PropTypes from 'prop-types';
 import isElectron from 'is-electron';
 

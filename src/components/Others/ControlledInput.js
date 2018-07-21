@@ -1,6 +1,6 @@
 import React from 'react';
-import Input from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
+import Input from '@material-ui/core/Input';
+import { FormControl, FormHelperText } from '@material-ui/core/Form';
 import PropTypes from 'prop-types';
 
 const ControlledNumberInput = ({ id, value, onChange, error }) => (

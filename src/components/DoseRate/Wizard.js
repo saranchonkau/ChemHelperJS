@@ -33,8 +33,8 @@ export default reduxForm({
         initialData: initialData,
 
         opticalDensityData: initialOpticalDensityData,
-        pathLength: 0,
-        MAC: 0,
+        pathLength: '',
+        MAC: '',
 
         finalData: finalData,
         radYield: '',

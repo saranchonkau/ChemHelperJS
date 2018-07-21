@@ -2,11 +2,11 @@ import React, {Component} from 'react';
 import { AgGridReact } from "ag-grid-react";
 import 'ag-grid/dist/styles/ag-grid.css';
 import 'ag-grid/dist/styles/ag-theme-blue.css';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
-import Select from 'material-ui/Select';
-import { MenuItem } from 'material-ui/Menu';
+import Select from '@material-ui/core/Select';
+import { MenuItem } from '@material-ui/core';
 import {calculateRowId, numberFormatter, ReduxForms, Units} from "../../utils/utils";
 import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
 import {cellStyle, suppressProps} from "../App/StyleConstants";
@@ -17,6 +17,8 @@ import NextButton from '../Others/NextButton';
 import BackButton from '../Others/BackButton';
 import AddRowButton from '../Others/AddRowButton';
 import MaterialNumberInput from "../Others/MaterialNumberInput";
+import {finalTableColumnDefs} from "../../constants/index";
+import Grid from "../Grid/Grid";
 
 export const styles = theme => ({});
 
@@ -24,78 +26,33 @@ class FinalTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: cloneDeep(props.finalData),
+            data: props.finalData,
             solutionDensity: props.solutionDensity,
             solutionDensityError: '',
             radYield: props.radYield,
             radYieldError: '',
             unit: props.unit
         };
-        this.gridOptions = {
-            columnDefs: [
-                { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
-                { headerName: 'Time, min', field: 'time', width: 130, editable: true, cellStyle: cellStyle, valueParser: numberParser, ...suppressProps, unSortIcon: true},
-                { headerName: 'Concentration', field: 'concentration', width: 165, editable: true, cellStyle: cellStyle,
-                    valueParser: numberParser, unSortIcon: true, ...suppressProps, valueFormatter: numberFormatter
-                },
-                { colId: 'checkbox', headerName: 'On/Off', width: 90, cellRendererFramework: CheckBoxRenderer, cellStyle: cellStyle, ...suppressProps},
-                { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
-            ],
-            icons: {
-                sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
-                sortDescending: '<i class="fa fa-sort-desc" style="color: black"/>',
-                sortUnSort: '<i class="fa fa-sort" style="color: gray"/>',
-            },
-            enableSorting: true,
-            singleClickEdit: true,
-            stopEditingWhenGridLosesFocus: true,
-            enterMovesDownAfterEdit: true,
-            suppressRowClickSelection: true,
-            rowSelection: 'multiple',
-            onSelectionChanged: ({api}) => api.refreshCells({ columns: ['checkbox'], force: true }),
-            onRowDataChanged: ({api}) => this.checkNodeSelection(api),
-            onRowDataUpdated: () => this.setState({data: this.getRowData()}),
-            headerHeight: 50,
-            rowHeight: 30
-        };
     }
 
-    checkNodeSelection = gridApi => {
-        gridApi.forEachNode(node => {
-            if (node.data.isSelected) {
-                node.setSelected(true);
-            }
-        });
-    };
-
-    onGridReady = params => {
-        this.gridApi = params.api;
-        this.columnApi = params.columnApi;
-        this.checkNodeSelection(this.gridApi);
+    onGridReady = api => {
+        this.api = api;
     };
 
     addRow = () => {
-        const rowData = this.getRowData();
+        const rowData = this.api.getRowData();
         const newRow = {
             id: calculateRowId(rowData.map(data => data.id)),
             concentration: 0.0,
             time: 0.0,
             isSelected: true
         };
-        this.setState({data: [...rowData, newRow]});
+        this.api.createRow(newRow);
     };
-
-    getRowData = () => {
-        let array = [];
-        this.gridApi.forEachNode(node => array.push({...node.data, isSelected: node.selected}));
-        return array;
-    };
-
-    getTableHeight = dataLength => 64 + dataLength * 30.5;
 
     nextPage = () => {
         let {unit, radYield, solutionDensity} = this.state;
-        this.props.change('finalData', this.getRowData());
+        this.props.change('finalData', this.api.getRowData());
         this.props.change('unit', unit);
         this.props.change('radYield', Number.parseFloat(radYield));
         this.props.change('solutionDensity', Number.parseFloat(solutionDensity));
@@ -103,7 +60,7 @@ class FinalTable extends Component {
     };
 
     previousPage = () => {
-        this.props.change('finalData', this.getRowData());
+        this.props.change('finalData', this.api.getRowData());
         this.props.previousPage();
     };
 
@@ -118,20 +75,17 @@ class FinalTable extends Component {
 
     render() {
         let { classes, previousPage } = this.props;
-        const { radYield, radYieldError, solutionDensity, solutionDensityError, unit, data } = this.state;
+        const { radYield, solutionDensity, unit, data } = this.state;
         return (
             <div>
                 <h3 className="my-3 text-center">Dose rate</h3>
                 <h5 className="text-center">Final table</h5>
                 <div className='d-flex flex-row justify-content-center'>
-                    <div style={{width: 500}}>
-                        <div className="ag-theme-blue" style={{height: this.getTableHeight(data.length)}}>
-                            <AgGridReact
-                                rowData={data}
-                                onGridReady={this.onGridReady}
-                                gridOptions={this.gridOptions}
-                            />
-                        </div>
+                    <div>
+                        <Grid data={this.state.data}
+                              options={{ columnDefs: finalTableColumnDefs }}
+                              onGridReady={this.onGridReady}
+                        />
                         <div className='d-flex flex-row justify-content-between'>
                             <BackButton onClick={this.previousPage}/>
                             <AddRowButton onClick={this.addRow}/>

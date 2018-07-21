@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import { reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {Line} from 'react-chartjs-2';

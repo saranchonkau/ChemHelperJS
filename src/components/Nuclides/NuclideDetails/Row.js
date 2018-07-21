@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from "prop-types";
-import { TableCell, TableRow } from 'material-ui/Table';
-import Tooltip from 'material-ui/Tooltip';
-import {withStyles} from "material-ui";
+import { TableCell, TableRow } from '@material-ui/core/Table';
+import Tooltip from '@material-ui/core/Tooltip';
+import {withStyles} from '@material-ui/core';
 
 const styles = {
     body: {

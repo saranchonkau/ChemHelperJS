@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, FormControl, Input, InputLabel, withStyles} from "material-ui";
+import {Button, FormControl, Input, InputLabel, withStyles} from "@material-ui/core";
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {actionCreators} from "./filterBarReducer";

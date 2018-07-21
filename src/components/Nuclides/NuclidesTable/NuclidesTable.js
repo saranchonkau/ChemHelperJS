@@ -41,7 +41,8 @@ class NuclidesTable extends Component {
             ],
             enableSorting: true,
             onSortChanged: params => {
-                const sortModel = params.api.getSortModel();+
+                const sortModel = params.api.getSortModel();
+                console.log('SORT MODEL CHANGED: ', sortModel);
                 this.setState({sortModel, currentPage: 0});
                 this.requestData(this.configureQuery({sort: sortModel, filter: this.props.filter}));
             },

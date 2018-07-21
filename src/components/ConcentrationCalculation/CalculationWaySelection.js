@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import { withStyles } from 'material-ui/styles';
-import Radio, { RadioGroup } from 'material-ui/Radio';
-import { FormLabel, FormControl, FormControlLabel } from 'material-ui/Form';
+import { withStyles } from '@material-ui/core/styles';
+import { RadioGroup, Radio } from '@material-ui/core';
+import { FormLabel, FormControl, FormControlLabel } from '@material-ui/core';
 import {ConcentrationCalculationWays} from "../../utils/utils";
 import NextButton from '../Others/NextButton';
 import {getFormValues, reduxForm} from "redux-form";

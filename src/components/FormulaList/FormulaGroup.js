@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Collapse, List, ListItem, ListItemText, withStyles} from "material-ui";
-import {ExpandLess, ExpandMore} from "material-ui-icons";
+import {Collapse, List, ListItem, ListItemText, withStyles} from '@material-ui/core';
+import {ExpandLess, ExpandMore} from "@material-ui/icons";
 import {NavLink} from "react-router-dom";
 
 const styles = theme => ({

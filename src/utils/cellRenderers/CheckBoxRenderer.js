@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import circle from '@fortawesome/fontawesome-free-regular/faCircle';
 import checkCircle from '@fortawesome/fontawesome-free-regular/faCheckCircle';
-import Checkbox from 'material-ui/Checkbox';
+import { Checkbox } from '@material-ui/core';
 
 class CheckBoxRenderer extends Component {
     constructor(props){

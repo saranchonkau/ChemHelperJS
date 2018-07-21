@@ -1,6 +1,5 @@
 import React from 'react';
-import Input from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
+import { FormControl, FormHelperText, Input } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import {intermediateNumberRegexp, dotRegexp} from '../../utils/utils';
 
@@ -43,7 +42,7 @@ class MaterialNumberInput extends React.Component {
                 <Input
                     value={value}
                     onChange={this.onChange}
-                    inputProps={{ onBlur: this.onBlur }}
+                    onBlur={this.onBlur}
                 />
                 <FormHelperText id={id}>{error}</FormHelperText>
             </FormControl>

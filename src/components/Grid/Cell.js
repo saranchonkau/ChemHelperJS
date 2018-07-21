@@ -1,0 +1,103 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import CheckBoxCell from './CheckBoxCell';
+import RemoveCell from "./RemoveCell";
+import OutsideAlerter from "../Others/OutsideAlerter";
+import {CellTypes} from "../../constants/index";
+import cx from 'classnames';
+
+class Cell extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.state = {
+            editing: false,
+            value: props.value
+        };
+        this.inputRef = null;
+    }
+
+    setInputRef = node => {
+        this.inputRef = node;
+    };
+
+    handleClick = () => {
+        const { type, editable } = this.props;
+        if (type === CellTypes.DEFAULT && editable && !this.state.editing) {
+            this.setState({ editing: true });
+        }
+    };
+
+    handleChange = event => {
+        const newValue = event.target.value;
+        this.setState({ value: this.props.parse(newValue, this.state.value) });
+    };
+
+    onBlur = () => {
+        const { value, api, field, rowIndex, normalize } = this.props;
+        if (value !== this.state.value) {
+            api.updateCell({ rowIndex, field, newValue: normalize(this.state.value) });
+        }
+        this.setState({ editing: false });
+    };
+
+    renderCellContent = () => {
+        const { type, value, rowIndex, api, format } = this.props;
+        switch (type) {
+            case CellTypes.DEFAULT: return format(value);
+            case CellTypes.CHECK_BOX: return <CheckBoxCell value={value} onClick={() => api.toggleSelection(rowIndex)}/>;
+            case CellTypes.REMOVE: return <RemoveCell onClick={() => api.removeRow(rowIndex)}/>;
+        }
+    };
+
+    isNaN = () => this.props.type === CellTypes.DEFAULT && Number.isNaN(this.props.value) && !this.state.editing;
+
+    render(){
+        const { editing, value } = this.state;
+        const cellClassName = cx('cell', {
+            'error-cell': this.isNaN()
+        });
+        return (
+            <div className={cellClassName} onClick={this.handleClick}>
+                {
+                    editing
+                        ? <OutsideAlerter handleClickOutside={this.onBlur}>
+                            <input className='inputCell'
+                                   ref={this.setInputRef}
+                                   autoFocus
+                                   value={value}
+                                   onChange={this.handleChange}
+                            />
+                          </OutsideAlerter>
+                        : this.renderCellContent()
+                }
+            </div>
+        );
+    }
+}
+
+Cell.propTypes = {
+    value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+        PropTypes.bool
+    ]),
+    headerName: PropTypes.string,
+    field: PropTypes.string,
+    type: PropTypes.string,
+    parse: PropTypes.func,
+    format: PropTypes.func,
+    api: PropTypes.object,
+    rowIndex: PropTypes.number
+};
+
+const defaultFunc = value => value;
+
+Cell.defaultProps = {
+    type: CellTypes.DEFAULT,
+    format: defaultFunc,
+    parse: defaultFunc,
+    normalize: defaultFunc
+};
+
+export default Cell;

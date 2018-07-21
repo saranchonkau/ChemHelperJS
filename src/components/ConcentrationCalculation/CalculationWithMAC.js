@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { AgGridReact } from "ag-grid-react";
 import 'ag-grid/dist/styles/ag-grid.css';
 import 'ag-grid/dist/styles/ag-theme-blue.css';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import {reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {getInitialData} from "../../utils/Data";
@@ -21,6 +21,8 @@ import SavePatternButton from "../Others/SavePatternButton";
 import CopyButton from "../Others/CopyButton";
 import {createOpticalDensityTableTSVFile} from "../../utils/excel/opticalDensityTable";
 import MaterialNumberInput from "../Others/MaterialNumberInput";
+import Grid from "../Grid/Grid";
+import {calculationWithMACColumnDefs} from "../../constants/index";
 
 export const styles = theme => ({});
 
@@ -30,63 +32,30 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
         constructor(props) {
             super(props);
             this.state = {
-                data: cloneDeep(props.data),
-                pathLength: props.pathLength,
+                data: props.data,
+                pathLength: props.pathLength ,
                 pathLengthError: '',
                 MAC: props.MAC,
                 MACError: ''
             };
-            this.gridOptions = {
-                columnDefs: [
-                    { headerName: '№', field: 'id', width: 70, cellStyle: cellStyle, ...suppressProps, unSortIcon: true },
-                    { headerName: 'Optical Density', field: 'density', width: 175, editable: true, cellStyle: cellStyle, valueParser: numberParser, unSortIcon: true, ...suppressProps},
-                    { headerName: 'Concentration', field: 'concentration', width: 175, editable: true, cellStyle: cellStyle,
-                        valueParser: numberParser, unSortIcon: true, ...suppressProps, valueFormatter: numberFormatter
-                    },
-                    { width: 20, cellRendererFramework: RemoveRowRenderer, cellStyle: cellStyle, cellClass: 'no-border', ...suppressProps}
-                ],
-                icons: {
-                    sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
-                    sortDescending: '<i class="fa fa-sort-desc" style="color: black"/>',
-                    sortUnSort: '<i class="fa fa-sort" style="color: gray"/>'
-                },
-                enableSorting: true,
-                singleClickEdit: true,
-                stopEditingWhenGridLosesFocus: true,
-                enterMovesDownAfterEdit: true,
-                suppressRowClickSelection: true,
-                rowSelection: 'multiple',
-                onRowDataUpdated: (params) => this.setState({data: this.getRowData()}),
-                headerHeight: 50,
-                rowHeight: 30
-            };
         }
 
-        getRowData = () => {
-            let array = [];
-            this.gridApi.forEachNode(node => array.push({...node.data}));
-            return array;
-        };
-
-        onGridReady = params => {
-            this.gridApi = params.api;
-            this.columnApi = params.columnApi;
+        onGridReady = api => {
+            this.api = api;
         };
 
         addRow = () => {
-            const rowData = this.getRowData();
+            const rowData = this.api.getRowData();
             const newRow = {
                 id: calculateRowId(rowData.map(data => data.id)),
                 density: 0.0,
                 isSelected: true
             };
-            this.setState({data: [...rowData, newRow]});
+            this.api.createRow(newRow);
         };
 
-        getTableHeight = dataLength => 64 + dataLength * 30.5;
-
         modifyFinalData = () => {
-            return this.state.data.map(point => {
+            return this.api.getRowData().map(point => {
                 const foundPoint = this.props.finalData.find(finalPoint => finalPoint.id === point.id);
                 return {
                     id: point.id,
@@ -98,18 +67,13 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
             });
         };
 
-        calculateConcentrations = () => {
-            const data = this.getRowData();
-            data.forEach(point => { point.concentration = point.density / (this.state.pathLength * this.state.MAC); });
-            this.setState({data: data});
-        };
-
         getOpticalDensityData = () => {
-            const data = this.gridApi ? this.getRowData() : this.state.data;
-            return data.map(point => ({
-                ...point,
-                concentration: point.density / (this.state.pathLength * this.state.MAC)
-            }));
+            return this.api
+                ? this.api.getRowData().map(point => ({
+                    ...point,
+                    concentration: point.density / (this.state.pathLength * this.state.MAC)
+                }))
+                : [];
         };
 
         getExportData = () => ({
@@ -141,24 +105,21 @@ const CalculationWithMACWrapper = ({form, ...rest}) => {
 
         render() {
             const { classes, title } = this.props;
-            const { pathLength, pathLengthError, MAC, MACError, data } = this.state;
+            const { pathLength, MAC, data } = this.state;
             return (
                 <React.Fragment>
                     <h3 className="my-3 text-center">{title}</h3>
                     <h5 className="text-center">Calculation with molar extinction coefficient</h5>
                     <div className='d-flex justify-content-center'>
                         <div style={{width: 600}}>
-                            <div className="ag-theme-blue" style={{height: this.getTableHeight(this.state.data.length)}}>
-                                <AgGridReact
-                                    rowData={this.state.data}
-                                    onGridReady={this.onGridReady}
-                                    gridOptions={this.gridOptions}
-                                />
-                            </div>
+                            <Grid data={this.state.data}
+                                  options={{ columnDefs: calculationWithMACColumnDefs }}
+                                  onGridReady={this.onGridReady}
+                            />
                             <div className='d-flex flex-row justify-content-between'>
                                 <BackButton onClick={this.previousPage}/>
                                 <MaterialButton text={'Calculate concentrations'}
-                                                onClick={this.calculateConcentrations}
+                                                onClick={() => this.setState({ data: this.getOpticalDensityData() })}
                                                 disabled={!this.isCorrectData() || data.length === 0}
                                 />
                                 <AddRowButton onClick={this.addRow}/>

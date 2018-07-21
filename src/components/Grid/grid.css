@@ -1,0 +1,47 @@
+.grid {
+    display: grid;
+    grid-template-rows: 50px auto;
+    /*width: 525px;*/
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.header {
+    display: grid;
+    /*grid-template-columns: 70px 130px 165px 90px 70px;*/
+    background-color: #36304a;
+    place-items: center stretch;
+}
+
+.header  .cell {
+    color: #fff;
+    font-size: 18px;
+}
+
+.grid-row {
+    display: grid;
+    /*grid-template-columns: 70px 130px 165px 90px 70px;*/
+    height: 30px;
+    place-items: center stretch;
+    background-color: #e6e3e3;
+}
+
+.cell {
+    padding: 0 12px;
+    font: 400 16px "Helvetica Neue", sans-serif;
+}
+
+.error-cell {
+    box-shadow: 0px 0px 1em 2px #B00020;
+    border-radius: 3px;
+}
+
+.inputCell{
+    background-color: transparent;
+    width: 100%;
+    outline: none;
+    border: none;
+    box-shadow: 0px 0px 1em 2px #36304a;
+    padding: 1px 5px;
+    border-radius: 3px;
+}

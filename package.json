@@ -14,11 +14,14 @@
     "popper.js": "^1.12.9"
   },
   "devDependencies": {
+    "@material-ui/core": "^1.2.3",
+    "@material-ui/icons": "^1.1.0",
     "ag-grid": "^16.0.1",
     "ag-grid-react": "^16.0.0",
     "aphrodite": "^1.2.5",
     "bootstrap": "^4.0.0",
     "chart.js": "^2.7.1",
+    "classnames": "^2.2.6",
     "electron": "^1.7.15",
     "electron-builder": "^19.56.2",
     "electron-packager": "^10.1.2",
@@ -27,8 +30,6 @@
     "history": "^4.7.2",
     "is-electron": "^2.1.0",
     "lodash": "^4.17.5",
-    "material-ui": "^1.0.0-beta.34",
-    "material-ui-icons": "^1.0.0-beta.17",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.0",
     "react": "^16.4.1",

@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import List from 'material-ui/List';
+import { withStyles } from '@material-ui/core/styles';
+import List from '@material-ui/core/List';
 import FormulaGroup from './FormulaGroup';
 
 const styles = theme => ({
     root: {
+        flexShrink: 0,
         marginRight: 5,
         height: '100%',
         width: '100%',

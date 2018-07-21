@@ -1,7 +1,7 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import { withStyles } from 'material-ui/styles';
-import PlusOne from 'material-ui-icons/PlusOne';
+import Button from '@material-ui/core/Button';
+import { withStyles } from '@material-ui/core/styles';
+import PlusOne from '@material-ui/icons/PlusOne';
 import PropTypes from 'prop-types';
 
 const styles = theme => ({
