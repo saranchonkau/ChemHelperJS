@@ -1,3 +1,1 @@
-import Nuclides from './Nuclides';
-
-export default Nuclides;
+export { default } from './Nuclides';

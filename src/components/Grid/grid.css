@@ -10,7 +10,9 @@
     display: grid;
     /*grid-template-columns: 70px 130px 165px 90px 70px;*/
     background-color: #36304a;
-    place-items: center stretch;
+    /*place-items: center stretch;*/
+    align-items: center;
+    justify-items: stretch;
 }
 
 .header  .cell {
@@ -22,7 +24,9 @@
     display: grid;
     /*grid-template-columns: 70px 130px 165px 90px 70px;*/
     height: 30px;
-    place-items: center stretch;
+    /*place-items: center stretch;*/
+    align-items: center;
+    justify-items: stretch;
     background-color: #e6e3e3;
 }
 

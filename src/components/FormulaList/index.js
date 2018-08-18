@@ -1,3 +1,1 @@
-import FormulaList from './FormulaList';
-
-export default FormulaList;
+export { default } from './FormulaList';

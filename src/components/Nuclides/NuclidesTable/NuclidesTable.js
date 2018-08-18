@@ -1,16 +1,13 @@
 import React, {Component} from 'react';
-import { AgGridReact } from "ag-grid-react";
-import 'ag-grid/dist/styles/ag-grid.css';
-import 'ag-grid/dist/styles/ag-theme-fresh.css';
 import isElectron from 'is-electron';
 import ReactPaginate from 'react-paginate';
-import {cellStyle, suppressProps} from "../../App/StyleConstants";
 import {connect} from 'react-redux';
 import {getParam, getWhereParam, removeNull} from "../../../utils/query";
-import '../../App/table.css';
 import {stateSelectors} from "../FilterBar/filterBarReducer";
 import {bindActionCreators} from "redux";
 import {actionCreators} from "../NuclideDetails/nuclideDetailsReducer";
+import {nuclidesTableColumnDefs, SortTypes} from "../../../constants";
+import Grid from "../../Grid/Grid";
 
 class NuclidesTable extends Component {
 
@@ -20,42 +17,6 @@ class NuclidesTable extends Component {
             data: [],
             count: 0,
             currentPage: 0,
-            sortModel: [{colId: 'z', sort: 'asc'}, {colId: 'n', sort: 'asc'}]
-        };
-        this.gridOptions = {
-            columnDefs: [
-                { unSortIcon: true, headerName: 'ID', field: 'nucid', width: 90, cellStyle: cellStyle, ...suppressProps, suppressSorting: true},
-                { unSortIcon: true, headerName: 'Z', field: 'z', width: 80, cellStyle: cellStyle, ...suppressProps, sort: 'asc'},
-                { unSortIcon: true, headerName: 'N', field: 'n', width: 80, cellStyle: cellStyle, ...suppressProps, sort: 'asc'},
-                { unSortIcon: true, headerName: 'Symbol', field: 'symbol', width: 130, cellStyle: cellStyle, ...suppressProps},
-                { unSortIcon: true, headerName: 'A', field: 'atomic_mass', width: 170, cellStyle: cellStyle, ...suppressProps, suppressSorting: true,
-                    valueFormatter: params => {
-                        let A = Number.parseFloat(params.value);
-                        if (Number.isNaN(A)) {
-                            return params.value;
-                        } else {
-                            return (A/1000000).toString(10)
-                        }
-                    }
-                }
-            ],
-            enableSorting: true,
-            onSortChanged: params => {
-                const sortModel = params.api.getSortModel();
-                console.log('SORT MODEL CHANGED: ', sortModel);
-                this.setState({sortModel, currentPage: 0});
-                this.requestData(this.configureQuery({sort: sortModel, filter: this.props.filter}));
-            },
-            onRowClicked: ({data}) => {
-                console.log('Data: ', data);
-                this.props.openNuclideDetails(data)},
-            icons: {
-                sortAscending: '<i class="fa fa-sort-asc" style="color: black" />',
-                sortDescending: '<i class="fa fa-sort-desc" style="color: black"/>',
-                sortUnSort: '<i class="fa fa-sort" style="color: gray"/>',
-            },
-            headerHeight: 50,
-            rowHeight: 30
         };
     }
 
@@ -82,8 +43,17 @@ class NuclidesTable extends Component {
         }
     }
 
-    configureQuery = ({sort = this.state.sortModel, page = 0, filter = {}} ) => {
-        const sortParam = sort.map(obj => `${obj.colId} ${obj.sort.toUpperCase()}`).join(', ');
+    onSortChanged = newSortModel => {
+        this.setState({ currentPage: 0 });
+        this.requestData(this.configureQuery({sort: newSortModel, filter: this.props.filter}));
+    };
+
+    onRowClick = rowData => this.props.openNuclideDetails(rowData);
+
+    getSortParam = columnIndex => nuclidesTableColumnDefs[columnIndex].field;
+
+    configureQuery = ({sort = this.api.getSortModel(), page = 0, filter = {}} ) => {
+        const sortParam = sort.map(obj => `${this.getSortParam(obj.columnIndex)} ${obj.sort.toUpperCase()}`).join(', ');
         const pageParam = `limit ${page * 10}, 10`;
         const filterParam = this.configureFilterParam(filter);
         return removeNull([
@@ -108,49 +78,51 @@ class NuclidesTable extends Component {
     handlePageClick = ({selected}) => {
         this.setState({currentPage: selected});
         this.requestData(this.configureQuery({
-            sort: this.state.sortModel,
+            sort: this.api.getSortModel(),
             filter: this.props.filter,
             page: selected
         }));
     };
 
-    getTableHeight = () => 64 + 10 * 30.5;
-
-    onGridReady = params => {
-        this.gridApi = params.api;
-        this.columnApi = params.columnApi;
+    onGridReady = api => {
+        this.api = api;
     };
 
     render(){
-        const {data} = this.state;
         return (
             <div className='w-100 d-flex justify-content-center py-3 px-3'>
-                <div style={{width: 590}}>
+                <div>
                     <h2 className='text-center'>Database of nuclides</h2>
-                    <div className="ag-theme-blue " style={{height: this.getTableHeight()}}>
-                        <AgGridReact
-                            rowData={data}
-                            onGridReady={this.onGridReady}
-                            gridOptions={this.gridOptions}
-                        />
-                    </div>
-                    <ReactPaginate previousLabel={"Previous"}
-                                   nextLabel={"Next"}
-                                   breakLabel={<span className='page-link'>...</span>}
-                                   breakClassName={"page-item"}
-                                   pageCount={Math.ceil(this.state.count / 10)}
-                                   marginPagesDisplayed={2}
-                                   pageRangeDisplayed={5}
-                                   forcePage={this.state.currentPage}
-                                   onPageChange={this.handlePageClick}
-                                   containerClassName={"pagination mt-2"}
-                                   activeClassName={"active"}
-                                   pageClassName={'page-item'}
-                                   pageLinkClassName={'page-link'}
-                                   previousClassName={'page-item'}
-                                   nextClassName={'page-item'}
-                                   previousLinkClassName={'page-link'}
-                                   nextLinkClassName={'page-link'}
+                    <Grid data={this.state.data}
+                          options={{
+                              columnDefs: nuclidesTableColumnDefs,
+                              onSortChanged: this.onSortChanged,
+                              onRowClick: this.onRowClick
+                          }}
+                          defaultSortModel={[
+                              { columnIndex: 1, sort: SortTypes.ASC },
+                              { columnIndex: 2, sort: SortTypes.ASC }
+                          ]}
+                          onGridReady={this.onGridReady}
+                    />
+                    <ReactPaginate
+                        previousLabel={"Previous"}
+                        nextLabel={"Next"}
+                        breakLabel={<span className='page-link'>...</span>}
+                        breakClassName={"page-item"}
+                        pageCount={Math.ceil(this.state.count / 10)}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={5}
+                        forcePage={this.state.currentPage}
+                        onPageChange={this.handlePageClick}
+                        containerClassName={"pagination mt-2"}
+                        activeClassName={"active"}
+                        pageClassName={'page-item'}
+                        pageLinkClassName={'page-link'}
+                        previousClassName={'page-item'}
+                        nextClassName={'page-item'}
+                        previousLinkClassName={'page-link'}
+                        nextLinkClassName={'page-link'}
                     />
                 </div>
             </div>

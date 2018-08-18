@@ -1,16 +1,10 @@
 import React, {Component} from 'react';
-import { AgGridReact } from "ag-grid-react";
-import 'ag-grid/dist/styles/ag-grid.css';
-import 'ag-grid/dist/styles/ag-theme-blue.css';
 import { withStyles } from '@material-ui/core/styles';
 import {reduxForm, getFormValues} from 'redux-form';
 import {connect} from 'react-redux';
 import {getInitialData} from "../../utils/Data";
-import RemoveRowRenderer from '../../utils/cellRenderers/RemoveRowRenderer';
-import {cellStyle, suppressProps} from "../App/StyleConstants";
-import {cloneDeep} from "lodash";
 import {
-    calculateRowId, ExcelPatternTypes, numberFormatter, numberParser,
+    calculateRowId, ExcelPatternTypes,
     PageNumbers
 } from "../../utils/utils";
 import NextButton from '../Others/NextButton';

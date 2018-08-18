@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from "prop-types";
-import { TableCell, TableRow } from '@material-ui/core/Table';
-import Tooltip from '@material-ui/core/Tooltip';
-import {withStyles} from '@material-ui/core';
+import { TableCell, TableRow, Tooltip, withStyles } from '@material-ui/core';
 
 const styles = {
     body: {
@@ -36,7 +34,10 @@ Row.propTypes = {
         PropTypes.string,
         PropTypes.number
     ]),
-    tooltip: PropTypes.string
+    tooltip: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.node
+    ])
 };
 
 export default withStyles(styles)(Row);

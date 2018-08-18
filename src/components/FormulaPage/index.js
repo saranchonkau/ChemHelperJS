@@ -1,3 +1,1 @@
-import FormulaPage from './FormulaPage';
-
-export default FormulaPage;
+export  { default } from './FormulaPage';

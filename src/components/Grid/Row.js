@@ -5,23 +5,25 @@ import Cell from './Cell';
 class Row extends React.Component {
 
     renderCell = ({ field, ...rest }) => {
-        const { api, data, index } = this.props;
+        const { api, data } = this.props;
         return (
             <Cell
                 value={data[field]}
                 field={field}
-                rowIndex={index}
+                rowId={data.rowId}
                 api={api}
-                key={`${index}_${field}`}
+                key={[data.rowId, field].join('_')}
                 {...rest}
             />
         );
     };
 
+    onRowClick = () => this.props.onRowClick && this.props.onRowClick(this.props.data);
+
     render(){
         const { columnDefs, style } = this.props;
         return (
-            <div className='grid-row' style={style}>
+            <div className='grid-row' style={style} onClick={this.onRowClick}>
                 {columnDefs.map(this.renderCell)}
             </div>
         );
@@ -39,7 +41,7 @@ Row.propTypes = {
         format: PropTypes.func,
         normalize: PropTypes.func
     })).isRequired,
-    index: PropTypes.number,
+    onRowClick: PropTypes.func,
     api: PropTypes.object,
     style: PropTypes.object
 };

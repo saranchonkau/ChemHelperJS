@@ -4,15 +4,20 @@ import SortableHeaderCell from './SortableHeaderCell';
 
 class Header extends React.Component {
 
-    getColumnSortModel = columnIndex => this.props.sortModel.find(model => model.columnIndex === columnIndex);
+    getSortModelOrder = columnIndex => this.props.sortModel.findIndex(model => model.columnIndex === columnIndex);
 
     renderColumnName = (columnDefinition, index) => {
         return columnDefinition.sortable
-            ? <SortableHeaderCell {...columnDefinition}
-                                  key={index}
-                                  sortModel={this.getColumnSortModel(index)}
-                                  onSort={() => this.props.api.sortColumn(index)}/>
-            : (<div className='cell' key={index}>{columnDefinition.headerName}</div>);
+            ? <SortableHeaderCell
+                {...columnDefinition}
+                key={index}
+                sortOrder={this.getSortModelOrder(index)}
+                sortModel={this.props.sortModel}
+                onSort={() => this.props.api.sortColumn(index)}
+            />
+            : (
+                <div className='cell' key={index}>{columnDefinition.headerName}</div>
+            );
     };
 
     render(){

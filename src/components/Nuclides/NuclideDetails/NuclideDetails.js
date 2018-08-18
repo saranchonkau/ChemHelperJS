@@ -1,13 +1,14 @@
 import React from 'react';
-import Dialog, {
+import {
+    Dialog,
     DialogContent,
     DialogTitle,
-} from '@material-ui/core/Dialog';
+    Table,
+    TableBody
+} from '@material-ui/core';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import CloseButton from "../../Others/CloseButton";
-import Table, { TableBody } from '@material-ui/core/Table';
-import {withStyles} from '@material-ui/core';
 import Row from './Row';
 import {bindActionCreators} from 'redux';
 import {actionCreators, stateSelectors} from "./nuclideDetailsReducer";

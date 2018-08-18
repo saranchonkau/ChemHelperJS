@@ -1,8 +1,7 @@
-import {bsuColor} from "../App/StyleConstants";
 
 export default {
     root: {
-        backgroundColor: bsuColor
+        backgroundColor: '#00285f'
     },
     flex: {
         flex: 1,

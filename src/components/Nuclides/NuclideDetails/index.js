@@ -1,3 +1,1 @@
-import NuclideDetails from './NuclideDetails';
-
-export default NuclideDetails;
+export { default } from './NuclideDetails';

@@ -1,3 +1,1 @@
-import Wizard from './Wizard';
-
-export default Wizard;
+export { default } from './Wizard';
