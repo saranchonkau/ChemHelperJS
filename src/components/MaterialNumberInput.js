@@ -21,7 +21,7 @@ class MaterialNumberInput extends React.Component {
       .replace(dotRegexp, '.')
       .replace(/[\u0435\u0443]/, 'e');
     if (intermediateNumberRegexp.test(correctValue)) {
-      const value = { value: correctValue, error: '' };
+      const value = { value: correctValue, error: '', name: event.target.name };
       this.setState(value);
       this.props.onChange(value);
     }
@@ -36,19 +36,23 @@ class MaterialNumberInput extends React.Component {
   };
 
   render() {
-    const { id } = this.props;
+    const { name } = this.props;
     const { value, error } = this.state;
     return (
-      <FormControl error={Boolean(error)} aria-describedby={id}>
-        <Input value={value} onChange={this.onChange} onBlur={this.onBlur} />
-        <FormHelperText id={id}>{error}</FormHelperText>
+      <FormControl error={Boolean(error)}>
+        <Input
+          value={value}
+          name={name}
+          onChange={this.onChange}
+          onBlur={this.onBlur}
+        />
+        <FormHelperText>{error}</FormHelperText>
       </FormControl>
     );
   }
 }
 
 MaterialNumberInput.propTypes = {
-  id: PropTypes.string,
   initialValue: PropTypes.string,
   onChange: PropTypes.func,
 };

@@ -200,7 +200,10 @@ class Grid extends Component {
       ? this.getSortedData()
       : this.state.data;
     return (
-      <div className="grid" style={{ width: this.getGridWidth() }}>
+      <div
+        className={`grid ${this.props.className || ''}`}
+        style={{ width: this.getGridWidth() }}
+      >
         <Header
           columnDefs={this.props.options.columnDefs}
           sortModel={this.state.sortModel}

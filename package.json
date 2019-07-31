@@ -19,6 +19,7 @@
     "history": "^4.7.2",
     "is-electron": "^2.1.0",
     "jss": "^9.8.7",
+    "katex": "^0.10.2",
     "lodash": "^4.17.10",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.2",

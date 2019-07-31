@@ -201,14 +201,14 @@ export const getNumberWithSign = num => {
   }
 };
 
-const expFormat = num => {
+export const expFormat = num => {
   let formatted = numeral(num).format('0.00000e+0');
   let parts = formatted.split('e');
   let power = parseInt(parts[1], 10);
   return power === 0 ? parts[0] : `${parts[0]}\\cdot{10^{${power}}}`;
 };
 
-const expFormatWithSign = num => {
+export const expFormatWithSign = num => {
   let formatted = numeral(num).format('+0.00000e+0');
   let parts = formatted.split('e');
   let power = parseInt(parts[1], 10);
@@ -225,6 +225,7 @@ const getSign = num => {
   }
 };
 
+// TODO remove component and library
 const Equation = ({ slope, intercept }) => (
   <Tex
     texContent={`y=${expFormat(slope)}\\cdot{x}${expFormatWithSign(intercept)}`}
@@ -236,6 +237,7 @@ Equation.propTypes = {
   intercept: PropTypes.number,
 };
 
+// TODO remove component and library
 const RSquared = ({ rSquared }) => (
   <Tex texContent={`R^2=${numeral(rSquared).format('0.00000')}`} />
 );
@@ -244,6 +246,7 @@ RSquared.propTypes = {
   rSquared: PropTypes.number,
 };
 
+// TODO remove component and library
 const Result = ({ name, value, error, unit }) => (
   <Tex
     texContent={`

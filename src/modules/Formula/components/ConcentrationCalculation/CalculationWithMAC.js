@@ -1,5 +1,4 @@
 import React, { useReducer, useRef } from 'react';
-import pick from 'lodash/pick';
 import styled from 'styled-components';
 
 import { calculateRowId, ExcelPatternTypes, simpleReducer } from 'utils/utils';
@@ -18,22 +17,28 @@ import { useWizardContext } from 'components/Wizard';
 
 import { createOpticalDensityTableTSVFile } from 'utils/excel/opticalDensityTable';
 
+import Subtitle from './components/Subtitle';
+import ContentWrapper from './components/ContentWrapper';
+import Container from './components/Container';
+import Title from './components/Title';
+
 function CalculationWithMAC({ title }) {
   const { nextStep, previousStep, updateState, state } = useWizardContext();
 
   const api = useRef();
 
-  const [data, dispatch] = useReducer(
-    simpleReducer,
-    pick(state, ['opticalDensityData', 'pathLength', 'MAC']),
-  );
+  const [data, dispatch] = useReducer(simpleReducer, {
+    pathLength: state.pathLength,
+    MAC: state.MAC,
+    opticalDensityData: state.opticalDensityData,
+  });
   const [errors, errorDispatch] = useReducer(simpleReducer, {
     pathLength: '',
     MAC: '',
   });
 
-  function onGridReady(api) {
-    api.current = api;
+  function onGridReady(gridApi) {
+    api.current = gridApi;
   }
 
   function addRow() {
@@ -94,7 +99,7 @@ function CalculationWithMAC({ title }) {
     previousStep();
   };
 
-  const handleNumberChange = name => ({ value, error }) => {
+  const handleNumberChange = ({ value, error, name }) => {
     dispatch({ [name]: value });
     errorDispatch({ [name]: error });
   };
@@ -103,88 +108,101 @@ function CalculationWithMAC({ title }) {
     return data.pathLength && data.MAC && !errors.pathLength && !errors.MAC;
   };
 
+  const tsvFile = createOpticalDensityTableTSVFile({
+    data: getExportData(),
+  });
+
   const { pathLength, MAC, opticalDensityData } = data;
   return (
     <Container>
       <Title>{title}</Title>
-      <h5 className="text-center">
-        Calculation with molar extinction coefficient
-      </h5>
-      <div className="d-flex justify-content-center">
-        <div style={{ width: 600 }}>
-          <Grid
+      <Subtitle>Calculation with molar extinction coefficient</Subtitle>
+      <ContentWrapper>
+        <Content>
+          <StyledGrid
             data={opticalDensityData}
             options={{ columnDefs: calculationWithMACColumnDefs }}
             onGridReady={onGridReady}
           />
-          <div className="d-flex flex-row justify-content-between">
+          <ButtonRow>
             <BackButton onClick={previousPage} />
             <MaterialButton
               text={'Calculate concentrations'}
               onClick={() =>
                 dispatch({ opticalDensityData: getOpticalDensityData() })
               }
-              disabled={!isCorrectData() || opticalDensityData.length === 0}
+              disabled={!isCorrectData()}
             />
             <AddRowButton onClick={addRow} />
             <NextButton onClick={nextPage} disabled={!isCorrectData()} />
-          </div>
-          <h5 className="my-3 text-center">
-            Enter parameters for calculating concentrations:
-          </h5>
-          <table>
-            <tbody>
-              <tr>
-                <td>Path length (cm):</td>
-                <td>
-                  <MaterialNumberInput
-                    id={'pathLength-input'}
-                    initialValue={pathLength}
-                    onChange={handleNumberChange('pathLength')}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td style={{ width: 200 }}>
-                  Molar attenuation coefficient &#949; (l/(mol&middot;cm)):
-                </td>
-                <td>
-                  <MaterialNumberInput
-                    id={'MAC-input'}
-                    initialValue={MAC}
-                    onChange={handleNumberChange('MAC')}
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div className="d-flex justify-content-end">
-            <CopyButton
-              text={createOpticalDensityTableTSVFile({
-                data: getExportData(),
-              })}
-              disabled={!isCorrectData()}
-            />
+          </ButtonRow>
+          <Subtitle>Enter parameters for calculating concentrations:</Subtitle>
+          <Row>
+            <NameCell>Path length (cm):</NameCell>
+            <InputCell>
+              <MaterialNumberInput
+                initialValue={pathLength}
+                name="pathLength"
+                onChange={handleNumberChange}
+              />
+            </InputCell>
+          </Row>
+          <Row>
+            <NameCell>
+              Molar attenuation coefficient &#949; (l/(mol&middot;cm)):
+            </NameCell>
+            <InputCell>
+              <MaterialNumberInput
+                initialValue={MAC}
+                name="MAC"
+                onChange={handleNumberChange}
+              />
+            </InputCell>
+          </Row>
+          <Footer>
+            <CopyButton text={tsvFile} disabled={!isCorrectData()} />
             <SavePatternButton
               patternType={ExcelPatternTypes.OPTICAL_DENSITY_TABLE}
             />
-          </div>
-        </div>
-      </div>
+          </Footer>
+        </Content>
+      </ContentWrapper>
     </Container>
   );
 }
 
-const Container = styled.div`
+const Content = styled.div`
+  width: 600px;
   display: flex;
   flex-direction: column;
+`;
+
+const StyledGrid = styled(Grid)`
+  align-self: center;
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+`;
+
+const Row = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const NameCell = styled.div`
+  flex: 0 0 200px;
+`;
+
+const InputCell = styled.div`
   flex: 1;
 `;
 
-const Title = styled.header`
-  font-size: 30px;
-  margin: 2rem auto 1rem auto;
-  text-align: center;
+const Footer = styled.div`
+  display: flex;
+  justify-content: flex-end;
 `;
 
 export default CalculationWithMAC;

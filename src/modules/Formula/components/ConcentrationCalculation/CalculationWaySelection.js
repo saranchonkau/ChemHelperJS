@@ -9,6 +9,10 @@ import { ConcentrationCalculationWays, simpleReducer } from 'utils/utils';
 import NextButton from 'components/NextButton';
 import { useWizardContext } from 'components/Wizard';
 
+import Container from './components/Container';
+import Title from './components/Title';
+import ContentWrapper from './components/ContentWrapper';
+
 const OPTIONS = [
   {
     id: 1,
@@ -78,25 +82,8 @@ function CalculationWaySelection({ title }) {
   );
 }
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-`;
-
-const Title = styled.header`
-  font-size: 30px;
-  margin: 2rem auto 1rem auto;
-  text-align: center;
-`;
-
 const StyledFormControl = styled(FormControl)`
   margin: 24px;
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  justify-content: center;
 `;
 
 const Content = styled.div`

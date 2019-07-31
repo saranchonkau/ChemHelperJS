@@ -113,13 +113,13 @@ export const calculationWithMACColumnDefs = [
   {
     headerName: 'Optical Density',
     field: 'density',
-    width: 130,
+    width: 175,
     ...editableNumberProps,
   },
   {
     headerName: 'Concentration',
     field: 'concentration',
-    width: 165,
+    width: 175,
     ...editableNumberProps,
     format: numberFormatter,
   },
