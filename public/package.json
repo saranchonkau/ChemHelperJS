@@ -6,9 +6,7 @@
   "dependencies": {
     "node-gyp": "^3.6.2",
     "sqlite3": "^3.1.13",
-    "knex": "^0.14.3",
-    "jquery": "^3.3.1",
-    "popper.js": "^1.13.0"
+    "knex": "^0.14.3"
   },
   "description": "React and Electron Awesome App",
   "main": "./main.js",

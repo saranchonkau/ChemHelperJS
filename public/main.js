@@ -1,7 +1,7 @@
 const {app, BrowserWindow, ipcMain, clipboard } = require('electron');
 const path = require('path');
 const url = require('url');
-const queries = require("./db/queries");
+// const queries = require("./db/queries");
 const excel = require("./excel/excel");
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -32,16 +32,16 @@ function createWindow () {
     })
 }
 
-ipcMain.on('executeQuery', (event, query) => {
-    queries.executeQuery(query)
-        .then(result => event.sender.send('queryResponse', result));
-    }
-);
-
-ipcMain.on('countAll', (event, query) => {
-    queries.executeQuery(query)
-        .then(result => event.sender.send('countAll', result));
-});
+// ipcMain.on('executeQuery', (event, query) => {
+//     queries.executeQuery(query)
+//         .then(result => event.sender.send('queryResponse', result));
+//     }
+// );
+//
+// ipcMain.on('countAll', (event, query) => {
+//     queries.executeQuery(query)
+//         .then(result => event.sender.send('countAll', result));
+// });
 
 /*
 ipcMain.on('exportTableDataOnly', (event, data) => {

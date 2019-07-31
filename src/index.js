@@ -1,16 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './components/App';
+import App from './App';
 import registerServiceWorker from './registerServiceWorker';
-import store from './store';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
-import 'bootstrap/dist/js/bootstrap.min';
 import 'typeface-roboto';
-import './components/App/App.css';
+import 'assets/styles/globalStyles.css';
+import 'assets/styles/normalize.css';
 
-ReactDOM.render(
-    <App store={store}/>,
-    document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById('root'));
 registerServiceWorker();
