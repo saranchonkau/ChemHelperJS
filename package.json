@@ -20,7 +20,6 @@
     "is-electron": "^2.1.0",
     "jss": "^9.8.7",
     "lodash": "^4.17.10",
-    "node-uuid": "^1.4.8",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.2",
     "react": "^16.8.6",
@@ -38,6 +37,7 @@
     "redux-form": "^7.4.2",
     "styled-components": "^4.3.2",
     "typeface-roboto": "0.0.54",
+    "typeface-ubuntu": "0.0.65",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

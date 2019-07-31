@@ -1,33 +1,32 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
 import Back from '@material-ui/icons/ArrowBack';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
-const styles = theme => ({
-    button: {
-        margin: theme.spacing.unit,
-    },
-    leftIcon: {
-        marginRight: theme.spacing.unit,
-    }
-});
-
-const BackButton = ({ classes, onClick, disabled }) => (
-    <Button className={classes.button}
-            variant="raised"
-            color="secondary"
-            onClick={onClick}
-            disabled={disabled}
-    >
-        <Back className={classes.leftIcon} />
-        Back
-    </Button>
+const BackButton = ({ onClick, disabled }) => (
+  <StyledButton
+    variant="contained"
+    color="secondary"
+    onClick={onClick}
+    disabled={disabled}
+  >
+    <Icon />
+    Back
+  </StyledButton>
 );
 
+const StyledButton = styled(Button)`
+  margin: 8px;
+`;
+
+const Icon = styled(Back)`
+  margin-right: 8px;
+`;
+
 BackButton.propTypes = {
-    onClick: PropTypes.func,
-    disabled: PropTypes.bool
+  onClick: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
-export default withStyles(styles)(BackButton);
+export default BackButton;

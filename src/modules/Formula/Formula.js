@@ -10,7 +10,7 @@ import RadiationYield from './components/RadiationYield';
 // import DoseRate from './components/DoseRate';
 
 const Formula = () => (
-  <React.Fragment>
+  <>
     <Header />
     <Content>
       <FormulaList />
@@ -21,7 +21,7 @@ const Formula = () => (
         {/*<Route exact path="/formula/quantumYield" component={QuantumYield} />*/}
       </Switch>
     </Content>
-  </React.Fragment>
+  </>
 );
 
 const Content = styled.div`

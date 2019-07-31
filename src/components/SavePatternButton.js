@@ -1,18 +1,9 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
-import FileDownload from '@material-ui/icons/FontDownload';
 import PropTypes from 'prop-types';
 import isElectron from 'is-electron';
-
-const styles = theme => ({
-  button: {
-    margin: theme.spacing.unit,
-  },
-  rightIcon: {
-    marginLeft: theme.spacing.unit,
-  },
-});
+import styled from 'styled-components';
+import Button from '@material-ui/core/Button';
+import Download from '@material-ui/icons/GetApp';
 
 const savePattern = type => {
   if (isElectron()) {
@@ -20,22 +11,29 @@ const savePattern = type => {
   }
 };
 
-const SavePatternButton = ({ classes, patternType, disabled }) => (
-  <Button
-    className={classes.button}
-    variant="raised"
+const SavePatternButton = ({ patternType, disabled }) => (
+  <StyledButton
+    variant="contained"
     color="primary"
     onClick={() => savePattern(patternType)}
     disabled={disabled}
   >
     Save excel pattern
-    <FileDownload className={classes.rightIcon} />
-  </Button>
+    <Icon />
+  </StyledButton>
 );
+
+const StyledButton = styled(Button)`
+  margin: 8px;
+`;
+
+const Icon = styled(Download)`
+  margin-left: 8px;
+`;
 
 SavePatternButton.propTypes = {
   disabled: PropTypes.bool,
   patternType: PropTypes.string.isRequired,
 };
 
-export default withStyles(styles)(SavePatternButton);
+export default SavePatternButton;

@@ -5,6 +5,7 @@ import { StylesProvider, ThemeProvider } from '@material-ui/styles';
 const theme = createMuiTheme({
   typography: {
     useNextVariants: true,
+    fontFamily: ['Ubuntu', 'Helvetica Neue', 'Arial', 'sans-serif'],
   },
 });
 

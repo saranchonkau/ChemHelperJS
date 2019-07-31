@@ -1,132 +1,137 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import React, { useReducer } from 'react';
+import styled from 'styled-components';
+
 import { RadioGroup, Radio } from '@material-ui/core';
 import { FormLabel, FormControl, FormControlLabel } from '@material-ui/core';
-import { getFormValues, reduxForm } from 'redux-form';
-import { connect } from 'react-redux';
 
-import { ConcentrationCalculationWays } from 'utils/utils';
+import { ConcentrationCalculationWays, simpleReducer } from 'utils/utils';
+
 import NextButton from 'components/NextButton';
+import { useWizardContext } from 'components/Wizard';
 
-const styles = theme => ({
-  root: {
-    display: 'flex',
+const OPTIONS = [
+  {
+    id: 1,
+    value: ConcentrationCalculationWays.OWN_WAY,
+    label: 'Enter own values',
   },
-  formControl: {
-    margin: theme.spacing.unit * 3,
+  {
+    id: 2,
+    value: ConcentrationCalculationWays.MOLAR_ATTENUATION_COEFFICIENT_WAY,
+    label: 'Calculate with molar extinction coefficient',
   },
-  group: {
-    margin: `${theme.spacing.unit}px 0`,
+  {
+    id: 3,
+    value: ConcentrationCalculationWays.CALIBRATION_TABLE_WAY,
+    label: 'Calculate with calibration table',
   },
-  label: {
-    fontSize: '1rem',
-  },
-  checked: {
-    color: '#25bf75',
-  },
-  formLabelRoot: {
-    color: 'rgb(33, 37, 41)',
-    fontSize: '1.2rem',
-    fontWeight: 500,
-  },
-  formLabelFocused: {
-    color: 'rgb(33, 37, 41)',
-    fontSize: '1.2rem',
-    fontWeight: 500,
-  },
-});
+];
 
-const CalculationWaySelectionWrapper = ({ form, ...rest }) => {
-  class CalculationWaySelection extends Component {
-    constructor(props) {
-      super(props);
+function CalculationWaySelection({ title }) {
+  const { setStep, updateState, state } = useWizardContext();
 
-      this.state = {
-        calculationWay: ConcentrationCalculationWays.OWN_WAY,
-      };
-    }
+  const [data, dispatch] = useReducer(simpleReducer, {
+    calculationWay: state.calculationWay,
+  });
 
-    handleChange = (event, value) => this.setState({ calculationWay: value });
-
-    nextPage = () => {
-      this.props.change('calculationWay', this.state.calculationWay);
-      this.props.goToPage(Number.parseInt(this.state.calculationWay, 10));
-    };
-
-    render() {
-      const { classes, title } = this.props;
-      const {
-        OWN_WAY,
-        MOLAR_ATTENUATION_COEFFICIENT_WAY,
-        CALIBRATION_TABLE_WAY,
-      } = ConcentrationCalculationWays;
-      return (
-        <React.Fragment>
-          <h3 className="my-3 text-center">{title}</h3>
-          <div className="d-flex justify-content-center">
-            <div style={{ width: 540 }}>
-              <div className={classes.root}>
-                <FormControl
-                  component="fieldset"
-                  className={classes.formControl}
-                >
-                  <FormLabel
-                    component="legend"
-                    classes={{
-                      root: classes.formLabelRoot,
-                      focused: classes.formLabelFocused,
-                    }}
-                  >
-                    Choose way of concentration calculation:
-                  </FormLabel>
-                  <RadioGroup
-                    name="calculationWaySelection"
-                    className={classes.group}
-                    value={this.state.calculationWay}
-                    onChange={this.handleChange}
-                  >
-                    <FormControlLabel
-                      classes={{ label: classes.label }}
-                      value={OWN_WAY}
-                      control={<Radio classes={{ checked: classes.checked }} />}
-                      label="Enter own values"
-                    />
-                    <FormControlLabel
-                      classes={{ label: classes.label }}
-                      value={MOLAR_ATTENUATION_COEFFICIENT_WAY}
-                      control={<Radio classes={{ checked: classes.checked }} />}
-                      label="Calculate with molar extinction coefficient"
-                    />
-                    <FormControlLabel
-                      classes={{ label: classes.label }}
-                      value={CALIBRATION_TABLE_WAY}
-                      control={<Radio classes={{ checked: classes.checked }} />}
-                      label="Calculate with calibration table"
-                    />
-                  </RadioGroup>
-                </FormControl>
-              </div>
-              <div className="d-flex flex-row justify-content-end">
-                <NextButton onClick={this.nextPage} />
-              </div>
-            </div>
-          </div>
-        </React.Fragment>
-      );
-    }
+  function handleChange(event, value) {
+    dispatch({ calculationWay: value });
   }
 
-  CalculationWaySelection = connect(state => ({
-    data: getFormValues(form)(state).initialData,
-  }))(CalculationWaySelection);
+  function nextPage() {
+    updateState(data);
+    setStep(Number.parseInt(data.calculationWay, 10));
+  }
 
-  CalculationWaySelection = reduxForm({
-    form: form,
-    destroyOnUnmount: false,
-    forceUnregisterOnUnmount: true,
-  })(withStyles(styles)(CalculationWaySelection));
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <ContentWrapper>
+        <Content>
+          <Form>
+            <StyledFormControl component="fieldset">
+              <StyledFormLabel component="legend">
+                Choose way of concentration calculation:
+              </StyledFormLabel>
+              <StyledRadioGroup
+                name="calculationWay"
+                value={data.calculationWay}
+                onChange={handleChange}
+              >
+                {OPTIONS.map(option => (
+                  <FormControlLabel
+                    key={option.id}
+                    value={option.value}
+                    control={<StyledRadio />}
+                    label={option.label}
+                  />
+                ))}
+              </StyledRadioGroup>
+            </StyledFormControl>
+          </Form>
+          <Footer>
+            <NextButton onClick={nextPage} />
+          </Footer>
+        </Content>
+      </ContentWrapper>
+    </Container>
+  );
+}
 
-  return <CalculationWaySelection {...rest} />;
-};
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
 
-export default CalculationWaySelectionWrapper;
+const Title = styled.header`
+  font-size: 30px;
+  margin: 2rem auto 1rem auto;
+  text-align: center;
+`;
+
+const StyledFormControl = styled(FormControl)`
+  margin: 24px;
+`;
+
+const ContentWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const Content = styled.div`
+  width: 540px;
+`;
+
+const Form = styled.form`
+  display: flex;
+`;
+
+const StyledRadioGroup = styled(RadioGroup)`
+  margin: 4px 0;
+`;
+const StyledFormLabel = styled(props => (
+  <FormLabel {...props} classes={{ root: 'root', focused: 'root' }} />
+))`
+  &.root {
+    color: rgb(33, 37, 41);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+`;
+
+const StyledRadio = styled(props => (
+  <Radio {...props} classes={{ checked: 'checked' }} />
+))`
+  &.checked {
+    color: #25bf75;
+  }
+`;
+
+const Footer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+export default CalculationWaySelection;

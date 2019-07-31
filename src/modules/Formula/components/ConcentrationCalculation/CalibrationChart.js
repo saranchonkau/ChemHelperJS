@@ -1,119 +1,139 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { reduxForm, getFormValues } from 'redux-form';
-import { connect } from 'react-redux';
+import React from 'react';
+import styled from 'styled-components';
 import { Line } from 'react-chartjs-2';
+
 import {
   ExcelPatternTypes,
   getTrendResult,
   RSquared,
   suggestMaxValue,
   suggestMinValue,
+  Equation,
 } from 'utils/utils';
-import { Equation } from 'utils/utils';
-import NextButton from 'components/NextButton';
-import BackButton from 'components/BackButton';
 import { chartOptions, datasets } from 'utils/charts';
-import CopyButton from 'components/CopyButton';
-import SavePatternButton from 'components/SavePatternButton';
 import { createCalibrationTableTSVFile } from 'utils/excel/calibrationTable';
 
-const styles = theme => ({});
+import NextButton from 'components/NextButton';
+import BackButton from 'components/BackButton';
+import CopyButton from 'components/CopyButton';
+import SavePatternButton from 'components/SavePatternButton';
+import { useWizardContext } from 'components/Wizard';
 
-const CalibrationChartWrapper = ({ form, ...rest }) => {
-  class CalibrationChart extends Component {
-    getExportData = () => this.props.data.filter(point => point.isSelected);
+function CalibrationChart({ title }) {
+  const { nextStep, previousStep, updateState, state } = useWizardContext();
 
-    getSelectedData = () => {
-      return this.props.data
-        .filter(point => point.isSelected)
-        .map(data => ({ x: data.concentration, y: data.density }));
+  const getExportData = () =>
+    state.initialData.filter(point => point.isSelected);
+
+  const getSelectedData = () => {
+    return state.initialData
+      .filter(point => point.isSelected)
+      .map(data => ({ x: data.concentration, y: data.density }));
+  };
+
+  const getUnselectedData = () => {
+    return state.initialData
+      .filter(point => !point.isSelected)
+      .map(data => ({ x: data.concentration, y: data.density }));
+  };
+
+  const getTrendData = () => {
+    const data = getSelectedData();
+    const trendFunc = getTrendResult(data).predictY;
+    return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
+  };
+
+  const nextPage = () => {
+    const data = getSelectedData();
+    updateState({ trendFunc: getTrendResult(data).predictX });
+    nextStep();
+  };
+
+  const getChartProps = () => {
+    const xArray = state.initialData.map(point => point.concentration);
+    return {
+      data: {
+        datasets: [
+          datasets.selectedData({ data: getSelectedData() }),
+          datasets.unselectedData({ data: getUnselectedData() }),
+          datasets.trendData({ data: getTrendData() }),
+        ],
+      },
+      options: chartOptions({
+        tooltipLabelCallback: (tooltipItem, data) => [
+          `Optical density: ${tooltipItem.yLabel}`,
+          `Concentration: ${tooltipItem.xLabel} mol/l`,
+        ],
+        xLabel: 'Concentration, M',
+        yLabel: 'Optical density, D',
+        xTicksMin: suggestMinValue(xArray),
+        xTicksMax: suggestMaxValue(xArray),
+      }),
     };
+  };
 
-    getUnselectedData = () => {
-      return this.props.data
-        .filter(point => !point.isSelected)
-        .map(data => ({ x: data.concentration, y: data.density }));
-    };
+  const result = getTrendResult(getSelectedData());
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <Subtitle>Calibration chart</Subtitle>
+      <ContentWrapper>
+        <Content>
+          <Line {...getChartProps()} />
+          <Equation slope={result.slope} intercept={result.intercept} />
+          <br />
+          <RSquared rSquared={result.rSquared} />
+          <Footer>
+            <BackButton onClick={previousStep} />
+            <CopyButton
+              text={createCalibrationTableTSVFile({
+                data: getExportData(),
+              })}
+            />
+            <SavePatternButton
+              patternType={ExcelPatternTypes.CALIBRATION_TABLE}
+            />
+            <NextButton onClick={nextPage} />
+          </Footer>
+        </Content>
+      </ContentWrapper>
+    </Container>
+  );
+}
 
-    getTrendData = () => {
-      let data = this.getSelectedData();
-      let trendFunc = getTrendResult(data).predictY;
-      return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
-    };
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
 
-    nextPage = () => {
-      let data = this.getSelectedData();
-      this.props.change('trendFunc', getTrendResult(data).predictX);
-      this.props.nextPage();
-    };
+const Title = styled.header`
+  font-size: 30px;
+  margin: 2rem auto 1rem auto;
+  text-align: center;
+`;
 
-    getChartProps = () => {
-      const xArray = this.props.data.map(point => point.concentration);
-      return {
-        data: {
-          datasets: [
-            datasets.selectedData({ data: this.getSelectedData() }),
-            datasets.unselectedData({ data: this.getUnselectedData() }),
-            datasets.trendData({ data: this.getTrendData() }),
-          ],
-        },
-        options: chartOptions({
-          tooltipLabelCallback: (tooltipItem, data) => [
-            `Optical density: ${tooltipItem.yLabel}`,
-            `Concentration: ${tooltipItem.xLabel} mol/l`,
-          ],
-          xLabel: 'Concentration, M',
-          yLabel: 'Optical density, D',
-          xTicksMin: suggestMinValue(xArray),
-          xTicksMax: suggestMaxValue(xArray),
-        }),
-      };
-    };
+const Subtitle = styled.p`
+  margin-top: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+`;
 
-    render() {
-      const { classes, previousPage, title } = this.props;
-      const result = getTrendResult(this.getSelectedData());
-      return (
-        <div>
-          <h3 className="my-3 text-center">{title}</h3>
-          <h5 className="text-center">Calibration chart</h5>
-          <div className="d-flex flex-row justify-content-center">
-            <div style={{ width: 700, height: '100%' }}>
-              <Line {...this.getChartProps()} />
-              <Equation slope={result.slope} intercept={result.intercept} />
-              <br />
-              <RSquared rSquared={result.rSquared} />
-              <div className="d-flex flex-row justify-content-between">
-                <BackButton onClick={previousPage} />
-                <CopyButton
-                  text={createCalibrationTableTSVFile({
-                    data: this.getExportData(),
-                  })}
-                />
-                <SavePatternButton
-                  patternType={ExcelPatternTypes.CALIBRATION_TABLE}
-                />
-                <NextButton onClick={this.nextPage} />
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  }
+const ContentWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`;
 
-  CalibrationChart = connect(state => ({
-    data: getFormValues(form)(state).initialData,
-  }))(CalibrationChart);
+const Content = styled.div`
+  width: 700px;
+  height: 100%;
+`;
 
-  CalibrationChart = reduxForm({
-    form: form,
-    destroyOnUnmount: false,
-    forceUnregisterOnUnmount: true,
-  })(withStyles(styles)(CalibrationChart));
+const Footer = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+`;
 
-  return <CalibrationChart {...rest} />;
-};
-
-export default CalibrationChartWrapper;
+export default CalibrationChart;

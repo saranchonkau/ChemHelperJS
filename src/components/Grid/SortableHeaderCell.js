@@ -1,23 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import styled from 'styled-components';
+
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import sortIcon from '@fortawesome/fontawesome-free-solid/faSort';
 import sortUpIcon from '@fortawesome/fontawesome-free-solid/faSortUp';
 import sortDownIcon from '@fortawesome/fontawesome-free-solid/faSortDown';
 import get from 'lodash/get';
 import { SortTypes } from 'constants/common';
-
-const styles = theme => ({
-  button: {
-    padding: 0,
-    outline: 'none',
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    float: 'right',
-  },
-});
 
 class SortableHeaderCell extends React.Component {
   getSortIcon = () => {
@@ -35,11 +25,11 @@ class SortableHeaderCell extends React.Component {
   };
 
   render() {
-    const { headerName, onSort, classes, sortOrder, sortModel } = this.props;
+    const { headerName, onSort, sortOrder, sortModel } = this.props;
     return (
       <div className="cell">
         {headerName}
-        <button type="button" className={classes.button} onClick={onSort}>
+        <Button type="button" onClick={onSort}>
           {sortModel.length > 1 && sortOrder !== -1 && (
             <span style={{ color: 'white' }}>{sortOrder + 1}</span>
           )}
@@ -47,11 +37,20 @@ class SortableHeaderCell extends React.Component {
             icon={this.getSortIcon()}
             style={{ color: 'white' }}
           />
-        </button>
+        </Button>
       </div>
     );
   }
 }
+
+const Button = styled.button`
+  padding: 0;
+  outline: none;
+  border: 0;
+  background-color: transparent;
+  cursor: pointer;
+  float: right;
+`;
 
 SortableHeaderCell.propTypes = {
   headerName: PropTypes.string,
@@ -66,4 +65,4 @@ SortableHeaderCell.propTypes = {
   onSort: PropTypes.func,
 };
 
-export default withStyles(styles)(SortableHeaderCell);
+export default SortableHeaderCell;

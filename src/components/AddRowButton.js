@@ -1,33 +1,33 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
-import PlusOne from '@material-ui/icons/PlusOne';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-const styles = theme => ({
-    button: {
-        margin: theme.spacing.unit,
-    },
-    leftIcon: {
-        marginRight: theme.spacing.unit,
-    }
-});
+import Button from '@material-ui/core/Button';
+import PlusOne from '@material-ui/icons/PlusOne';
 
-const AddRowButton = ({ classes, onClick, disabled }) => (
-    <Button className={classes.button}
-            variant="raised"
-            color="secondary"
-            onClick={onClick}
-            disabled={disabled}
-    >
-        <PlusOne className={classes.leftIcon}/>
-        Row
-    </Button>
+const AddRowButton = ({ onClick, disabled }) => (
+  <StyledButton
+    variant="contained"
+    color="secondary"
+    onClick={onClick}
+    disabled={disabled}
+  >
+    <Icon />
+    Row
+  </StyledButton>
 );
 
+const StyledButton = styled(Button)`
+  margin: 8px;
+`;
+
+const Icon = styled(PlusOne)`
+  margin-right: 8px;
+`;
+
 AddRowButton.propTypes = {
-    onClick: PropTypes.func,
-    disabled: PropTypes.bool
+  onClick: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
-export default withStyles(styles)(AddRowButton);
+export default AddRowButton;

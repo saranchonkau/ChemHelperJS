@@ -1,18 +1,10 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
-import FileCopy from '@material-ui/icons/FileCopy';
 import PropTypes from 'prop-types';
 import isElectron from 'is-electron';
+import styled from 'styled-components';
 
-const styles = theme => ({
-  button: {
-    margin: theme.spacing.unit,
-  },
-  rightIcon: {
-    marginLeft: theme.spacing.unit,
-  },
-});
+import Button from '@material-ui/core/Button';
+import FileCopy from '@material-ui/icons/FileCopy';
 
 const copyDataToClipboard = text => {
   if (isElectron()) {
@@ -20,22 +12,29 @@ const copyDataToClipboard = text => {
   }
 };
 
-const CopyButton = ({ classes, text, disabled }) => (
-  <Button
-    className={classes.button}
-    variant="raised"
+const CopyButton = ({ text, disabled }) => (
+  <StyledButton
+    variant="contained"
     color="primary"
     onClick={() => copyDataToClipboard(text)}
     disabled={disabled}
   >
     Copy data
-    <FileCopy className={classes.rightIcon} />
-  </Button>
+    <Icon />
+  </StyledButton>
 );
+
+const StyledButton = styled(Button)`
+  margin: 8px;
+`;
+
+const Icon = styled(FileCopy)`
+  margin-left: 8px;
+`;
 
 CopyButton.propTypes = {
   disabled: PropTypes.bool,
   text: PropTypes.string.isRequired,
 };
 
-export default withStyles(styles)(CopyButton);
+export default CopyButton;

@@ -1,195 +1,190 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { reduxForm, getFormValues } from 'redux-form';
-import { connect } from 'react-redux';
-import { getInitialData } from 'utils/Data';
-import { calculateRowId, ExcelPatternTypes, PageNumbers } from 'utils/utils';
+import React, { useReducer, useRef } from 'react';
+import pick from 'lodash/pick';
+import styled from 'styled-components';
+
+import { calculateRowId, ExcelPatternTypes, simpleReducer } from 'utils/utils';
+
+import { calculationWithMACColumnDefs } from 'constants/common';
+
 import NextButton from 'components/NextButton';
 import BackButton from 'components/BackButton';
 import AddRowButton from 'components/AddRowButton';
 import MaterialButton from 'components/MaterialButton';
 import SavePatternButton from 'components/SavePatternButton';
 import CopyButton from 'components/CopyButton';
-import { createOpticalDensityTableTSVFile } from 'utils/excel/opticalDensityTable';
 import MaterialNumberInput from 'components/MaterialNumberInput';
-import Grid from 'components/Grid/Grid';
-import { calculationWithMACColumnDefs } from 'constants/common';
+import Grid from 'components/Grid';
+import { useWizardContext } from 'components/Wizard';
 
-export const styles = theme => ({});
+import { createOpticalDensityTableTSVFile } from 'utils/excel/opticalDensityTable';
 
-const CalculationWithMACWrapper = ({ form, ...rest }) => {
-  class CalculationWithMAC extends Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        data: props.data,
-        pathLength: props.pathLength,
-        pathLengthError: '',
-        MAC: props.MAC,
-        MACError: '',
-      };
-    }
+function CalculationWithMAC({ title }) {
+  const { nextStep, previousStep, updateState, state } = useWizardContext();
 
-    onGridReady = api => {
-      this.api = api;
-    };
+  const api = useRef();
 
-    addRow = () => {
-      const rowData = this.api.getRowData();
-      const newRow = {
-        id: calculateRowId(rowData.map(data => data.id)),
-        density: 0.0,
-        isSelected: true,
-      };
-      this.api.createRow(newRow);
-    };
+  const [data, dispatch] = useReducer(
+    simpleReducer,
+    pick(state, ['opticalDensityData', 'pathLength', 'MAC']),
+  );
+  const [errors, errorDispatch] = useReducer(simpleReducer, {
+    pathLength: '',
+    MAC: '',
+  });
 
-    modifyFinalData = () => {
-      return this.api.getRowData().map(point => {
-        const foundPoint = this.props.finalData.find(
-          finalPoint => finalPoint.id === point.id,
-        );
-        return {
-          id: point.id,
-          time: foundPoint ? foundPoint.time : 0.0,
-          concentration:
-            point.density / (this.state.pathLength * this.state.MAC),
-          density: point.density,
-          isSelected: true,
-        };
-      });
-    };
-
-    getOpticalDensityData = () => {
-      return this.api
-        ? this.api.getRowData().map(point => ({
-            ...point,
-            concentration:
-              point.density / (this.state.pathLength * this.state.MAC),
-          }))
-        : [];
-    };
-
-    getExportData = () => ({
-      opticalDensityData: this.getOpticalDensityData(),
-      pathLength: this.state.pathLength,
-      MAC: this.state.MAC,
-    });
-
-    nextPage = () => {
-      this.props.change('finalData', this.modifyFinalData());
-      this.props.change('opticalDensityData', this.getOpticalDensityData());
-      this.props.change('pathLength', Number.parseFloat(this.state.pathLength));
-      this.props.change('MAC', Number.parseFloat(this.state.MAC));
-      this.props.goToPage(PageNumbers.FINAL_TABLE);
-    };
-
-    previousPage = () => {
-      this.props.change('pathLength', 0);
-      this.props.change('MAC', 0);
-      this.props.previousPage();
-    };
-
-    handleNumberChange = name => ({ value, error }) =>
-      this.setState({ [name]: value, [`${name}Error`]: error });
-
-    isCorrectData = () => {
-      const { pathLength, pathLengthError, MAC, MACError } = this.state;
-      return pathLength && MAC && (!pathLengthError && !MACError);
-    };
-
-    render() {
-      const { classes, title } = this.props;
-      const { pathLength, MAC, data } = this.state;
-      return (
-        <React.Fragment>
-          <h3 className="my-3 text-center">{title}</h3>
-          <h5 className="text-center">
-            Calculation with molar extinction coefficient
-          </h5>
-          <div className="d-flex justify-content-center">
-            <div style={{ width: 600 }}>
-              <Grid
-                data={this.state.data}
-                options={{ columnDefs: calculationWithMACColumnDefs }}
-                onGridReady={this.onGridReady}
-              />
-              <div className="d-flex flex-row justify-content-between">
-                <BackButton onClick={this.previousPage} />
-                <MaterialButton
-                  text={'Calculate concentrations'}
-                  onClick={() =>
-                    this.setState({ data: this.getOpticalDensityData() })
-                  }
-                  disabled={!this.isCorrectData() || data.length === 0}
-                />
-                <AddRowButton onClick={this.addRow} />
-                <NextButton
-                  onClick={this.nextPage}
-                  disabled={!this.isCorrectData()}
-                />
-              </div>
-              <h5 className="my-3 text-center">
-                Enter parameters for calculating concentrations:
-              </h5>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>Path length (cm):</td>
-                    <td>
-                      <MaterialNumberInput
-                        id={'pathLength-input'}
-                        initialValue={pathLength}
-                        onChange={this.handleNumberChange('pathLength')}
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ width: 200 }}>
-                      Molar attenuation coefficient &#949; (l/(mol&middot;cm)):
-                    </td>
-                    <td>
-                      <MaterialNumberInput
-                        id={'MAC-input'}
-                        initialValue={MAC}
-                        onChange={this.handleNumberChange('MAC')}
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="d-flex justify-content-end">
-                <CopyButton
-                  text={createOpticalDensityTableTSVFile({
-                    data: this.getExportData(),
-                  })}
-                  disabled={!this.isCorrectData()}
-                />
-                <SavePatternButton
-                  patternType={ExcelPatternTypes.OPTICAL_DENSITY_TABLE}
-                />
-              </div>
-            </div>
-          </div>
-        </React.Fragment>
-      );
-    }
+  function onGridReady(api) {
+    api.current = api;
   }
 
-  CalculationWithMAC = connect(state => ({
-    data: getFormValues(form)(state).opticalDensityData,
-    pathLength: getFormValues(form)(state).pathLength,
-    MAC: getFormValues(form)(state).MAC,
-    finalData: getFormValues(form)(state).finalData,
-  }))(CalculationWithMAC);
+  function addRow() {
+    const rowData = api.current.getRowData();
+    const newRow = {
+      id: calculateRowId(rowData.map(data => data.id)),
+      density: 0.0,
+      isSelected: true,
+    };
+    api.current.createRow(newRow);
+  }
 
-  CalculationWithMAC = reduxForm({
-    form: form,
-    destroyOnUnmount: false,
-    forceUnregisterOnUnmount: true,
-  })(withStyles(styles)(CalculationWithMAC));
+  function modifyFinalData() {
+    return api.current.getRowData().map(point => {
+      const foundPoint = state.finalData.find(
+        finalPoint => finalPoint.id === point.id,
+      );
+      return {
+        id: point.id,
+        time: foundPoint ? foundPoint.time : 0.0,
+        concentration: point.density / (data.pathLength * data.MAC),
+        density: point.density,
+        isSelected: true,
+      };
+    });
+  }
 
-  return <CalculationWithMAC {...rest} />;
-};
+  function getOpticalDensityData() {
+    return api.current
+      ? api.current.getRowData().map(point => ({
+          ...point,
+          concentration: point.density / (data.pathLength * data.MAC),
+        }))
+      : [];
+  }
 
-export default CalculationWithMACWrapper;
+  const getExportData = () => ({
+    opticalDensityData: getOpticalDensityData(),
+    pathLength: data.pathLength,
+    MAC: data.MAC,
+  });
+
+  const nextPage = () => {
+    updateState({
+      finalData: modifyFinalData(),
+      opticalDensityData: getOpticalDensityData(),
+      pathLength: Number.parseFloat(data.pathLength),
+      MAC: Number.parseFloat(data.MAC),
+    });
+    nextStep();
+  };
+
+  const previousPage = () => {
+    updateState({
+      pathLength: 0,
+      MAC: 0,
+    });
+    previousStep();
+  };
+
+  const handleNumberChange = name => ({ value, error }) => {
+    dispatch({ [name]: value });
+    errorDispatch({ [name]: error });
+  };
+
+  const isCorrectData = () => {
+    return data.pathLength && data.MAC && !errors.pathLength && !errors.MAC;
+  };
+
+  const { pathLength, MAC, opticalDensityData } = data;
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <h5 className="text-center">
+        Calculation with molar extinction coefficient
+      </h5>
+      <div className="d-flex justify-content-center">
+        <div style={{ width: 600 }}>
+          <Grid
+            data={opticalDensityData}
+            options={{ columnDefs: calculationWithMACColumnDefs }}
+            onGridReady={onGridReady}
+          />
+          <div className="d-flex flex-row justify-content-between">
+            <BackButton onClick={previousPage} />
+            <MaterialButton
+              text={'Calculate concentrations'}
+              onClick={() =>
+                dispatch({ opticalDensityData: getOpticalDensityData() })
+              }
+              disabled={!isCorrectData() || opticalDensityData.length === 0}
+            />
+            <AddRowButton onClick={addRow} />
+            <NextButton onClick={nextPage} disabled={!isCorrectData()} />
+          </div>
+          <h5 className="my-3 text-center">
+            Enter parameters for calculating concentrations:
+          </h5>
+          <table>
+            <tbody>
+              <tr>
+                <td>Path length (cm):</td>
+                <td>
+                  <MaterialNumberInput
+                    id={'pathLength-input'}
+                    initialValue={pathLength}
+                    onChange={handleNumberChange('pathLength')}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: 200 }}>
+                  Molar attenuation coefficient &#949; (l/(mol&middot;cm)):
+                </td>
+                <td>
+                  <MaterialNumberInput
+                    id={'MAC-input'}
+                    initialValue={MAC}
+                    onChange={handleNumberChange('MAC')}
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="d-flex justify-content-end">
+            <CopyButton
+              text={createOpticalDensityTableTSVFile({
+                data: getExportData(),
+              })}
+              disabled={!isCorrectData()}
+            />
+            <SavePatternButton
+              patternType={ExcelPatternTypes.OPTICAL_DENSITY_TABLE}
+            />
+          </div>
+        </div>
+      </div>
+    </Container>
+  );
+}
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
+const Title = styled.header`
+  font-size: 30px;
+  margin: 2rem auto 1rem auto;
+  text-align: center;
+`;
+
+export default CalculationWithMAC;

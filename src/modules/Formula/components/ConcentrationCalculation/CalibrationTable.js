@@ -1,81 +1,94 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { reduxForm, getFormValues } from 'redux-form';
-import { connect } from 'react-redux';
-import { calculateRowId } from 'utils/utils';
+import React, { useRef } from 'react';
+import styled from 'styled-components';
+
 import NextButton from 'components/NextButton';
 import BackButton from 'components/BackButton';
 import AddRowButton from 'components/AddRowButton';
-import Grid from 'components/Grid/Grid';
+import Grid from 'components/Grid';
+import { useWizardContext } from 'components/Wizard';
+
 import { calibrationTableColumnDefs } from 'constants/common';
+import { calculateRowId } from 'utils/utils';
 
-const styles = theme => ({});
+function CalibrationTable({ title }) {
+  const { nextStep, previousStep, updateState, state } = useWizardContext();
 
-const CalibrationTableWrapper = ({ form, ...rest }) => {
-  class CalibrationTable extends Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        data: props.data,
-      };
-    }
+  const api = useRef();
 
-    onGridReady = api => {
-      this.api = api;
+  const onGridReady = gridApi => {
+    api.current = gridApi;
+  };
+
+  const addRow = () => {
+    const rowData = api.current.getRowData();
+    const newRow = {
+      id: calculateRowId(rowData.map(data => data.id)),
+      concentration: 0.0,
+      density: 0.0,
+      isSelected: true,
     };
+    api.current.createRow(newRow);
+  };
 
-    addRow = () => {
-      const rowData = this.api.getRowData();
-      const newRow = {
-        id: calculateRowId(rowData.map(data => data.id)),
-        concentration: 0.0,
-        density: 0.0,
-        isSelected: true,
-      };
-      this.api.createRow(newRow);
-    };
+  const nextPage = () => {
+    updateState({ initialData: api.current.getRowData() });
+    nextStep();
+  };
 
-    nextPage = () => {
-      this.props.change('initialData', this.api.getRowData());
-      this.props.nextPage();
-    };
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <Subtitle>Calibration table</Subtitle>
+      <ContentWrapper>
+        <Content>
+          <Grid
+            data={state.initialData}
+            options={{ columnDefs: calibrationTableColumnDefs }}
+            onGridReady={onGridReady}
+          />
+          <Footer>
+            <BackButton onClick={previousStep} />
+            <AddRowButton onClick={addRow} />
+            <NextButton onClick={nextPage} />
+          </Footer>
+        </Content>
+      </ContentWrapper>
+    </Container>
+  );
+}
 
-    render() {
-      let { classes, previousPage, title } = this.props;
-      return (
-        <React.Fragment>
-          <h3 className="my-3 text-center">{title}</h3>
-          <h5 className="text-center">Calibration table</h5>
-          <div className="d-flex justify-content-center">
-            <div style={{ width: 525 }}>
-              <Grid
-                data={this.state.data}
-                options={{ columnDefs: calibrationTableColumnDefs }}
-                onGridReady={this.onGridReady}
-              />
-              <div className="d-flex flex-row justify-content-between">
-                <BackButton onClick={previousPage} />
-                <AddRowButton onClick={this.addRow} />
-                <NextButton onClick={this.nextPage} />
-              </div>
-            </div>
-          </div>
-        </React.Fragment>
-      );
-    }
-  }
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
 
-  CalibrationTable = connect(state => ({
-    data: getFormValues(form)(state).initialData,
-  }))(CalibrationTable);
+const Title = styled.header`
+  font-size: 30px;
+  margin: 2rem auto 1rem auto;
+  text-align: center;
+`;
 
-  CalibrationTable = reduxForm({
-    form: form,
-    destroyOnUnmount: false,
-    forceUnregisterOnUnmount: true,
-  })(withStyles(styles)(CalibrationTable));
+const Subtitle = styled.p`
+  margin-top: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+`;
 
-  return <CalibrationTable {...rest} />;
-};
+const ContentWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`;
 
-export default CalibrationTableWrapper;
+const Content = styled.div`
+  width: 525px;
+`;
+
+const Footer = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+`;
+
+export default CalibrationTable;

@@ -23,7 +23,6 @@
 .grid-row {
     display: grid;
     /*grid-template-columns: 70px 130px 165px 90px 70px;*/
-    height: 30px;
     /*place-items: center stretch;*/
     align-items: center;
     justify-items: stretch;
@@ -32,7 +31,8 @@
 
 .cell {
     padding: 0 12px;
-    font: 400 16px "Helvetica Neue", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
 }
 
 .error-cell {
