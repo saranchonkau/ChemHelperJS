@@ -1,7 +1,12 @@
 import React, { useReducer, useRef } from 'react';
 import styled from 'styled-components';
 
-import { calculateRowId, ExcelPatternTypes, simpleReducer } from 'utils/utils';
+import {
+  calculateRowId,
+  ExcelPatternTypes,
+  simpleReducer,
+  PageNumbers,
+} from 'utils/utils';
 
 import { calculationWithMACColumnDefs } from 'constants/common';
 
@@ -23,7 +28,7 @@ import Container from './components/Container';
 import Title from './components/Title';
 
 function CalculationWithMAC({ title }) {
-  const { nextStep, previousStep, updateState, state } = useWizardContext();
+  const { setStep, previousStep, updateState, state } = useWizardContext();
 
   const api = useRef();
 
@@ -88,7 +93,7 @@ function CalculationWithMAC({ title }) {
       pathLength: Number.parseFloat(data.pathLength),
       MAC: Number.parseFloat(data.MAC),
     });
-    nextStep();
+    setStep(PageNumbers.FINAL_TABLE);
   };
 
   const previousPage = () => {

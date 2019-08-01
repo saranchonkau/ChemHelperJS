@@ -63,7 +63,7 @@ function CalculationWaySelection({ title }) {
                 onChange={handleChange}
               >
                 {OPTIONS.map(option => (
-                  <FormControlLabel
+                  <StyledFormControlLabel
                     key={option.id}
                     value={option.value}
                     control={<StyledRadio />}
@@ -105,6 +105,14 @@ const StyledFormLabel = styled(props => (
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
     font-weight: bold;
+  }
+`;
+
+const StyledFormControlLabel = styled(props => (
+  <FormControlLabel {...props} classes={{ label: 'label' }} />
+))`
+  .label {
+    font-size: 1.1rem;
   }
 `;
 
