@@ -6,8 +6,8 @@ import Header from 'components/Header';
 
 import FormulaList from './components/FormulaList';
 import RadiationYield from './components/RadiationYield';
-// import QuantumYield from './components/QuantumYield';
-// import DoseRate from './components/DoseRate';
+import QuantumYield from './components/QuantumYield';
+import DoseRate from './components/DoseRate';
 
 const Formula = () => (
   <>
@@ -17,8 +17,8 @@ const Formula = () => (
       <Switch>
         <Route exact path="/formula" component={() => <div />} />
         <Route exact path="/formula/yield" component={RadiationYield} />
-        {/*<Route exact path="/formula/doseRate" component={DoseRate} />*/}
-        {/*<Route exact path="/formula/quantumYield" component={QuantumYield} />*/}
+        <Route exact path="/formula/doseRate" component={DoseRate} />
+        <Route exact path="/formula/quantumYield" component={QuantumYield} />
       </Switch>
     </Content>
   </>

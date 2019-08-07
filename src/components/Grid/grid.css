@@ -22,6 +22,7 @@
 
 .grid-row {
     display: grid;
+    height: 40px;
     /*grid-template-columns: 70px 130px 165px 90px 70px;*/
     /*place-items: center stretch;*/
     align-items: center;

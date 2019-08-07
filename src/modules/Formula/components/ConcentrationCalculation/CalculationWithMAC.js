@@ -50,7 +50,8 @@ function CalculationWithMAC({ title }) {
     const rowData = api.current.getRowData();
     const newRow = {
       id: calculateRowId(rowData.map(data => data.id)),
-      density: 0.0,
+      density: 0,
+      concentration: 0,
       isSelected: true,
     };
     api.current.createRow(newRow);

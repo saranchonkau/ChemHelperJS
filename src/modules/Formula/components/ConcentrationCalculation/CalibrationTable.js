@@ -8,7 +8,7 @@ import Grid from 'components/Grid';
 import { useWizardContext } from 'components/Wizard';
 
 import { calibrationTableColumnDefs } from 'constants/common';
-import { calculateRowId } from 'utils/utils';
+import { calculateRowId, PageNumbers } from 'utils/utils';
 
 import Container from './components/Container';
 import Title from './components/Title';
@@ -16,7 +16,7 @@ import Subtitle from './components/Subtitle';
 import ContentWrapper from './components/ContentWrapper';
 
 function CalibrationTable({ title }) {
-  const { nextStep, previousStep, updateState, state } = useWizardContext();
+  const { nextStep, setStep, updateState, state } = useWizardContext();
 
   const api = useRef();
 
@@ -28,8 +28,8 @@ function CalibrationTable({ title }) {
     const rowData = api.current.getRowData();
     const newRow = {
       id: calculateRowId(rowData.map(data => data.id)),
-      concentration: 0.0,
       density: 0.0,
+      concentration: 0.0,
       isSelected: true,
     };
     api.current.createRow(newRow);
@@ -39,6 +39,9 @@ function CalibrationTable({ title }) {
     updateState({ initialData: api.current.getRowData() });
     nextStep();
   };
+
+  const prevPage = () =>
+    setStep(PageNumbers.CONCENTRATION_CALCULATION_WAY_SELECTION);
 
   return (
     <Container>
@@ -52,7 +55,7 @@ function CalibrationTable({ title }) {
             onGridReady={onGridReady}
           />
           <Footer>
-            <BackButton onClick={previousStep} />
+            <BackButton onClick={prevPage} />
             <AddRowButton onClick={addRow} />
             <NextButton onClick={nextPage} />
           </Footer>

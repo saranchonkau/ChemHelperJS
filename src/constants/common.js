@@ -29,6 +29,8 @@ export const numberParser = (value, previousValue) => {
 };
 
 export const numberFormatter = value => {
+  if (Number(value) === 0) return 0;
+
   if (Number.isNaN(value)) {
     return value;
   } else {
