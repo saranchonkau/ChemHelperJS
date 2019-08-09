@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { finalData, initialData, initialOpticalDensityData } from 'utils/Data';
-import { ConcentrationCalculationWays } from 'utils/utils';
 
 import { Wizard } from 'components/Wizard';
 
@@ -13,6 +12,7 @@ import CalculationWithMAC from '../ConcentrationCalculation/CalculationWithMAC';
 
 import FinalTable from './FinalTable';
 import FinalChart from './FinalChart';
+import { ConcentrationCalculationWays } from '../../../../constants/common';
 
 const initialValues = {
   initialData: initialData,

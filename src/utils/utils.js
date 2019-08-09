@@ -1,7 +1,4 @@
-import React from 'react';
 import numeral from 'numeral';
-import { Tex } from 'react-tex';
-import PropTypes from 'prop-types';
 import { calculateStudentCoefficient } from './statiscticsDistributions';
 
 export const dotRegexp = /[,/\u0431\u044E]/;
@@ -11,44 +8,6 @@ export const intermediateNumberRegexp = /^[\+\-]?(?:\d*(?:\.?(?:\d+(?:(?:(?:[Ee]
 export function simpleReducer(state, payload) {
   return { ...state, ...payload };
 }
-
-export const Units = {
-  moleculesPerHundredVolt: 'molecules/100eV',
-  molPerJoule: 'mol/J',
-};
-
-export const ReduxForms = {
-  Yield: 'Yield',
-  QuantumYield: 'QuantumYield',
-  DoseRate: 'DoseRate',
-  ConcentrationCalculation: 'ConcentrationCalculation',
-};
-
-export const PageNumbers = {
-  CONCENTRATION_CALCULATION_WAY_SELECTION: 0,
-  MOLAR_ATTENUATION_COEFFICIENT_WAY: 1,
-  CALIBRATION_TABLE_WAY: 2,
-  CALIBRATION_CHART: 3,
-  OPTICAL_DENSITY_TABLE: 4,
-  FINAL_TABLE: 5,
-  FINAL_CHART: 6,
-};
-
-export const ConcentrationCalculationWays = {
-  OWN_WAY: PageNumbers.FINAL_TABLE.toString(10),
-  MOLAR_ATTENUATION_COEFFICIENT_WAY: PageNumbers.MOLAR_ATTENUATION_COEFFICIENT_WAY.toString(
-    10,
-  ),
-  CALIBRATION_TABLE_WAY: PageNumbers.CALIBRATION_TABLE_WAY.toString(10),
-};
-
-export const ExcelPatternTypes = {
-  RAD_CHEM_YIELD: 'RAD_CHEM_YIELD',
-  DOSE_RATE: 'DOSE_RATE',
-  QUANTUM_YIELD: 'QUANTUM_YIELD',
-  CALIBRATION_TABLE: 'CALIBRATION_TABLE',
-  OPTICAL_DENSITY_TABLE: 'OPTICAL_DENSITY_TABLE',
-};
 
 window.globalTrendFunction = () => {
   return getTrendResult([
@@ -225,45 +184,6 @@ const getSign = num => {
   }
 };
 
-// TODO remove component and library
-const Equation = ({ slope, intercept }) => (
-  <Tex
-    texContent={`y=${expFormat(slope)}\\cdot{x}${expFormatWithSign(intercept)}`}
-  />
-);
-
-Equation.propTypes = {
-  slope: PropTypes.number,
-  intercept: PropTypes.number,
-};
-
-// TODO remove component and library
-const RSquared = ({ rSquared }) => (
-  <Tex texContent={`R^2=${numeral(rSquared).format('0.00000')}`} />
-);
-
-RSquared.propTypes = {
-  rSquared: PropTypes.number,
-};
-
-// TODO remove component and library
-const Result = ({ name, value, error, unit }) => (
-  <Tex
-    texContent={`
-        ${name}=${expFormat(value)}
-        ${error ? `\\pm${expFormat(Math.abs(error))}` : ''}
-        ${unit ? `\\enspace{${unit}}` : ''}
-    `}
-  />
-);
-
-Result.propTypes = {
-  name: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired,
-  error: PropTypes.number,
-  unit: PropTypes.string,
-};
-
 export const numberParser = params => {
   const newValue = params.newValue
     .replace(dotRegexp, '.')
@@ -318,5 +238,3 @@ export const replaceAll = (string, omit, place, prevstring) => {
   prevstring = string.replace(omit, place);
   return replaceAll(prevstring, omit, place, string);
 };
-
-export { Equation, RSquared, Result };

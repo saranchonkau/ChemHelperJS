@@ -3,6 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "author": "Ivan Saranchonkau <ivan.saranchenkov@gmail.com>",
+  "scripts": {
+    "build-win-32": "build --em.main=build/main.js --win --ia32",
+    "build-win-64": "build --em.main=build/main.js --win --x64",
+    "build-linux": "build --em.main=build/main.js --linux",
+    "dist": "build --em.main=build/main.js",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "electron-dev": "cross-env ELECTRON_START_URL=http://localhost:3000 electron .",
+    "react-start": "react-scripts start",
+    "postinstall": "electron-builder install-app-deps",
+    "rebuild": "electron-rebuild -f -w sqlite3 --module-dir public"
+  },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-brands": "^5.0.13",
@@ -22,30 +36,28 @@
     "katex": "^0.10.2",
     "lodash": "^4.17.10",
     "numeral": "^2.0.6",
+    "overridable-react-scripts": "1.0.1",
     "prop-types": "^15.6.2",
-    "react": "^16.8.6",
+    "react": "^16.9.0",
     "react-chartjs-2": "^2.7.4",
-    "react-dom": "^16.8.6",
+    "react-dom": "^16.9.0",
     "react-paginate": "^5.2.4",
     "react-redux": "^5.0.7",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "^3.0.1",
-    "react-tex": "^1.4.0",
-    "redux": "^3.7.2",
-    "redux-devtools": "^3.4.1",
-    "redux-devtools-dock-monitor": "^1.1.3",
-    "redux-devtools-log-monitor": "^1.4.0",
-    "redux-form": "^7.4.2",
     "styled-components": "^4.3.2",
-    "typeface-roboto": "0.0.54",
     "typeface-ubuntu": "0.0.65",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "cross-env": "^5.2.0",
     "electron": "^6.0.0",
     "electron-builder": "^21.1.5",
     "electron-packager": "^14.0.4",
     "electron-rebuild": "^1.8.5",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "husky": "^2.4.1",
+    "lint-staged": "^8.2.1",
     "prettier": "^1.18.2"
   },
   "description": "React and Electron Awesome App",
@@ -63,19 +75,16 @@
       "build/**/*"
     ]
   },
-  "scripts": {
-    "build-win-32": "build --em.main=build/main.js --win --ia32",
-    "build-win-64": "build --em.main=build/main.js --win --x64",
-    "build-linux": "build --em.main=build/main.js --linux",
-    "dist": "build --em.main=build/main.js",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
-    "electron": "electron .",
-    "electron-dev": "set ELECTRON_START_URL=http://localhost:3000 && electron .",
-    "react-start": "react-scripts start",
-    "postinstall": "electron-builder install-app-deps",
-    "rebuild": "electron-rebuild -f -w sqlite3 --module-dir public"
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,json,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "browserslist": {
     "production": [

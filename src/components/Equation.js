@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import katex from 'katex';
 
 function Equation({ equation }) {
   const element = useRef();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     katex.render(equation, element.current, { throwOnError: false });
   }, [equation]);
 

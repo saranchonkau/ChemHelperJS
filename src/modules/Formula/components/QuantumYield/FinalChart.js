@@ -1,143 +1,138 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { reduxForm, getFormValues } from 'redux-form';
-import { connect } from 'react-redux';
+import React from 'react';
 import { Line } from 'react-chartjs-2';
-import {
-  Equation,
-  ExcelPatternTypes,
-  getTrendResult,
-  ReduxForms,
-  Result,
-  RSquared,
-  suggestMaxValue,
-  suggestMinValue,
-} from 'utils/utils';
+import styled from 'styled-components';
+
+import { getTrendResult, suggestMaxValue, suggestMinValue } from 'utils/utils';
 import { chartOptions, datasets } from 'utils/charts';
+import { createQuantumYieldTSVFile } from 'utils/excel/quantumYield';
+import { calculateQuantumYield } from 'utils/calculations';
+
+import { ExcelPatternTypes } from 'constants/common';
+
 import BackButton from 'components/BackButton';
 import SavePatternButton from 'components/SavePatternButton';
 import CopyButton from 'components/CopyButton';
-import { createQuantumYieldTSVFile } from 'utils/excel/quantumYield';
+import { useWizardContext } from 'components/Wizard';
+import LineEquation from 'components/LineEquation';
+import RSquaredEquation from 'components/RSquaredEquation';
+import CalculationResult from 'components/CalculationResult';
 
-const styles = theme => ({});
+import Container from '../Container';
+import Title from '../Title';
+import Subtitle from '../Subtitle';
+import ContentWrapper from '../ContentWrapper';
 
-class FinalChart extends Component {
-  constructor(props) {
-    super(props);
-    this.data = props.finalData.map(point => ({
-      ...point,
-      time: point.time * 60,
-    }));
-    this.result = getTrendResult(this.getSelectedData());
-    this.quantumYield = this.calculateQuantumYield(this.result.slope);
-    this.confidenceInterval =
-      this.result.slopeConfidenceInterval &&
-      this.calculateQuantumYield(this.result.slopeConfidenceInterval);
-  }
+function FinalChart({ title }) {
+  const { previousStep, state } = useWizardContext();
 
-  calculateQuantumYield = slope => {
-    const { volume, lightIntensity } = this.props;
-    return (6.02214e23 * volume * slope) / (1000 * lightIntensity);
-  };
+  const data = state.finalData.map(point => ({
+    ...point,
+    time: point.time * 60,
+  }));
 
-  getSelectedData = () =>
-    this.data
-      .filter(point => point.isSelected)
-      .map(data => ({ x: data.time, y: data.concentration }));
+  const selectedData = data
+    .filter(point => point.isSelected)
+    .map(data => ({ x: data.time, y: data.concentration }));
 
-  getUnselectedData = () =>
-    this.data
-      .filter(point => !point.isSelected)
-      .map(data => ({ x: data.time, y: data.concentration }));
+  const unselectedData = data
+    .filter(point => !point.isSelected)
+    .map(data => ({ x: data.time, y: data.concentration }));
 
-  getTrendData = () => {
-    let data = this.getSelectedData();
-    let trendFunc = getTrendResult(data).predictY;
-    return data.map(point => ({ x: point.x, y: trendFunc(point.x) }));
-  };
+  const result = getTrendResult(selectedData);
 
-  getExportData = () => ({
-    volume: this.props.volume,
-    lightIntensity: this.props.lightIntensity,
-    finalData: this.data.filter(point => point.isSelected),
-    quantumYield: this.quantumYield,
-    confidenceInterval: this.confidenceInterval,
+  const quantumYield = calculateQuantumYield({
+    slope: result.slope,
+    volume: state.volume,
+    lightIntensity: state.lightIntensity,
   });
 
-  getChartProps = () => {
-    const xArray = this.data.map(point => point.time);
-    return {
-      data: {
-        datasets: [
-          datasets.selectedData({ data: this.getSelectedData() }),
-          datasets.unselectedData({ data: this.getUnselectedData() }),
-          datasets.trendData({ data: this.getTrendData() }),
-        ],
-      },
-      options: chartOptions({
-        tooltipLabelCallback: (tooltipItem, data) => [
-          `Concentration: ${tooltipItem.yLabel} mol/l`,
-          `Time: ${tooltipItem.xLabel} sec`,
-        ],
-        xLabel: 'Time, sec',
-        yLabel: 'Concentration, M',
-        xTicksMin: suggestMinValue(xArray),
-        xTicksMax: suggestMaxValue(xArray),
-      }),
-    };
+  const confidenceInterval = result.slopeConfidenceInterval
+    ? calculateQuantumYield({
+        slope: result.slopeConfidenceInterval,
+        volume: state.volume,
+        lightIntensity: state.lightIntensity,
+      })
+    : 0;
+
+  const trendData = selectedData.map(point => ({
+    x: point.x,
+    y: result.predictY(point.x), // Trend function
+  }));
+
+  const exportData = {
+    volume: state.volume,
+    lightIntensity: state.lightIntensity,
+    finalData: data.filter(point => point.isSelected),
+    quantumYield,
+    confidenceInterval,
   };
 
-  render() {
-    const { classes, previousPage } = this.props;
-    return (
-      <div>
-        <h3 className="my-3 text-center">Quantum yield</h3>
-        <h5 className="text-center">Final chart</h5>
-        <div className="d-flex flex-row justify-content-center">
-          <div style={{ width: 700, height: 600 }}>
-            <Line {...this.getChartProps()} />
-            <div style={{ marginLeft: '5rem' }}>
-              <Equation
-                slope={this.result.slope}
-                intercept={this.result.intercept}
-              />
-              <br />
-              <RSquared rSquared={this.result.rSquared} />
-              <br />
-              <span style={{ fontFamily: 'KaTeX_Math' }}>
-                Confidence interval: 95%
-              </span>
-              <br />
-              <Result
-                name={'Quantum Yield'}
-                value={this.quantumYield}
-                error={this.confidenceInterval}
-              />
-            </div>
-            <div className="d-flex flex-row justify-content-between">
-              <BackButton onClick={previousPage} />
-              <CopyButton
-                text={createQuantumYieldTSVFile({ data: this.getExportData() })}
-              />
-              <SavePatternButton
-                patternType={ExcelPatternTypes.QUANTUM_YIELD}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const xArray = data.map(point => point.time);
+
+  const chartProps = {
+    data: {
+      datasets: [
+        datasets.selectedData({ data: selectedData }),
+        datasets.unselectedData({ data: unselectedData }),
+        datasets.trendData({ data: trendData }),
+      ],
+    },
+    options: chartOptions({
+      tooltipLabelCallback: (tooltipItem, data) => [
+        `Concentration: ${tooltipItem.yLabel} mol/l`,
+        `Time: ${tooltipItem.xLabel} sec`,
+      ],
+      xLabel: 'Time, sec',
+      yLabel: 'Concentration, M',
+      xTicksMin: suggestMinValue(xArray),
+      xTicksMax: suggestMaxValue(xArray),
+    }),
+  };
+
+  const tsvFile = createQuantumYieldTSVFile({ data: exportData });
+
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <Subtitle>Final chart</Subtitle>
+      <ContentWrapper>
+        <Content>
+          <Line {...chartProps} />
+          <LineEquation slope={result.slope} intercept={result.intercept} />
+          <br />
+          <RSquaredEquation rSquared={result.rSquared} />
+          <br />
+          <KatexText>Confidence interval: 95%</KatexText>
+          <br />
+          <CalculationResult
+            name="Quantum Yield"
+            value={quantumYield}
+            error={confidenceInterval}
+          />
+          <Footer>
+            <BackButton onClick={previousStep} />
+            <CopyButton text={tsvFile} />
+            <SavePatternButton patternType={ExcelPatternTypes.QUANTUM_YIELD} />
+          </Footer>
+        </Content>
+      </ContentWrapper>
+    </Container>
+  );
 }
 
-FinalChart = connect(state => ({
-  finalData: getFormValues(ReduxForms.QuantumYield)(state).finalData,
-  volume: getFormValues(ReduxForms.QuantumYield)(state).volume,
-  lightIntensity: getFormValues(ReduxForms.QuantumYield)(state).lightIntensity,
-}))(FinalChart);
+const Content = styled.div`
+  width: 700px;
+  height: 600px;
+`;
 
-export default reduxForm({
-  form: ReduxForms.QuantumYield, // <------ same form name
-  destroyOnUnmount: false, // <------ preserve form data
-  forceUnregisterOnUnmount: true, // <------ unregister fields on unmount
-})(withStyles(styles)(FinalChart));
+const Footer = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const KatexText = styled.span`
+  font-family: KaTeX_Math, sans-serif;
+`;
+
+export default FinalChart;

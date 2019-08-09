@@ -1,161 +1,165 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { reduxForm, getFormValues } from 'redux-form';
-import { connect } from 'react-redux';
+import React, { useReducer, useRef } from 'react';
 import Select from '@material-ui/core/Select';
 import { MenuItem } from '@material-ui/core';
-import { calculateRowId, ReduxForms, Units } from 'utils/utils';
+
+import { calculateRowId, simpleReducer } from 'utils/utils';
+
 import NextButton from 'components/NextButton';
 import BackButton from 'components/BackButton';
 import AddRowButton from 'components/AddRowButton';
 import MaterialNumberInput from 'components/MaterialNumberInput';
-import { finalTableColumnDefs } from 'constants/common';
-import Grid from 'components/Grid/Grid';
+import { finalTableColumnDefs, Units } from 'constants/common';
+import Grid from 'components/Grid';
+import { useWizardContext } from 'components/Wizard';
+import Container from '../Container';
+import Title from '../Title';
+import Subtitle from '../Subtitle';
+import ContentWrapper from '../ContentWrapper';
+import styled from 'styled-components';
 
-export const styles = theme => ({});
+function FinalTable({ title }) {
+  const { nextStep, previousStep, updateState, state } = useWizardContext();
 
-class FinalTable extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: props.finalData,
-      solutionDensity: props.solutionDensity,
-      solutionDensityError: '',
-      radYield: props.radYield,
-      radYieldError: '',
-      unit: props.unit,
-    };
-  }
+  const [data, dispatch] = useReducer(simpleReducer, {
+    solutionDensity: state.solutionDensity,
+    radYield: state.radYield,
+    finalData: state.finalData,
+    unit: state.unit,
+  });
+  const [errors, errorDispatch] = useReducer(simpleReducer, {
+    solutionDensity: '',
+    radYield: '',
+  });
 
-  onGridReady = api => {
-    this.api = api;
+  const api = useRef();
+
+  const onGridReady = gridApi => {
+    api.current = gridApi;
   };
 
-  addRow = () => {
-    const rowData = this.api.getRowData();
+  const addRow = () => {
+    const rowData = api.current.getRowData();
     const newRow = {
       id: calculateRowId(rowData.map(data => data.id)),
       concentration: 0.0,
       time: 0.0,
       isSelected: true,
     };
-    this.api.createRow(newRow);
+    api.current.createRow(newRow);
   };
 
-  nextPage = () => {
-    let { unit, radYield, solutionDensity } = this.state;
-    this.props.change('finalData', this.api.getRowData());
-    this.props.change('unit', unit);
-    this.props.change('radYield', Number.parseFloat(radYield));
-    this.props.change('solutionDensity', Number.parseFloat(solutionDensity));
-    this.props.nextPage();
+  const nextPage = () => {
+    updateState({
+      finalData: api.current.getRowData(),
+      unit: data.unit,
+      radYield: Number.parseFloat(data.radYield),
+      solutionDensity: Number.parseFloat(data.solutionDensity),
+    });
+    nextStep();
   };
 
-  previousPage = () => {
-    this.props.change('finalData', this.api.getRowData());
-    this.props.previousPage();
+  const previousPage = () => {
+    updateState({
+      finalData: api.current.getRowData(),
+    });
+    previousStep();
   };
 
-  handleChange = name => event => this.setState({ [name]: event.target.value });
+  const handleChange = event =>
+    dispatch({ [event.target.name]: event.target.value });
 
-  handleNumberChange = name => ({ value, error }) =>
-    this.setState({ [name]: value, [`${name}Error`]: error });
-
-  isCorrectData = () => {
-    const {
-      solutionDensity,
-      solutionDensityError,
-      radYield,
-      radYieldError,
-    } = this.state;
-    return (
-      solutionDensity && radYield && (!solutionDensityError && !radYieldError)
-    );
+  const handleNumberChange = ({ value, error, name }) => {
+    dispatch({ [name]: value });
+    errorDispatch({ [name]: error });
   };
 
-  render() {
-    let { classes, previousPage } = this.props;
-    const { radYield, solutionDensity, unit, data } = this.state;
-    return (
-      <div>
-        <h3 className="my-3 text-center">Dose rate</h3>
-        <h5 className="text-center">Final table</h5>
-        <div className="d-flex flex-row justify-content-center">
-          <div>
-            <Grid
-              data={this.state.data}
-              options={{ columnDefs: finalTableColumnDefs }}
-              onGridReady={this.onGridReady}
-            />
-            <div className="d-flex flex-row justify-content-between">
-              <BackButton onClick={this.previousPage} />
-              <AddRowButton onClick={this.addRow} />
-              <NextButton
-                onClick={this.nextPage}
-                disabled={!this.isCorrectData()}
+  const isCorrectData =
+    data.solutionDensity &&
+    data.radYield &&
+    (!errors.solutionDensity && !errors.radYield);
+
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <Subtitle>Final table</Subtitle>
+      <ContentWrapper>
+        <Content>
+          <StyledGrid
+            data={data.finalData}
+            options={{ columnDefs: finalTableColumnDefs }}
+            onGridReady={onGridReady}
+          />
+          <ButtonRow>
+            <BackButton onClick={previousPage} />
+            <AddRowButton onClick={addRow} />
+            <NextButton onClick={nextPage} disabled={!isCorrectData} />
+          </ButtonRow>
+          <Subtitle>Enter parameters for calculating dose rate:</Subtitle>
+          <Row>
+            <NameCell>Solution density &rho; (g/ml):</NameCell>
+            <InputCell>
+              <MaterialNumberInput
+                name="solutionDensity"
+                initialValue={data.solutionDensity}
+                onChange={handleNumberChange}
               />
-            </div>
-            <h5 className="my-3 text-center">
-              Enter parameters for calculating dose rate:
-            </h5>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Solution density &rho; (g/ml):</td>
-                  <td>
-                    <MaterialNumberInput
-                      id={'solutionDensity-input'}
-                      initialValue={solutionDensity}
-                      onChange={this.handleNumberChange('solutionDensity')}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>{`Yield G : (${unit})`}</td>
-                  <td>
-                    <MaterialNumberInput
-                      id={'radYield-input'}
-                      initialValue={radYield}
-                      onChange={this.handleNumberChange('radYield')}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ width: 200 }}>Unit of measure of yield:</td>
-                  <td>
-                    <Select
-                      value={this.state.unit}
-                      onChange={this.handleChange('unit')}
-                    >
-                      <MenuItem value={Units.moleculesPerHundredVolt}>
-                        {Units.moleculesPerHundredVolt}
-                      </MenuItem>
-                      <MenuItem value={Units.molPerJoule}>
-                        {Units.molPerJoule}
-                      </MenuItem>
-                    </Select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  }
+            </InputCell>
+          </Row>
+          <Row>
+            <NameCell>{`Yield G : (${data.unit})`}</NameCell>
+            <InputCell>
+              <MaterialNumberInput
+                name="radYield"
+                initialValue={data.radYield}
+                onChange={handleNumberChange}
+              />
+            </InputCell>
+          </Row>
+          <Row>
+            <NameCell>Unit of measure of yield:</NameCell>
+            <InputCell>
+              <Select value={data.unit} name="unit" onChange={handleChange}>
+                <MenuItem value={Units.moleculesPerHundredVolt}>
+                  {Units.moleculesPerHundredVolt}
+                </MenuItem>
+                <MenuItem value={Units.molPerJoule}>
+                  {Units.molPerJoule}
+                </MenuItem>
+              </Select>
+            </InputCell>
+          </Row>
+        </Content>
+      </ContentWrapper>
+    </Container>
+  );
 }
 
-const formSelector = state => getFormValues(ReduxForms.DoseRate)(state);
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
-FinalTable = connect(state => ({
-  finalData: formSelector(state).finalData,
-  radYield: formSelector(state).radYield,
-  solutionDensity: formSelector(state).solutionDensity,
-  unit: formSelector(state).unit,
-}))(FinalTable);
+const StyledGrid = styled(Grid)`
+  align-self: center;
+`;
 
-export default reduxForm({
-  form: ReduxForms.DoseRate,
-  destroyOnUnmount: false,
-  forceUnregisterOnUnmount: true,
-})(withStyles(styles)(FinalTable));
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+`;
+
+const Row = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const NameCell = styled.div`
+  flex: 0 0 230px;
+`;
+
+const InputCell = styled.div`
+  flex: 1;
+`;
+
+export default FinalTable;

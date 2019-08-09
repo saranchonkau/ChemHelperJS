@@ -64,13 +64,23 @@ class Cell extends React.Component {
     Number.isNaN(this.props.value) &&
     !this.state.editing;
 
+  getCellTitle = () =>
+    this.props.type === CellTypes.DEFAULT
+      ? this.props.format(this.props.value)
+      : null;
+
   render() {
     const { editing, value } = this.state;
     const cellClassName = cx('cell', {
       'error-cell': this.isNaN(),
+      editing: editing,
     });
     return (
-      <div className={cellClassName} onClick={this.handleClick}>
+      <div
+        className={cellClassName}
+        title={this.getCellTitle()}
+        onClick={this.handleClick}
+      >
         {editing ? (
           <OutsideAlerter handleClickOutside={this.onBlur}>
             <input

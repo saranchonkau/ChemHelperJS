@@ -1,17 +1,40 @@
-import React, { useCallback, useMemo, useReducer, useState } from 'react';
-import { WizardProvider } from './Wizard.context';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+} from 'react';
+import last from 'lodash/last';
+
 import { simpleReducer } from 'utils/utils';
+import { PageNumbers } from 'constants/common';
+
+import { WizardProvider } from './Wizard.context';
 
 function Wizard({ components, initialValues, title }) {
-  const [step, setStep] = useState(0);
+  const [steps, setSteps] = useState([
+    PageNumbers.CONCENTRATION_CALCULATION_WAY_SELECTION,
+  ]);
   const [state, dispatch] = useReducer(simpleReducer, initialValues);
 
-  const nextStep = useCallback(() => setStep(prevStep => prevStep + 1), [
-    setStep,
-  ]);
-  const previousStep = useCallback(() => setStep(prevStep => prevStep - 1), [
-    setStep,
-  ]);
+  useEffect(() => dispatch(initialValues), [initialValues]);
+
+  useEffect(() => console.log('STATE: ', state), [state]);
+
+  const nextStep = useCallback(
+    () => setSteps(prevSteps => [...prevSteps, last(prevSteps) + 1]),
+    [],
+  );
+  const previousStep = useCallback(
+    () => setSteps(prevSteps => prevSteps.slice(0, -1)),
+    [],
+  );
+
+  const setStep = useCallback(
+    step => setSteps(prevSteps => [...prevSteps, step]),
+    [],
+  );
 
   const updateState = useCallback(data => dispatch(data), [dispatch]);
 
@@ -23,10 +46,10 @@ function Wizard({ components, initialValues, title }) {
       updateState,
       state,
     }),
-    [],
+    [nextStep, previousStep, setStep, state, updateState],
   );
 
-  const Page = components[step];
+  const Page = components[last(steps)];
   return (
     <WizardProvider value={context}>
       <Page title={title} />

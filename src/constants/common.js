@@ -182,3 +182,41 @@ export const nuclidesTableColumnDefs = [
     format: atomicMassFormatter,
   },
 ];
+
+export const Units = {
+  moleculesPerHundredVolt: 'molecules/100eV',
+  molPerJoule: 'mol/J',
+};
+
+export const ReduxForms = {
+  Yield: 'Yield',
+  QuantumYield: 'QuantumYield',
+  DoseRate: 'DoseRate',
+  ConcentrationCalculation: 'ConcentrationCalculation',
+};
+
+export const PageNumbers = {
+  CONCENTRATION_CALCULATION_WAY_SELECTION: 0,
+  MOLAR_ATTENUATION_COEFFICIENT_WAY: 1,
+  CALIBRATION_TABLE_WAY: 2,
+  CALIBRATION_CHART: 3,
+  OPTICAL_DENSITY_TABLE: 4,
+  FINAL_TABLE: 5,
+  FINAL_CHART: 6,
+};
+
+export const ConcentrationCalculationWays = {
+  OWN_WAY: PageNumbers.FINAL_TABLE.toString(10),
+  MOLAR_ATTENUATION_COEFFICIENT_WAY: PageNumbers.MOLAR_ATTENUATION_COEFFICIENT_WAY.toString(
+    10,
+  ),
+  CALIBRATION_TABLE_WAY: PageNumbers.CALIBRATION_TABLE_WAY.toString(10),
+};
+
+export const ExcelPatternTypes = {
+  RAD_CHEM_YIELD: 'RAD_CHEM_YIELD',
+  DOSE_RATE: 'DOSE_RATE',
+  QUANTUM_YIELD: 'QUANTUM_YIELD',
+  CALIBRATION_TABLE: 'CALIBRATION_TABLE',
+  OPTICAL_DENSITY_TABLE: 'OPTICAL_DENSITY_TABLE',
+};

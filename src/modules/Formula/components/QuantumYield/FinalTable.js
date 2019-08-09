@@ -1,143 +1,142 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { reduxForm, getFormValues } from 'redux-form';
-import { connect } from 'react-redux';
-import { calculateRowId, ReduxForms } from 'utils/utils';
+import React, { useReducer, useRef } from 'react';
+import styled from 'styled-components';
+
+import { calculateRowId, simpleReducer } from 'utils/utils';
+
 import NextButton from 'components/NextButton';
 import BackButton from 'components/BackButton';
 import AddRowButton from 'components/AddRowButton';
 import MaterialNumberInput from 'components/MaterialNumberInput';
 import { finalTableColumnDefs } from 'constants/common';
-import Grid from 'components/Grid/Grid';
+import Grid from 'components/Grid';
+import { useWizardContext } from 'components/Wizard';
 
-const styles = theme => ({});
+import Container from '../Container';
+import Title from '../Title';
+import Subtitle from '../Subtitle';
+import ContentWrapper from '../ContentWrapper';
 
-class FinalTable extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: props.finalData,
-      lightIntensity: props.lightIntensity,
-      lightIntensityError: '',
-      volume: props.volume,
-      volumeError: '',
-    };
-  }
+function FinalTable({ title }) {
+  const { nextStep, previousStep, updateState, state } = useWizardContext();
 
-  onGridReady = api => {
-    this.api = api;
+  const [data, dispatch] = useReducer(simpleReducer, {
+    lightIntensity: state.lightIntensity,
+    volume: state.volume,
+    finalData: state.finalData,
+  });
+  const [errors, errorDispatch] = useReducer(simpleReducer, {
+    lightIntensity: '',
+    volume: '',
+  });
+
+  const api = useRef();
+
+  const onGridReady = gridApi => {
+    api.current = gridApi;
   };
 
-  addRow = () => {
-    const rowData = this.api.getRowData();
+  const addRow = () => {
+    const rowData = api.current.getRowData();
     const newRow = {
       id: calculateRowId(rowData.map(data => data.id)),
       concentration: 0.0,
       time: 0.0,
       isSelected: true,
     };
-    this.api.createRow(newRow);
+    api.current.createRow(newRow);
   };
 
-  nextPage = () => {
-    const { volume, lightIntensity } = this.state;
-    this.props.change('finalData', this.api.getRowData());
-    this.props.change('volume', Number.parseFloat(volume));
-    this.props.change('lightIntensity', Number.parseFloat(lightIntensity));
-    this.props.nextPage();
+  const nextPage = () => {
+    updateState({
+      finalData: api.current.getRowData(),
+      volume: Number.parseFloat(data.volume),
+      lightIntensity: Number.parseFloat(data.lightIntensity),
+    });
+    nextStep();
   };
 
-  previousPage = () => {
-    this.props.change('finalData', this.api.getRowData());
-    this.props.previousPage();
+  const previousPage = () => {
+    updateState({
+      finalData: api.current.getRowData(),
+    });
+    previousStep();
   };
 
-  handleNumberChange = name => ({ value, error }) =>
-    this.setState({ [name]: value, [`${name}Error`]: error });
-
-  isCorrectData = () => {
-    const {
-      volume,
-      volumeError,
-      lightIntensity,
-      lightIntensityError,
-    } = this.state;
-    return volume && lightIntensity && (!volumeError && !lightIntensityError);
+  const handleNumberChange = ({ value, error, name }) => {
+    dispatch({ [name]: value });
+    errorDispatch({ [name]: error });
   };
 
-  render() {
-    const {
-      volume,
-      volumeError,
-      lightIntensity,
-      lightIntensityError,
-      data,
-    } = this.state;
-    let { classes, previousPage } = this.props;
-    return (
-      <div>
-        <h3 className="my-3 text-center">Quantum yield</h3>
-        <h5 className="text-center">Final table</h5>
-        <div className="d-flex justify-content-center">
-          <div>
-            <Grid
-              data={this.state.data}
-              options={{ columnDefs: finalTableColumnDefs }}
-              onGridReady={this.onGridReady}
-            />
-            <div className="d-flex flex-row justify-content-between">
-              <BackButton onClick={this.previousPage} />
-              <AddRowButton onClick={this.addRow} />
-              <NextButton
-                onClick={this.nextPage}
-                disabled={!this.isCorrectData()}
+  const isCorrectData =
+    data.volume &&
+    data.lightIntensity &&
+    (!errors.volume && !errors.lightIntensity);
+
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <Subtitle>Final table</Subtitle>
+      <ContentWrapper>
+        <Content>
+          <Grid
+            data={data.finalData}
+            options={{ columnDefs: finalTableColumnDefs }}
+            onGridReady={onGridReady}
+          />
+          <ButtonRow>
+            <BackButton onClick={previousPage} />
+            <AddRowButton onClick={addRow} />
+            <NextButton onClick={nextPage} disabled={!isCorrectData} />
+          </ButtonRow>
+          <Subtitle>Enter parameters for calculating quantum yield:</Subtitle>
+          <Row>
+            <NameCell>Light intensity I (photon/s):</NameCell>
+            <InputCell>
+              <MaterialNumberInput
+                name="lightIntensity"
+                initialValue={data.lightIntensity}
+                onChange={handleNumberChange}
               />
-            </div>
-            <h5 className="my-3 text-center">
-              Enter parameters for calculating quantum yield:
-            </h5>
-            <table>
-              <tbody>
-                <tr>
-                  <td style={{ width: 130 }}>Light intensity I (photon/s):</td>
-                  <td>
-                    <MaterialNumberInput
-                      id={'lightIntensity-input'}
-                      initialValue={lightIntensity}
-                      onChange={this.handleNumberChange('lightIntensity')}
-                      error={lightIntensityError}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Volume V (ml):</td>
-                  <td>
-                    <MaterialNumberInput
-                      id={'volume-input'}
-                      initialValue={volume}
-                      onChange={this.handleNumberChange('volume')}
-                      error={volumeError}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  }
+            </InputCell>
+          </Row>
+          <Row>
+            <NameCell>Volume V (ml):</NameCell>
+            <InputCell>
+              <MaterialNumberInput
+                name="volume"
+                initialValue={data.volume}
+                onChange={handleNumberChange}
+              />
+            </InputCell>
+          </Row>
+        </Content>
+      </ContentWrapper>
+    </Container>
+  );
 }
 
-FinalTable = connect(state => ({
-  trendFunc: getFormValues(ReduxForms.QuantumYield)(state).trendFunc,
-  finalData: getFormValues(ReduxForms.QuantumYield)(state).finalData,
-  lightIntensity: getFormValues(ReduxForms.QuantumYield)(state).lightIntensity,
-  volume: getFormValues(ReduxForms.QuantumYield)(state).volume,
-}))(FinalTable);
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
-export default reduxForm({
-  form: ReduxForms.QuantumYield,
-  destroyOnUnmount: false,
-  forceUnregisterOnUnmount: true,
-})(withStyles(styles)(FinalTable));
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
+`;
+
+const Row = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const NameCell = styled.div`
+  flex: 0 0 130px;
+`;
+
+const InputCell = styled.div`
+  flex: 1;
+`;
+
+export default FinalTable;

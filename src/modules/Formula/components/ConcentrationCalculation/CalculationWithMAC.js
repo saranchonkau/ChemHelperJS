@@ -1,14 +1,13 @@
 import React, { useReducer, useRef } from 'react';
 import styled from 'styled-components';
 
-import {
-  calculateRowId,
-  ExcelPatternTypes,
-  simpleReducer,
-  PageNumbers,
-} from 'utils/utils';
+import { calculateRowId, simpleReducer } from 'utils/utils';
 
-import { calculationWithMACColumnDefs } from 'constants/common';
+import {
+  calculationWithMACColumnDefs,
+  ExcelPatternTypes,
+  PageNumbers,
+} from 'constants/common';
 
 import NextButton from 'components/NextButton';
 import BackButton from 'components/BackButton';
@@ -22,10 +21,10 @@ import { useWizardContext } from 'components/Wizard';
 
 import { createOpticalDensityTableTSVFile } from 'utils/excel/opticalDensityTable';
 
-import Subtitle from './components/Subtitle';
-import ContentWrapper from './components/ContentWrapper';
-import Container from './components/Container';
-import Title from './components/Title';
+import Subtitle from '../Subtitle';
+import ContentWrapper from '../ContentWrapper';
+import Container from '../Container';
+import Title from '../Title';
 
 function CalculationWithMAC({ title }) {
   const { setStep, previousStep, updateState, state } = useWizardContext();

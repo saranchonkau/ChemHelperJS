@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import isElectron from 'is-electron';
 import ReactPaginate from 'react-paginate';
 import { connect } from 'react-redux';
-import Grid from 'components/Grid/Grid';
+import Grid from 'components/Grid';
 
 import { getParam, getWhereParam, removeNull } from 'utils/query';
 import { stateSelectors } from '../FilterBar/filterBarReducer';

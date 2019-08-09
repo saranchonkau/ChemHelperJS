@@ -1,52 +1,58 @@
 .grid {
-    display: grid;
-    grid-template-rows: 50px auto;
-    /*width: 525px;*/
-    border-radius: 10px;
-    overflow: hidden;
+  display: grid;
+  grid-template-rows: 50px auto;
+  /*width: 525px;*/
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .header {
-    display: grid;
-    /*grid-template-columns: 70px 130px 165px 90px 70px;*/
-    background-color: #36304a;
-    /*place-items: center stretch;*/
-    align-items: center;
-    justify-items: stretch;
+  display: grid;
+  /*grid-template-columns: 70px 130px 165px 90px 70px;*/
+  background-color: #36304a;
+  /*place-items: center stretch;*/
+  align-items: center;
+  justify-items: stretch;
 }
 
-.header  .cell {
-    color: #fff;
-    font-size: 18px;
+.header .cell {
+  color: #fff;
+  font-size: 18px;
 }
 
 .grid-row {
-    display: grid;
-    height: 40px;
-    /*grid-template-columns: 70px 130px 165px 90px 70px;*/
-    /*place-items: center stretch;*/
-    align-items: center;
-    justify-items: stretch;
-    background-color: #e6e3e3;
+  display: grid;
+  height: 40px;
+  /*grid-template-columns: 70px 130px 165px 90px 70px;*/
+  /*place-items: center stretch;*/
+  align-items: center;
+  justify-items: stretch;
+  background-color: #e6e3e3;
 }
 
 .cell {
-    padding: 0 12px;
-    font-weight: 400;
-    font-size: 16px;
+  padding: 0 12px;
+  font-weight: 400;
+  font-size: 18px;
 }
 
 .error-cell {
-    box-shadow: 0px 0px 1em 2px #B00020;
-    border-radius: 3px;
+  box-shadow: 0px 0px 1em 2px #b00020;
+  border-radius: 3px;
 }
 
-.inputCell{
-    background-color: transparent;
-    width: 100%;
-    outline: none;
-    border: none;
-    box-shadow: 0px 0px 1em 2px #36304a;
-    padding: 1px 5px;
-    border-radius: 3px;
+.editing {
+  background-color: #fff;
+  padding: 0.3rem 0.7rem;
+  font-size: 1rem;
+  border-radius: 3px;
+  border: 1px solid rgba(54, 48, 74, 0.5);
+  box-shadow: 0 0 0 0.2rem rgba(54, 48, 74, 0.22);
+}
+
+.inputCell {
+  background-color: transparent;
+  width: 100%;
+  outline: none;
+  border: none;
 }

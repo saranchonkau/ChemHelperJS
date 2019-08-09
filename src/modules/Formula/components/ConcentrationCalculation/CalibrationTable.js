@@ -7,13 +7,13 @@ import AddRowButton from 'components/AddRowButton';
 import Grid from 'components/Grid';
 import { useWizardContext } from 'components/Wizard';
 
-import { calibrationTableColumnDefs } from 'constants/common';
-import { calculateRowId, PageNumbers } from 'utils/utils';
+import { calibrationTableColumnDefs, PageNumbers } from 'constants/common';
+import { calculateRowId } from 'utils/utils';
 
-import Container from './components/Container';
-import Title from './components/Title';
-import Subtitle from './components/Subtitle';
-import ContentWrapper from './components/ContentWrapper';
+import Container from '../Container';
+import Title from '../Title';
+import Subtitle from '../Subtitle';
+import ContentWrapper from '../ContentWrapper';
 
 function CalibrationTable({ title }) {
   const { nextStep, setStep, updateState, state } = useWizardContext();

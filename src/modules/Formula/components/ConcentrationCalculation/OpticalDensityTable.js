@@ -12,10 +12,10 @@ import MaterialButton from 'components/MaterialButton';
 import Grid from 'components/Grid';
 import { useWizardContext } from 'components/Wizard';
 
-import Container from './components/Container';
-import Title from './components/Title';
-import Subtitle from './components/Subtitle';
-import ContentWrapper from './components/ContentWrapper';
+import Container from '../Container';
+import Title from '../Title';
+import Subtitle from '../Subtitle';
+import ContentWrapper from '../ContentWrapper';
 
 function OpticalDensityTable({ title }) {
   const { nextStep, previousStep, updateState, state } = useWizardContext();
