@@ -73,6 +73,8 @@ class Grid extends Component {
         return SortTypes.NONE;
       case SortTypes.NONE:
         return SortTypes.DESC;
+      default:
+        return null;
     }
   };
 
@@ -119,6 +121,8 @@ class Grid extends Component {
         return (a, b) => a[field] - b[field];
       case SortTypes.DESC:
         return (a, b) => b[field] - a[field];
+      default:
+        return null;
     }
   };
 

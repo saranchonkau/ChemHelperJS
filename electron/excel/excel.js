@@ -22,11 +22,14 @@ const getPatternPath = calculationWay => {
 */
 
 const PatternPaths = {
-    RAD_CHEM_YIELD: path.resolve(__dirname, './Rad_chem_yield.xlsx'),
-    QUANTUM_YIELD: path.resolve(__dirname, './Quantum_yield.xlsx'),
-    DOSE_RATE: path.resolve(__dirname, './Dose_rate.xlsx'),
-    CALIBRATION_TABLE: path.resolve(__dirname, './Calibration_table.xlsx'),
-    OPTICAL_DENSITY_TABLE: path.resolve(__dirname, './Optical_density_table.xlsx')
+  RAD_CHEM_YIELD: path.resolve(__dirname, './Rad_chem_yield.xlsx'),
+  QUANTUM_YIELD: path.resolve(__dirname, './Quantum_yield.xlsx'),
+  DOSE_RATE: path.resolve(__dirname, './Dose_rate.xlsx'),
+  CALIBRATION_TABLE: path.resolve(__dirname, './Calibration_table.xlsx'),
+  OPTICAL_DENSITY_TABLE: path.resolve(
+    __dirname,
+    './Optical_density_table.xlsx',
+  ),
 };
 
 /*
@@ -164,19 +167,19 @@ exports.exportTableDataWithCharts = ({ mainWindow, data }) => {
 */
 
 exports.savePattern = ({ mainWindow, type }) => {
-    showSaveDialog({
-        mainWindow,
-        callBack: copyPattern(type)
-    })
+  showSaveDialog({
+    mainWindow,
+    callBack: copyPattern(type),
+  });
 };
 
 const copyPattern = type => fileName => {
-    if (fileName && path.extname(fileName) === '.xlsx') {
-        const writeStream = fs.createWriteStream(fileName);
-        writeStream.on('finish', () => showMessageBox());
-        writeStream.on('error', error => showErrorBox(error));
-        fs.createReadStream(PatternPaths[type]).pipe(writeStream);
-    }
+  if (fileName && path.extname(fileName) === '.xlsx') {
+    const writeStream = fs.createWriteStream(fileName);
+    writeStream.on('finish', () => showMessageBox());
+    writeStream.on('error', error => showErrorBox(error));
+    fs.createReadStream(PatternPaths[type]).pipe(writeStream);
+  }
 };
 
 /*
@@ -246,34 +249,33 @@ const fillYieldWorksheet = ({ workbook, data }) => {
 */
 
 const showMessageBox = () => {
-    dialog.showMessageBox({
-        type: 'info',
-        title: 'ChemHelper',
-        message: 'Excel file was successfully saved !',
-        buttons: ["OK"]
-    });
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'ChemHelper',
+    message: 'Excel file was successfully saved !',
+    buttons: ['OK'],
+  });
 };
 
 const showErrorBox = error => {
-    console.log(`Error: ${error.message}`);
-    dialog.showErrorBox(
-        'Error',
-        'Some error has occurred. Please contact with administrator and try to save file again.'
-    );
+  console.log(`Error: ${error.message}`);
+  dialog.showErrorBox(
+    'Error',
+    'Some error has occurred. Please contact with administrator and try to save file again.',
+  );
 };
 
-const showSaveDialog = ({mainWindow, callBack}) => {
-    dialog.showSaveDialog(mainWindow,
-        {
-            title: 'Choose path',
-            defaultPath: `${process.env.USERPROFILE}\\Desktop`,
-            filters: [
-                { name: 'Excel files', extensions: ['xlsx'] }
-            ]
-        },
-        fileName => {
-            console.log(`FileName = [${fileName}]`);
-            callBack(fileName);
-        }
-    );
+const showSaveDialog = ({ mainWindow, callBack }) => {
+  dialog.showSaveDialog(
+    mainWindow,
+    {
+      title: 'Choose path',
+      defaultPath: `${process.env.USERPROFILE}\\Desktop`,
+      filters: [{ name: 'Excel files', extensions: ['xlsx'] }],
+    },
+    fileName => {
+      console.log(`FileName = [${fileName}]`);
+      callBack(fileName);
+    },
+  );
 };

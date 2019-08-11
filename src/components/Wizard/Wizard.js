@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import last from 'lodash/last';
 
-import { simpleReducer } from 'utils/utils';
+import { simpleReducer } from 'utils/common';
 import { PageNumbers } from 'constants/common';
 
 import { WizardProvider } from './Wizard.context';
@@ -19,8 +19,6 @@ function Wizard({ components, initialValues, title }) {
   const [state, dispatch] = useReducer(simpleReducer, initialValues);
 
   useEffect(() => dispatch(initialValues), [initialValues]);
-
-  useEffect(() => console.log('STATE: ', state), [state]);
 
   const nextStep = useCallback(
     () => setSteps(prevSteps => [...prevSteps, last(prevSteps) + 1]),

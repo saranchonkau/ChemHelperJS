@@ -11,11 +11,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "electron": "electron .",
-    "electron-dev": "cross-env ELECTRON_START_URL=http://localhost:3000 electron .",
-    "react-start": "react-scripts start",
-    "postinstall": "electron-builder install-app-deps",
-    "rebuild": "electron-rebuild -f -w sqlite3 --module-dir public"
+    "react-start": "react-scripts start"
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
@@ -50,10 +46,6 @@
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
-    "electron": "^6.0.0",
-    "electron-builder": "^21.1.5",
-    "electron-packager": "^14.0.4",
-    "electron-rebuild": "^1.8.5",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.1.0",
     "husky": "^2.4.1",
@@ -62,7 +54,7 @@
   },
   "description": "React and Electron Awesome App",
   "homepage": "./",
-  "main": "public/main.js",
+  "main": "electron/main.js",
   "build": {
     "productName": "ChemHelper",
     "appId": "by.bsu.chemistry",

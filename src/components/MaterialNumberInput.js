@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormControl, FormHelperText, Input } from '@material-ui/core';
 import PropTypes from 'prop-types';
-import { intermediateNumberRegexp, dotRegexp } from 'utils/utils';
+import { intermediateNumberRegexp, dotRegexp } from 'utils/common';
 
 const errorText = 'Wrong number format';
 
@@ -15,6 +15,9 @@ class MaterialNumberInput extends React.Component {
     };
   }
 
+  getError = value =>
+    Number.isFinite(Number.parseFloat(value)) ? '' : errorText;
+
   onChange = event => {
     const newValue = event.target.value;
     const correctValue = newValue
@@ -23,19 +26,11 @@ class MaterialNumberInput extends React.Component {
     if (intermediateNumberRegexp.test(correctValue)) {
       const result = {
         value: correctValue,
-        error: '',
+        error: this.getError(newValue),
         name: event.target.name,
       };
       this.setState(result);
       this.props.onChange(result);
-    }
-  };
-
-  onBlur = () => {
-    if (this.state.value && !Number.parseFloat(this.state.value)) {
-      const error = { error: errorText };
-      this.props.onChange(error);
-      this.setState(error);
     }
   };
 
@@ -44,12 +39,7 @@ class MaterialNumberInput extends React.Component {
     const { value, error } = this.state;
     return (
       <FormControl error={Boolean(error)}>
-        <Input
-          value={value}
-          name={name}
-          onChange={this.onChange}
-          onBlur={this.onBlur}
-        />
+        <Input value={value} name={name} onChange={this.onChange} />
         <FormHelperText>{error}</FormHelperText>
       </FormControl>
     );

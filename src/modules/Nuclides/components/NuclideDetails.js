@@ -1,17 +1,14 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Table,
-  TableBody,
-} from '@material-ui/core';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import CloseButton from '../components/CloseButton';
+import styled from 'styled-components';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+
 import Row from './Row';
-import { bindActionCreators } from 'redux';
-import { actionCreators, stateSelectors } from './nuclideDetailsReducer';
 
 const getHalfLifeUnit = half_life_unit => {
   switch (half_life_unit) {
@@ -70,13 +67,13 @@ const handleValue = (value, uncertainty, unit) => {
   return result || null;
 };
 
-const NuclidesDetails = ({ open, nuclide, closeNuclideDetails }) => (
-  <Dialog open={open} onClose={closeNuclideDetails}>
+const NuclidesDetails = ({ nuclide, onClose }) => (
+  <Dialog open onClose={onClose}>
     <DialogTitle>
-      <div className="d-flex justify-content-between align-items-center">
+      <Header>
         Nuclide details
-        <CloseButton onClick={closeNuclideDetails} />
-      </div>
+        <Button onClick={onClose}>&times;</Button>
+      </Header>
     </DialogTitle>
     <DialogContent>
       <Table>
@@ -289,7 +286,17 @@ NuclidesDetails.propTypes = {
   open: PropTypes.bool,
 };
 
-export default connect(
-  state => ({ ...stateSelectors.getNuclideState(state) }),
-  dispatch => bindActionCreators(actionCreators, dispatch),
-)(NuclidesDetails);
+const Header = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const Button = styled.button`
+  background-color: transparent;
+  font-size: 36px;
+  border: 0;
+  cursor: pointer;
+`;
+
+export default NuclidesDetails;

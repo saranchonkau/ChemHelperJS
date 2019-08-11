@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import isElectron from 'is-electron';
 import ReactPaginate from 'react-paginate';
-import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+
 import Grid from 'components/Grid';
 
 import { getParam, getWhereParam, removeNull } from 'utils/query';
-import { stateSelectors } from '../FilterBar/filterBarReducer';
-import { bindActionCreators } from 'redux';
-import { actionCreators } from '../NuclideDetails/nuclideDetailsReducer';
+import { sendMessage } from 'utils/ipc';
+
 import { nuclidesTableColumnDefs, SortTypes } from 'constants/common';
 
 class NuclidesTable extends Component {
@@ -35,7 +36,7 @@ class NuclidesTable extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.filter.modCount !== nextProps.filter.modCount) {
+    if (this.props.filter !== nextProps.filter) {
       this.setState({ page: 0 });
       const query = this.configureQuery({ filter: nextProps.filter });
       this.requestData(query);
@@ -75,13 +76,10 @@ class NuclidesTable extends Component {
   };
 
   requestCount = (query = '') =>
-    window.ipcRenderer.send(
-      'countAll',
-      `select count(*) from nuclides ${query}`,
-    );
+    sendMessage('countAll', `select count(*) from nuclides ${query}`);
 
   requestData = (query = '') =>
-    window.ipcRenderer.send('executeQuery', `select * from nuclides ${query}`);
+    sendMessage('executeQuery', `select * from nuclides ${query}`);
 
   configureFilterParam = filter => {
     return getWhereParam([
@@ -108,10 +106,10 @@ class NuclidesTable extends Component {
 
   render() {
     return (
-      <div className="w-100 d-flex justify-content-center py-3 px-3">
+      <Container>
         <div>
-          <h2 className="text-center">Database of nuclides</h2>
-          <Grid
+          <Title>Database of nuclides</Title>
+          <StyledGrid
             data={this.state.data}
             options={{
               columnDefs: nuclidesTableColumnDefs,
@@ -144,12 +142,60 @@ class NuclidesTable extends Component {
             nextLinkClassName={'page-link'}
           />
         </div>
-      </div>
+      </Container>
     );
   }
 }
 
-export default connect(
-  state => ({ filter: stateSelectors.getFilter(state) }),
-  dispatch => bindActionCreators(actionCreators, dispatch),
-)(NuclidesTable);
+NuclidesTable.propTypes = {
+  filter: PropTypes.object.isRequired,
+  openNuclideDetails: PropTypes.func.isRequired,
+};
+
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 2rem;
+
+  .page-link {
+    position: relative;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    margin-left: -1px;
+    line-height: 1.25;
+  }
+  .page-item {
+    color: #36304a;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+  }
+  .pagination {
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+    border-radius: 0.25rem;
+    margin-top: 1rem;
+  }
+  .active {
+    cursor: default;
+    z-index: 1;
+    color: #fff;
+    background-color: #36304a;
+    font-weight: bold;
+  }
+`;
+
+const StyledGrid = styled(Grid)`
+  min-height: 450px;
+  background-color: #e6e3e3;
+`;
+
+const Title = styled.header`
+  font-size: 30px;
+  margin: 2rem auto 1rem auto;
+  text-align: center;
+`;
+
+export default NuclidesTable;

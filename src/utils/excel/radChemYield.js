@@ -1,4 +1,4 @@
-import { replaceAll } from '../utils';
+import { replaceAll } from '../common';
 
 const TAB = '\t';
 const CRLF = '\r\n';

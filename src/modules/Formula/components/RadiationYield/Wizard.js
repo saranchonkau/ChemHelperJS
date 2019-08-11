@@ -1,6 +1,10 @@
 import React from 'react';
 
-import { finalData, initialData, initialOpticalDensityData } from 'utils/Data';
+import {
+  finalData,
+  initialData,
+  initialOpticalDensityData,
+} from 'constants/defaultData';
 
 import { Wizard } from 'components/Wizard';
 

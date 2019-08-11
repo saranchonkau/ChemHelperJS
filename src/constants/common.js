@@ -15,8 +15,8 @@ export const SortTypes = {
 // ***** Regular expressions *****
 
 export const dotRegexp = /[,/\u0431\u044E]/;
-export const finalNumberRegexp = /^[\+\-]?\d*\.?\d+(?:[Ee][\+\-]?\d{1,2})?$/;
-export const intermediateNumberRegexp = /^[\+\-]?(?:\d*(?:\.?(?:\d+(?:(?:(?:[Ee]\+)|(?:[Ee]\-)|(?:[Ee]))?(?:\d{1,2})?)?)?)?)?$/;
+export const finalNumberRegexp = /^[+-]?\d*\.?\d+(?:[Ee][+-]?\d{1,2})?$/;
+export const intermediateNumberRegexp = /^[+-]?(?:\d*(?:\.?(?:\d+(?:(?:(?:[Ee]\+)|(?:[Ee]-)|(?:[Ee]))?(?:\d{1,2})?)?)?)?)?$/;
 
 // ***** Helper functions *****
 
@@ -178,7 +178,7 @@ export const nuclidesTableColumnDefs = [
   {
     headerName: 'A',
     field: 'atomic_mass',
-    width: 170,
+    width: 200,
     format: atomicMassFormatter,
   },
 ];

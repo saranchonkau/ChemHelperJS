@@ -56,6 +56,8 @@ class Cell extends React.Component {
         return <CheckBoxCell value={value} onClick={this.onToggleSelection} />;
       case CellTypes.REMOVE:
         return <RemoveCell onClick={this.onRowRemove} />;
+      default:
+        return null;
     }
   };
 

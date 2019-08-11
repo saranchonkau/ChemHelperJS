@@ -5,9 +5,11 @@ import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import Download from '@material-ui/icons/GetApp';
 
+import { sendMessage } from 'utils/ipc';
+
 const savePattern = type => {
   if (isElectron()) {
-    window.ipcRenderer.send('saveExcelPattern', type);
+    sendMessage('saveExcelPattern', type);
   }
 };
 

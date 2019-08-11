@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { expFormat } from 'utils/utils';
+import { expFormat } from 'utils/common';
 
 import Equation from './Equation';
 

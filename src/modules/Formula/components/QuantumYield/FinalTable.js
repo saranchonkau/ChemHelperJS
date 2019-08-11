@@ -1,7 +1,7 @@
 import React, { useReducer, useRef } from 'react';
 import styled from 'styled-components';
 
-import { calculateRowId, simpleReducer } from 'utils/utils';
+import { calculateRowId, simpleReducer } from 'utils/common';
 
 import NextButton from 'components/NextButton';
 import BackButton from 'components/BackButton';

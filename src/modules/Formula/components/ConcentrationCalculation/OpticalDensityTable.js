@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { calculateRowId } from 'utils/utils';
+import { calculateRowId } from 'utils/common';
 
 import { opticalDensityTableColumnDefs } from 'constants/common';
 
@@ -34,6 +34,7 @@ function OpticalDensityTable({ title }) {
     const newRow = {
       id: calculateRowId(rowData.map(data => data.id)),
       density: 0.0,
+      concentration: 0.0,
       isSelected: true,
     };
     api.current.createRow(newRow);

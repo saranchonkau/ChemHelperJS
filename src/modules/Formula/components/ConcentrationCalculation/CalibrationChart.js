@@ -2,8 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { Line } from 'react-chartjs-2';
 
-import { getTrendResult, suggestMaxValue, suggestMinValue } from 'utils/utils';
+import { suggestMaxValue, suggestMinValue } from 'utils/common';
 import { chartOptions, datasets } from 'utils/charts';
+import { getTrendResult } from 'utils/calculations';
 import { createCalibrationTableTSVFile } from 'utils/excel/calibrationTable';
 
 import { ExcelPatternTypes } from 'constants/common';
@@ -31,7 +32,7 @@ function CalibrationChart({ title }) {
     .map(data => ({ x: data.concentration, y: data.density }));
 
   const unselectedData = state.initialData
-    .filter(point => point.isSelected)
+    .filter(point => !point.isSelected)
     .map(data => ({ x: data.concentration, y: data.density }));
 
   const result = getTrendResult(selectedData);

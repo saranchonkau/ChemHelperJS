@@ -2,10 +2,10 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import styled from 'styled-components';
 
-import { getTrendResult, suggestMaxValue, suggestMinValue } from 'utils/utils';
+import { suggestMaxValue, suggestMinValue } from 'utils/common';
 import { chartOptions, datasets } from 'utils/charts';
 import { createDoseRateTSVFile } from 'utils/excel/doseRate';
-import { calculateDoseRate } from 'utils/calculations';
+import { calculateDoseRate, getTrendResult } from 'utils/calculations';
 
 import BackButton from 'components/BackButton';
 import SavePatternButton from 'components/SavePatternButton';

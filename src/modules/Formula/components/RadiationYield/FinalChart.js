@@ -2,10 +2,10 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import styled from 'styled-components';
 
-import { getTrendResult, suggestMaxValue, suggestMinValue } from 'utils/utils';
+import { suggestMaxValue, suggestMinValue } from 'utils/common';
 import { chartOptions, datasets } from 'utils/charts';
 import { createYieldTSVFile } from 'utils/excel/radChemYield';
-import { calculateYield } from 'utils/calculations';
+import { calculateYield, getTrendResult } from 'utils/calculations';
 
 import { ExcelPatternTypes } from 'constants/common';
 

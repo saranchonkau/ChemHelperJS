@@ -4,7 +4,8 @@ import styled from 'styled-components';
 import { RadioGroup, Radio } from '@material-ui/core';
 import { FormLabel, FormControl, FormControlLabel } from '@material-ui/core';
 
-import { simpleReducer } from 'utils/utils';
+import { simpleReducer } from 'utils/common';
+import { ConcentrationCalculationWays } from 'constants/common';
 
 import NextButton from 'components/NextButton';
 import { useWizardContext } from 'components/Wizard';
@@ -12,7 +13,6 @@ import { useWizardContext } from 'components/Wizard';
 import Container from '../Container';
 import Title from '../Title';
 import ContentWrapper from '../ContentWrapper';
-import { ConcentrationCalculationWays } from '../../../../constants/common';
 
 const OPTIONS = [
   {

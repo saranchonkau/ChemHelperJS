@@ -4,6 +4,7 @@
   /*width: 525px;*/
   border-radius: 10px;
   overflow: hidden;
+  align-content: start;
 }
 
 .header {

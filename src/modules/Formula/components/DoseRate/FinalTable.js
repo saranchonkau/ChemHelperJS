@@ -2,7 +2,7 @@ import React, { useReducer, useRef } from 'react';
 import Select from '@material-ui/core/Select';
 import { MenuItem } from '@material-ui/core';
 
-import { calculateRowId, simpleReducer } from 'utils/utils';
+import { calculateRowId, simpleReducer } from 'utils/common';
 
 import NextButton from 'components/NextButton';
 import BackButton from 'components/BackButton';

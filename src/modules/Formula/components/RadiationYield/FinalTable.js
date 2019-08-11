@@ -2,7 +2,7 @@ import React, { useReducer, useRef } from 'react';
 import styled from 'styled-components';
 import { MenuItem, Select } from '@material-ui/core';
 
-import { calculateRowId, simpleReducer } from 'utils/utils';
+import { calculateRowId, simpleReducer } from 'utils/common';
 
 import { finalTableColumnDefs, Units } from 'constants/common';
 

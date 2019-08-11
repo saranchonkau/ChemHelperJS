@@ -8,7 +8,7 @@ import Grid from 'components/Grid';
 import { useWizardContext } from 'components/Wizard';
 
 import { calibrationTableColumnDefs, PageNumbers } from 'constants/common';
-import { calculateRowId } from 'utils/utils';
+import { calculateRowId } from 'utils/common';
 
 import Container from '../Container';
 import Title from '../Title';

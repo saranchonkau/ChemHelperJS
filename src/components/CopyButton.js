@@ -6,9 +6,11 @@ import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import FileCopy from '@material-ui/icons/FileCopy';
 
+import { sendMessage } from 'utils/ipc';
+
 const copyDataToClipboard = text => {
   if (isElectron()) {
-    window.ipcRenderer.send('copyToClipboard', text);
+    sendMessage('copyToClipboard', text);
   }
 };
 
