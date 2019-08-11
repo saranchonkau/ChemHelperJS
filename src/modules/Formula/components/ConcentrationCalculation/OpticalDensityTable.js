@@ -86,10 +86,11 @@ function OpticalDensityTable({ title }) {
           <Footer>
             <BackButton onClick={previousStep} />
             <MaterialButton
-              text="Calculate concentrations"
               onClick={calculateConcentrations}
               disabled={opticalDensityData.length === 0}
-            />
+            >
+              Calculate concentrations
+            </MaterialButton>
             <AddRowButton onClick={addRow} />
             <NextButton onClick={nextPage} />
           </Footer>

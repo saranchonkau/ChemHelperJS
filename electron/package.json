@@ -3,27 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "author": "Ivan Saranchonkau <ivan.saranchenkov@gmail.com>",
+  "description": "React and Electron App",
   "main": "main.js",
   "scripts": {
-    "build-win-32": "build --em.main=build/main.js --win --ia32",
-    "build-win-64": "build --em.main=build/main.js --win --x64",
-    "build-linux": "build --em.main=build/main.js --linux",
-    "dist": "build --em.main=build/main.js",
+    "pack": "electron-builder --dir",
+    "build": "electron-builder",
     "electron": "electron .",
     "electron-dev": "cross-env ELECTRON_START_URL=http://localhost:3000 electron .",
     "postinstall": "electron-builder install-app-deps",
     "rebuild": "electron-rebuild -f -w sqlite3"
   },
   "dependencies": {
-    "electron": "^6.0.1",
-    "electron-builder": "^21.2.0",
-    "electron-packager": "^14.0.4",
-    "electron-rebuild": "^1.8.5",
     "knex": "^0.19.1",
     "sqlite3": "^4.0.9"
   },
-  "description": "React and Electron Awesome App",
   "devDependencies": {
-    "cross-env": "^5.2.0"
+    "electron": "^6.0.1",
+    "cross-env": "^5.2.0",
+    "electron-builder": "^21.2.0",
+    "electron-packager": "^14.0.4",
+    "electron-rebuild": "^1.8.5"
   }
 }

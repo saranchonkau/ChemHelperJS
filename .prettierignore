@@ -1,1 +1,3 @@
 src/utils/statiscticsDistributions.js
+electron/dist/**/*
+build

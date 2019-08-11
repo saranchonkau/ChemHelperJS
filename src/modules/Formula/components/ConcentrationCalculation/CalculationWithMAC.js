@@ -132,12 +132,13 @@ function CalculationWithMAC({ title }) {
           <ButtonRow>
             <BackButton onClick={previousPage} />
             <MaterialButton
-              text={'Calculate concentrations'}
               onClick={() =>
                 dispatch({ opticalDensityData: getOpticalDensityData() })
               }
               disabled={!isCorrectData()}
-            />
+            >
+              Calculate concentrations
+            </MaterialButton>
             <AddRowButton onClick={addRow} />
             <NextButton onClick={nextPage} disabled={!isCorrectData()} />
           </ButtonRow>
