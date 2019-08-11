@@ -18,6 +18,7 @@ export const dotRegexp = /[,/\u0431\u044E]/;
 export const finalNumberRegexp = /^[+-]?\d*\.?\d+(?:[Ee][+-]?\d{1,2})?$/;
 export const intermediateNumberRegexp = /^[+-]?(?:\d*(?:\.?(?:\d+(?:(?:(?:[Ee]\+)|(?:[Ee]-)|(?:[Ee]))?(?:\d{1,2})?)?)?)?)?$/;
 
+// TODO move functions to utils directory
 // ***** Helper functions *****
 
 export const numberParser = (value, previousValue) => {
@@ -49,35 +50,7 @@ export const atomicMassFormatter = value => {
   }
 };
 
-// ***** Data *****
-
-export const calibrationData = [
-  {
-    id: 1,
-    concentration: 5e-5,
-    density: 0.015,
-    isSelected: true,
-  },
-  {
-    id: 2,
-    concentration: 8e-5,
-    density: 0.025,
-    isSelected: true,
-  },
-  {
-    id: 3,
-    concentration: 1e-4,
-    density: 0.03,
-    isSelected: true,
-  },
-  {
-    id: 4,
-    concentration: 4e-4,
-    density: 0.122,
-    isSelected: true,
-  },
-];
-
+// TODO move to separate file
 // ***** Column definitions *****
 
 const editableNumberProps = {
@@ -186,13 +159,6 @@ export const nuclidesTableColumnDefs = [
 export const Units = {
   moleculesPerHundredVolt: 'molecules/100eV',
   molPerJoule: 'mol/J',
-};
-
-export const ReduxForms = {
-  Yield: 'Yield',
-  QuantumYield: 'QuantumYield',
-  DoseRate: 'DoseRate',
-  ConcentrationCalculation: 'ConcentrationCalculation',
 };
 
 export const PageNumbers = {

@@ -1,30 +1,52 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import cx from 'classnames';
+import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
   button: {
-    margin: theme.spacing.unit,
+    margin: theme.spacing(1),
   },
-});
+  leftIcon: {
+    marginRight: theme.spacing(1),
+  },
+  rightIcon: {
+    marginLeft: theme.spacing(1),
+  },
+}));
 
-const MaterialButton = ({ text, classes, onClick, disabled }) => (
-  <Button
-    className={classes.button}
-    variant="contained"
-    color="secondary"
-    onClick={onClick}
-    disabled={disabled}
-  >
-    {text}
-  </Button>
-);
+function MaterialButton({
+  children,
+  className,
+  rightIcon: RightIcon,
+  leftIcon: LeftIcon,
+  variant = 'contained',
+  color = 'secondary',
+  ...rest
+}) {
+  const classes = useStyles();
+  return (
+    <Button
+      className={cx(classes.button, className)}
+      variant={variant}
+      color={color}
+      {...rest}
+    >
+      {LeftIcon ? <LeftIcon className={classes.leftIcon} /> : null}
+      {children}
+      {RightIcon ? <RightIcon className={classes.rightIcon} /> : null}
+    </Button>
+  );
+}
 
 MaterialButton.propTypes = {
   onClick: PropTypes.func,
-  disabled: PropTypes.bool,
-  text: PropTypes.string,
+  variant: PropTypes.oneOf(['text', 'outlined', 'contained']),
+  color: PropTypes.oneOf(['inherit', 'primary', 'secondary', 'default']),
+  rightIcon: PropTypes.object,
+  leftIcon: PropTypes.object,
+  className: PropTypes.func,
 };
 
-export default withStyles(styles)(MaterialButton);
+export default MaterialButton;

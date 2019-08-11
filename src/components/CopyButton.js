@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import isElectron from 'is-electron';
-import styled from 'styled-components';
 
-import Button from '@material-ui/core/Button';
 import FileCopy from '@material-ui/icons/FileCopy';
 
 import { sendMessage } from 'utils/ipc';
+
+import MaterialButton from './MaterialButton';
 
 const copyDataToClipboard = text => {
   if (isElectron()) {
@@ -14,29 +14,19 @@ const copyDataToClipboard = text => {
   }
 };
 
-const CopyButton = ({ text, disabled }) => (
-  <StyledButton
-    variant="contained"
+const CopyButton = ({ text, ...props }) => (
+  <MaterialButton
+    {...props}
+    rightIcon={FileCopy}
     color="primary"
     onClick={() => copyDataToClipboard(text)}
-    disabled={disabled}
   >
     Copy data
-    <Icon />
-  </StyledButton>
+  </MaterialButton>
 );
 
-const StyledButton = styled(Button)`
-  margin: 8px;
-`;
-
-const Icon = styled(FileCopy)`
-  margin-left: 8px;
-`;
-
 CopyButton.propTypes = {
-  disabled: PropTypes.bool,
-  text: PropTypes.string.isRequired,
+  text: PropTypes.string,
 };
 
 export default CopyButton;
