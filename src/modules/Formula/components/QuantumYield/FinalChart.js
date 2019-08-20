@@ -132,7 +132,7 @@ const Footer = styled.div`
 `;
 
 const KatexText = styled.span`
-  font-family: KaTeX_Math, sans-serif;
+  font-family: KaTeX_Main, sans-serif;
 `;
 
 export default FinalChart;

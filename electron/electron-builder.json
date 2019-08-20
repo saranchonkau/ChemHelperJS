@@ -7,7 +7,6 @@
     "target": "nsis"
   },
   "directories": {
-    "app": "."
-  },
-  "files": ["../build/**/*"]
+    "output": "../dist"
+  }
 }

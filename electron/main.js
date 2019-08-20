@@ -21,7 +21,7 @@ function createWindow() {
   const startUrl =
     process.env.ELECTRON_START_URL ||
     url.format({
-      pathname: path.resolve(__dirname, '../build/index.html'),
+      pathname: path.resolve(__dirname, 'client/index.html'),
       protocol: 'file:',
       slashes: true,
     });
