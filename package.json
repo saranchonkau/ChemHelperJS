@@ -8,7 +8,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "start": "react-scripts start"
+    "start": "react-scripts start",
+    "dist": "yarn build && cd electron && yarn build && yarn remove-client && cd .."
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
@@ -29,7 +30,7 @@
     "katex": "^0.10.2",
     "lodash": "^4.17.10",
     "numeral": "^2.0.6",
-    "overridable-react-scripts": "1.0.1",
+    "overridable-react-scripts": "2.0.1",
     "prop-types": "^15.6.2",
     "react": "^16.9.0",
     "react-chartjs-2": "^2.7.4",
